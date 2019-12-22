@@ -1,4 +1,4 @@
-# hypercampus
+# HyperCampus
 source and documentation of the HyperCampus app from Google Play store
 
 ## What is HyperCampus?
