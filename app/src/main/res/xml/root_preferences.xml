@@ -1,0 +1,39 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/srs_header">
+
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/srs_algorithms"
+            app:entryValues="@array/srs_algorithm_values"
+            app:key="srs_algorithm"
+            app:title="@string/algo_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <SeekBarPreference
+            app:key="forgetting_index"
+            app:min="5"
+            android:max="40"
+            app:defaultValue="10"
+            app:adjustable="true"
+            app:showSeekBarValue="true"
+            app:title="@string/fi_title"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/other_header">
+
+        <!--
+        <Preference
+            app:key="color_theme"
+            app:title="@string/color_title"/>
+            -->
+
+        <Preference
+            app:key="about"
+            app:title="@string/about_title"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

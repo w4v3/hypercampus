@@ -1,0 +1,76 @@
+<resources>
+    <!-- App bar -->
+    <string name="app_name">HyperCampus</string>
+    <string name="action_set">Settings</string>
+    <string name="action_stat">Stats</string>
+    <string name="action_exp">Export</string>
+    <string name="action_search">Search</string>
+    <string name="action_add">Add</string>
+    <string name="action_del">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="title_review">Review</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_edit_card">Edit card</string>
+
+    <!-- Courses, Lessons, Cards -->
+    <string name="course_symbol_hint">📚</string>
+    <string name="course_label_hint">Title</string>
+    <string name="course_newperday_hint">10</string>
+    <string name="newperday_add_sign">+</string>
+    <string name="newperday_per_day">/day</string>
+    <string name="lesson_symbol_hint">📓</string>
+    <string name="lesson_label_hint">Title</string>
+    <string name="string_app_name_logo">HyperCampus logo</string>
+    <string name="submit">Submit</string>
+    <string name="question">Question</string>
+    <string name="answer">Answer</string>
+    <string name="wrong">wrong</string>
+    <string name="right">right</string>
+    <string name="show_answer">Show answer</string>
+    <string name="no_more_due">No more cards due today!</string>
+    <string name="return_button">Return</string>
+    <string name="due_new">%d due | %d new</string>
+    <string name="due">%d due</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="new_">New %s</string>
+    <string name="are_you_sure">Are you sure? This cannot be undone.</string>
+    <string name="ok">OK</string>
+    <string name="edit_">Edit %s</string>
+    <string name="edit_dialog">Edit</string>
+    <plurals name="deleting_dialog">
+        <item quantity="one">Deleting one %2$s</item>
+        <item quantity="other">Deleting %1$d %2$ss</item>
+    </plurals>
+
+    <!-- Preferences -->
+    <string name="srs_header">Spaced Repetition System</string>
+    <string name="other_header">Other</string>
+    <string name="algo_title">Algorithm</string>
+    <string name="fi_title">Forgetting Index</string>
+    <string name="color_title">Pick color theme</string>
+    <string name="about_title">About …</string>
+
+    <string name="about">HyperCampus (a pun on hippocampus, a brain structure involved in long term memory) helps you learn whatever you want.</string>
+
+    <!-- Intro -->
+    <string name="welcome">Welcome to the HyperCampus app for creating and reviewing flashcard sets the smart way! Would you like an introduction?</string>
+    <string name="start_tour">Start tour</string>
+    <string name="no_thx">Nope</string>
+    <string name="got_it">GOT IT</string>
+    <string name="intro1">A flashcard deck is called a "course". Tap here to add a new course</string>
+    <string name="intro2">Once you have added flashcards to your course, I manage which cards you should review each day. Tap here to review a single course …</string>
+    <string name="intro3">… or use the HyperCampus button to review due cards from all courses</string>
+    <string name="intro4">Tap on a course to open it</string>
+    <string name="intro5">Each course consists of lessons, which can be added and reviewed just like courses. Tap on a lesson to see all of its flashcards</string>
+    <string name="intro6">Each card has a question …</string>
+    <string name="intro7">… and an answer. Add new cards with the add button or tap on an existing card to edit it</string>
+    <string name="intro8">Now use the HyperCampus button to check out how reviewing your cards works</string>
+    <string name="intro9">During your (hopefully) daily review, I will present some questions from your collection</string>
+    <string name="intro10">Try to find the answer, and tap this button</string>
+    <string name="intro11">I will reveal the answer, and you have to judge how well you knew it</string>
+    <string name="intro12">Tap in the yellow region if it was easy for you, or in the violet region if you didn\'t know it at all. Or somewhere in between if, well, it was something in between. That\'s all!</string>
+    <string name="course">course</string>
+    <string name="lesson">lesson</string>
+    <string name="card">card</string>
+</resources>

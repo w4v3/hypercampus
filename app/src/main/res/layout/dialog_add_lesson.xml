@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="editLesson"
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.Lesson" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/label_short"
+            android:layout_width="48sp"
+            android:layout_height="48sp"
+            android:layout_margin="@dimen/text_margin"
+            android:gravity="center"
+            android:hint="@string/lesson_symbol_hint"
+            android:maxLength="4"
+            android:text="@={editLesson.symbol}"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:importantForAutofill="no"
+            android:inputType="textEmailAddress"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <EditText
+            android:id="@+id/label_full"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:hint="@string/lesson_label_hint"
+            android:text="@={editLesson.name}"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/label_short"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

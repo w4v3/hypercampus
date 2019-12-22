@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/coursesList"
+    tools:ignore="UnusedNavigation">
+
+    <fragment
+        android:id="@+id/coursesList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.CoursesList"
+        android:label="@string/app_name"
+        tools:layout="@layout/deckdata_list">
+        <action
+            android:id="@+id/next_action"
+            app:destination="@id/lessonsList"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <argument
+            android:name="level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            android:defaultValue="COURSES" />
+        <argument
+            android:name="dataId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+    <fragment
+        android:id="@+id/lessonsList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.LessonsList"
+        tools:layout="@layout/deckdata_list" >
+        <action
+            android:id="@+id/next_action"
+            app:destination="@id/cardsList"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+        <argument
+            android:name="dataId"
+            app:argType="integer" />
+        <argument
+            android:name="level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            android:defaultValue="LESSONS" />
+    </fragment>
+    <fragment
+        android:id="@+id/cardsList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.CardsList"
+        tools:layout="@layout/deckdata_list">
+        <action
+            android:id="@+id/next_action"
+            app:destination="@id/edit" />
+        <argument
+            android:name="dataId"
+            app:argType="integer" />
+        <argument
+            android:name="level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            android:defaultValue="CARDS" />
+    </fragment>
+    <fragment
+        android:id="@+id/settings"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.Settings"
+        android:label="@string/title_settings"/>
+    <fragment
+        android:id="@+id/srs"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.Srs"
+        android:label="@string/title_review"
+        tools:layout="@layout/fragment_srs" >
+        <argument
+            android:name="units"
+            app:argType="integer[]"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            android:defaultValue="COURSES" />
+        <argument
+            android:name="full"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/edit"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.EditCard"
+        android:label="@string/title_edit_card"
+        tools:layout="@layout/fragment_edit_card" >
+        <argument
+            android:name="cardId"
+            android:defaultValue="-1"
+            app:argType="integer"/>
+        <argument
+            android:name="lessonId"
+            app:argType="integer" />
+        <argument
+            android:name="courseId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/back_to_cards"
+            app:destination="@id/cardsList"
+            app:popUpTo="@+id/cardsList"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <action
+        android:id="@+id/action_to_srs"
+        app:destination="@id/srs"
+        app:popUpTo="@+id/coursesList" />
+    <action
+        android:id="@+id/action_to_settings"
+        app:destination="@id/settings" />
+    <fragment
+        android:id="@+id/deckDataList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.DeckDataList"
+        android:label="DeckDataList" >
+        <argument
+            android:name="level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            android:defaultValue="COURSES" />
+        <argument
+            android:name="dataId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+</navigation>
