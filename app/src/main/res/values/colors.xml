@@ -5,7 +5,6 @@
     <color name="colorAccent">#FFAA00</color>
     <color name="colorAccentDark">#C67B00</color>
     <color name="colorContrastDark">#373737</color>
-    <color name="colorContrastLight">#C6C6C6</color>
     <color name="colorIntroBg">#DD7200CA</color>
     <color name="colorIntroFg">#FFAA00</color>
 </resources>

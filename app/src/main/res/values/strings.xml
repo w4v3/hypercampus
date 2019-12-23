@@ -2,8 +2,6 @@
     <!-- App bar -->
     <string name="app_name">HyperCampus</string>
     <string name="action_set">Settings</string>
-    <string name="action_stat">Stats</string>
-    <string name="action_exp">Export</string>
     <string name="action_search">Search</string>
     <string name="action_add">Add</string>
     <string name="action_del">Delete</string>
@@ -20,7 +18,6 @@
     <string name="newperday_per_day">/day</string>
     <string name="lesson_symbol_hint">📓</string>
     <string name="lesson_label_hint">Title</string>
-    <string name="string_app_name_logo">HyperCampus logo</string>
     <string name="submit">Submit</string>
     <string name="question">Question</string>
     <string name="answer">Answer</string>
@@ -48,7 +45,6 @@
     <string name="other_header">Other</string>
     <string name="algo_title">Algorithm</string>
     <string name="fi_title">Forgetting Index</string>
-    <string name="color_title">Pick color theme</string>
     <string name="about_title">About …</string>
 
     <string name="about">HyperCampus uses a spaced repetition algorithm to determine when to show a card the next time based on your grading. For more information on how and why it works, visit the <a href="https://www.github.com/w4v3/hypercampus">project github page.</a></string>

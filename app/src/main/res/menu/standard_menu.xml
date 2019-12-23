@@ -24,7 +24,6 @@
             app:showAsAction="ifRoom" />
 
         <item
-            android:id="@+id/action_to_settings"
             android:icon="@drawable/ic_settings_white_24dp"
             android:menuCategory="secondary"
             android:title="@string/action_set"

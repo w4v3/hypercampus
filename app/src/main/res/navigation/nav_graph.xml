@@ -2,8 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
     app:startDestination="@id/coursesList"
+    android:id="@+id/nav_graph"
     tools:ignore="UnusedNavigation">
 
     <fragment
@@ -12,8 +12,8 @@
         android:label="@string/app_name"
         tools:layout="@layout/deckdata_list">
         <action
-            android:id="@+id/next_action"
             app:destination="@id/lessonsList"
+            android:id="@+id/next_action"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -50,9 +50,8 @@
         android:id="@+id/cardsList"
         android:name="onion.w4v3xrmknycexlsd.app.hypercampus.CardsList"
         tools:layout="@layout/deckdata_list">
-        <action
-            android:id="@+id/next_action"
-            app:destination="@id/edit" />
+        <action app:destination="@id/edit"
+            android:id="@+id/next_action"/>
         <argument
             android:name="dataId"
             app:argType="integer" />
@@ -109,9 +108,8 @@
         android:id="@+id/action_to_srs"
         app:destination="@id/srs"
         app:popUpTo="@+id/coursesList" />
-    <action
-        android:id="@+id/action_to_settings"
-        app:destination="@id/settings" />
+    <action app:destination="@id/settings"
+        android:id="@+id/action_to_settings"/>
     <fragment
         android:id="@+id/deckDataList"
         android:name="onion.w4v3xrmknycexlsd.app.hypercampus.DeckDataList"

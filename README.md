@@ -19,7 +19,7 @@ source and documentation of the HyperCampus app from Google Play store
 
 ## Release notes
 
-### 20191223: version 0.A
+### 20191223: version 0.alpha
 - implemented SM 2 algorithm
 - several stress tests passed
 ### 20191222: version 0.0
