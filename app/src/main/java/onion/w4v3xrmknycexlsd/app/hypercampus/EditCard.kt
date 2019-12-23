@@ -36,6 +36,8 @@ class EditCard : Fragment() {
 
         //setMenuOnClickListeners()
 
+        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let { hideSoftKeyboard(it) } }
+
         setHasOptionsMenu(true)
         return binding.root
     }

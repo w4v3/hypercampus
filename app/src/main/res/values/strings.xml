@@ -51,14 +51,14 @@
     <string name="color_title">Pick color theme</string>
     <string name="about_title">About …</string>
 
-    <string name="about">HyperCampus (a pun on hippocampus, a brain structure involved in long term memory) helps you learn whatever you want.</string>
+    <string name="about">HyperCampus uses a spaced repetition algorithm to determine when to show a card the next time based on your grading. For more information on how and why it works, visit the <a href="https://www.github.com/w4v3/hypercampus">project github page.</a></string>
 
     <!-- Intro -->
-    <string name="welcome">Welcome to the HyperCampus app for creating and reviewing flashcard sets the smart way! Would you like an introduction?</string>
+    <string name="welcome">Welcome to the HyperCampus app! Use it to learn whatever you want. Would you like an introduction?</string>
     <string name="start_tour">Start tour</string>
     <string name="no_thx">Nope</string>
     <string name="got_it">GOT IT</string>
-    <string name="intro1">A flashcard deck is called a "course". Tap here to add a new course</string>
+    <string name="intro1">A flashcard deck is called a \"course\". Tap here to add a new course</string>
     <string name="intro2">Once you have added flashcards to your course, I manage which cards you should review each day. Tap here to review a single course …</string>
     <string name="intro3">… or use the HyperCampus button to review due cards from all courses</string>
     <string name="intro4">Tap on a course to open it</string>

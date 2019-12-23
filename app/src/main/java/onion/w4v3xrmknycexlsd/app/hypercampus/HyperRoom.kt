@@ -9,9 +9,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.*
-import java.util.*
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 1, exportSchema = false)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 1)
 abstract class HyperRoom : RoomDatabase() {
 
     abstract fun courseDao(): CourseDAO
@@ -153,11 +152,6 @@ class HyperRepository(private val courseDao: CourseDAO, private val lessonDao: L
             is Lesson -> lessonDao.update(data)
             is Card -> cardDao.update(data)
         }
-    }
-
-    private fun currentDate(): Int {
-        val date = Calendar.getInstance(Locale.US)
-        return date.get(Calendar.YEAR) * 10000 + (date.get(Calendar.MONTH) + 1) * 100 + date.get(Calendar.DAY_OF_MONTH)
     }
 }
 

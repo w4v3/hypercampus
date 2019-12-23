@@ -6,32 +6,37 @@ import androidx.room.*
 sealed class DeckData
 
 @Entity(tableName = "courses")
-data class Course(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int
+data class Course(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int = 0
                   , @ColumnInfo(name = "symbol") var symbol: String = ""
                   , @ColumnInfo(name = "name") var name: String = ""
                   , @ColumnInfo(name = "new_per_day") var new_per_day: Int = 10
                   , @ColumnInfo(name = "new_studied_today") var new_studied_today: Int = 0
+                  , @ColumnInfo(name = "learning_mode") var learning_mode: Int = MODE_LEARNT
+                  , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
 @Entity(tableName = "lessons")
-data class Lesson(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int
+data class Lesson(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int = 0
                   , @ColumnInfo(name = "course_id") val course_id: Int
                   , @ColumnInfo(name = "symbol") var symbol: String = ""
                   , @ColumnInfo(name = "name") var name: String = ""
                   , @ColumnInfo(name = "info_file") var info_file: String = ""
+                  , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
 @Entity(tableName = "cards")
-data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int
+data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id: Int = 0
                 , @ColumnInfo(name = "course_id") val course_id: Int
                 , @ColumnInfo(name = "lesson_id") val lesson_id: Int
                 , @ColumnInfo(name = "question") var question: String = ""
                 , @ColumnInfo(name = "answer") var answer: String = ""
                 , @ColumnInfo(name = "due") var due: Int? = null
-                , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
+                , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
                 , @ColumnInfo(name = "last_interval") var last_interval: Int = 0
+                , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
                 , @ColumnInfo(name = "hc1_difficulty") var difficulty: Float = 1f
                 , @ColumnInfo(name = "hc1_stability") var stability: Float = 1f
+                , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
 @Dao
@@ -77,7 +82,7 @@ interface LessonDAO {
     @Query("DELETE FROM lessons WHERE id=:id")
     suspend fun delete(id: Int)
 
-    @Query("DELETE FROM cards WHERE course_id=:courseId")
+    @Query("DELETE FROM lessons WHERE course_id=:courseId")
     suspend fun deleteCourse(courseId: Int)
 
     @Update

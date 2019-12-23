@@ -8,7 +8,21 @@ apply plugin: 'kotlin-kapt'
 
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
+    signingConfigs {
+        releaseSign {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
     defaultConfig {
@@ -32,11 +46,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.releaseSign
         }
 
         debug {
             debuggable true
             applicationIdSuffix ".debug"
+            pseudoLocalesEnabled true
         }
     }
 
@@ -72,7 +88,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    def nav_version = "2.1.0"
+    def nav_version = "2.2.0-rc04"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.fragment:fragment:1.2.0-rc04"
@@ -97,14 +113,12 @@ dependencies {
     // UI
     implementation "com.google.android.material:material:$rootProject.materialVersion"
 
-    // Testing
-    androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
-
     // Databinding
     kapt 'com.android.databinding:compiler:3.1.4'
 
-    // rtf view
-    api 'jp.wasabeef:richeditor-android:1.2.2'
-
     implementation 'com.github.deano2390:MaterialShowcaseView:1.3.4'
+
+    // Testing suite
+    androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
+    testImplementation 'junit:junit:4.12'
 }

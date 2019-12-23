@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -12,10 +11,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DeckdataListBinding
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DialogAddCourseBinding
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DialogAddLessonBinding
-import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DialogHypercampusBinding
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
@@ -91,12 +90,10 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
         // app intro
         val pref = activity?.getSharedPreferences("material_showcaseview_prefs",Context.MODE_PRIVATE)
         if (pref?.getBoolean("first_time", true) == true) {
-            val dialogBinding = DialogHypercampusBinding.inflate(layoutInflater)
-            dialogBinding.dialogText.text =
-                getString(R.string.welcome)
-            val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
+            val builder = activity?.let { MaterialAlertDialogBuilder(it) }
             builder?.setTitle(R.string.app_name)
-                ?.setView(dialogBinding.root)
+                ?.setMessage(R.string.welcome)
+                ?.setIcon(R.drawable.ic_logo)
                 ?.setPositiveButton(getString(R.string.start_tour)) { _, _ ->
                     intro = true
                     insertSamples()
@@ -118,6 +115,8 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
         } else {
             intro = true
         }
+
+        findNavController().addOnDestinationChangedListener { _, _, _ -> selected.clear(); selectionMode?.invalidate() }
 
         super.onActivityCreated(savedInstanceState)
     }
@@ -257,7 +256,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
                     Level.CARDS -> {}
                 }
 
-                val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
+                val builder = activity?.let { MaterialAlertDialogBuilder(it) }
                 builder?.setTitle(getString(R.string.new_,label))
                     ?.setView(cardBinding?.root)
                     ?.setPositiveButton(getString(R.string.add)) { _, _ ->
@@ -283,7 +282,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
     }
 
     fun deleteSelected() {
-        val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
+        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
         builder?.setTitle(resources.getQuantityString(R.plurals.deleting_dialog, selected.size, selected.size, label))
             ?.setMessage(getString(R.string.are_you_sure))
             ?.setPositiveButton(getString(R.string.ok)) { _, _ ->
@@ -326,7 +325,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
             }
         }
 
-        val builder: AlertDialog.Builder? = activity?.let { AlertDialog.Builder(it) }
+        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
         builder?.setTitle(getString(R.string.edit_, label))
             ?.setView(cardBinding?.root)
             ?.setPositiveButton(getString(R.string.edit_dialog)) { _, _ ->

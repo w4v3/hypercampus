@@ -19,6 +19,8 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
+import kotlin.math.ln
 import kotlin.random.Random
 
 class Srs : Fragment() {
@@ -62,9 +64,12 @@ class Srs : Fragment() {
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         newCardMode = MODE_LEARNT
+
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_SM2") ?: "$ALG_SM2")
+        val fi: Double = (prefs?.getInt("forgetting_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
-            ALG_SM2 -> SM2
+            ALG_SM2 -> SM2.also { SM2.fi = fi }
+            ALG_HC1 -> HC1.also { HC1.fi = fi }
             else -> null
         }
 
@@ -114,7 +119,8 @@ class Srs : Fragment() {
             }
 
             else -> {
-                binding.questionView.visibility = View.INVISIBLE
+                binding.questionLayout.visibility = View.INVISIBLE
+                binding.answerLayout.visibility = View.INVISIBLE
                 binding.noMoreQuestions.visibility = View.VISIBLE
             }
         }
@@ -122,13 +128,9 @@ class Srs : Fragment() {
 
     private val runNextCard = Runnable { nextCard() }
     private fun handleGrade(grade: Float) = viewModel.runAsync {
-        val interval = algorithm!!.calculateInterval(binding.currentCard!!,grade)
-        val currentDate = Calendar.getInstance(Locale.US)
-        currentDate.add(Calendar.DATE,interval)
-        val nextDueDate = SimpleDateFormat("yyyyMMdd", Locale.US).format(currentDate.time).toInt()
+        val updatedCard = algorithm?.calculateInterval(binding.currentCard!!,grade)
 
-        binding.currentCard!!.due = nextDueDate
-        viewModel.update(binding.currentCard!!)
+        updatedCard?.let { viewModel.update(it) }
 
         if (binding.currentCard!! in newCardList) {
             newCardList.remove(binding.currentCard!!)
@@ -225,11 +227,47 @@ class Srs : Fragment() {
 }
 
 sealed class SrsAlgorithm {
-    abstract suspend fun calculateInterval(card: Card, grade: Float): Int
+    var fi: Double = 0.9
+
+    abstract suspend fun calculateInterval(card: Card, grade: Float): Card
+
+    /*
+    fun forgettingCurve(t: Double, S: Double): Double {
+        return exp(-t/S)
+    }
+     */
+
+    fun invertForgetting(R: Double, S: Double): Double {
+        return -ln(R)*S
+    }
+
+    fun nextDue(interval: Int): Int {
+        val currentDate = Calendar.getInstance(Locale.US)
+        currentDate.add(Calendar.DATE,interval)
+        return SimpleDateFormat("yyyyMMdd", Locale.US).format(currentDate.time).toInt()
+    }
 }
 
 object SM2: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float): Int {
-        return 0
+    override suspend fun calculateInterval(card: Card, grade: Float): Card {
+        val q = grade * 5
+
+        val newEf = (card.eFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))).let { if (it < 1.3) 1.3 else it }
+        val newInt = if (grade < 0.5) 1 else when (card.last_interval) {
+            0 -> 1
+            1 -> ceil(invertForgetting(fi,40.0)).toInt()
+            else -> ceil(card.last_interval*newEf).toInt()
+        }
+
+        card.eFactor = newEf.toFloat()
+        card.due = nextDue(newInt)
+
+        return card
+    }
+}
+
+object HC1: SrsAlgorithm() {
+    override suspend fun calculateInterval(card: Card, grade: Float): Card {
+        return card
     }
 }
