@@ -1,5 +1,3 @@
-![HyperCampus Logo](/logo.svg)
-
 # HyperCampus
 source and documentation of the HyperCampus learning app from Google Play store
 
@@ -39,11 +37,17 @@ You can also set the _forgetting index_, which determines how much of the conten
 
 ## How does it work?
 
-### What is spaced repetition and why does it help me learn?
+HyperCampus implements a _spaced repetition system_, which is often considered to be the most efficient way to put facts into long-term memory. Spaced repetition relies on the [https://en.wikipedia.org/wiki/Spacing_effect](Spacing effect), stating that learning increases when study sessions are spaced out rather than massed. HyperCampus uses a computational model of long-term memory to predict the point in time when the probabiliy of forgetting an item rises above the requested _forgetting index_ (10% by default). Most of the algorithm is then concerned with improving the memory model in order to make more accurate predictions. Before diving into the details, let me explain some general concepts of spaced repetition by looking at how the SuperMemo-2 algorithm is implemented in HyperCampus.
 
 ### The SuperMemo 2 Algorithm
 
+A detailed description can be found [here](https://supermemo.guru/wiki/SuperMemo_1.0_for_DOS_(1987)#Algorithm_SM-2). The algorithm has two fixed intervals: At first, a card is shown after 1 day, and then 6 days later. Each time an item is successfully reviewed, the interval until it is shown the next time increases by a certain factor. This rests on the assumption that successfully reviewing a memory strengthens it in a way such that it takes longer to forget it. In case of an unsuccessful review, i.e. if the item was forgotten, the interval is reset to 1 day.
+
+The algorithm can also account for differences in learning difficulty across items by associating each item with an _easiness factor_ EF. The EF is the factor by which the intervals are increased after successful reviews. After each review, the EF of an item is updated depending on the grade the user has submitted. The implementation of SM-2 in HyperCampus differs from the original in that the original uses a grading system with six categories, from 0 to 5, while grading in HyperCampus is continuous. For SM-2, the continuous grade is scaled linearly to fit into the interval from 0 to 5, and then the update of the EF is carried out using a decimal grade. 
+
 ### The HyperCampus 1 Algorithm
+
+The discussion involves a lot of maths and is thus moved to [this document](/model.ipynb).
 
 ## Release notes
 
@@ -55,7 +59,7 @@ You can also set the _forgetting index_, which determines how much of the conten
 
 ## Licences
 
-The app includes the SuperMemo-2 algorithm, with modifications detailed [above](#the-supermemo-2-algorithm)
+The app includes the SuperMemo-2 algorithm, with modifications detailed [above](#the-supermemo-2-algorithm).
 ```
 Algorithm SM-2, (C) Copyright SuperMemo World, 1991.
 ```
