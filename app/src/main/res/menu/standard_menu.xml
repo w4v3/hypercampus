@@ -25,6 +25,7 @@
 
         <item
             android:icon="@drawable/ic_settings_white_24dp"
+            android:id="@+id/settings"
             android:menuCategory="secondary"
             android:title="@string/action_set"
             app:showAsAction="ifRoom" />
