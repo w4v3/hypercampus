@@ -47,7 +47,7 @@ The algorithm can also account for differences in learning difficulty across ite
 
 ### The HyperCampus 1 Algorithm
 
-The discussion involves a lot of maths and is thus moved to [this document](/model.ipynb).
+The discussion involves a lot of maths and is thus moved to [this document](/docs/model.ipynb).
 
 ## Release notes
 
