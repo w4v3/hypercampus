@@ -5,7 +5,7 @@
     <data>
         <variable
             name="editLesson"
-            type="onion.w4v3xrmknycexlsd.app.hypercampus.Lesson" />
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Lesson" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,13 +24,14 @@
             android:layout_margin="@dimen/text_margin"
             android:gravity="center"
             android:hint="@string/lesson_symbol_hint"
+            android:importantForAutofill="no"
+            android:inputType="textCapCharacters"
             android:maxLength="4"
             android:text="@={editLesson.symbol}"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:importantForAutofill="no"
-            android:inputType="textEmailAddress"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,10 +43,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
             android:hint="@string/lesson_label_hint"
-            android:text="@={editLesson.name}"
-            android:textAppearance="?attr/textAppearanceListItem"
             android:importantForAutofill="no"
             android:inputType="textCapSentences"
+            android:minHeight="48dp"
+            android:text="@={editLesson.name}"
+            android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/coursesList"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.CoursesList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.browse.CoursesList"
         android:label="@string/app_name"
         tools:layout="@layout/deckdata_list">
         <action
@@ -20,7 +20,7 @@
             app:popExitAnim="@anim/slide_out_right" />
         <argument
             android:name="level"
-            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
             android:defaultValue="COURSES" />
         <argument
             android:name="dataId"
@@ -29,7 +29,7 @@
     </fragment>
     <fragment
         android:id="@+id/lessonsList"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.LessonsList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.browse.LessonsList"
         tools:layout="@layout/deckdata_list" >
         <action
             android:id="@+id/next_action"
@@ -43,12 +43,12 @@
             app:argType="integer" />
         <argument
             android:name="level"
-            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
             android:defaultValue="LESSONS" />
     </fragment>
     <fragment
         android:id="@+id/cardsList"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.CardsList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.browse.CardsList"
         tools:layout="@layout/deckdata_list">
         <action app:destination="@id/edit"
             android:id="@+id/next_action"/>
@@ -57,16 +57,16 @@
             app:argType="integer" />
         <argument
             android:name="level"
-            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
             android:defaultValue="CARDS" />
     </fragment>
     <fragment
         android:id="@+id/settings"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.Settings"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.SettingsFragment"
         android:label="@string/title_settings"/>
     <fragment
         android:id="@+id/srs"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.Srs"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.review.SrsFragment"
         android:label="@string/title_review"
         tools:layout="@layout/fragment_srs" >
         <argument
@@ -76,7 +76,7 @@
             android:defaultValue="@null" />
         <argument
             android:name="level"
-            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
             android:defaultValue="COURSES" />
         <argument
             android:name="full"
@@ -85,7 +85,7 @@
     </fragment>
     <fragment
         android:id="@+id/edit"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.EditCard"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.browse.EditCardFragment"
         android:label="@string/title_edit_card"
         tools:layout="@layout/fragment_edit_card" >
         <argument
@@ -112,11 +112,11 @@
         android:id="@+id/action_to_settings"/>
     <fragment
         android:id="@+id/deckDataList"
-        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.DeckDataList"
+        android:name="onion.w4v3xrmknycexlsd.app.hypercampus.browse.DeckDataListFragment"
         android:label="DeckDataList" >
         <argument
             android:name="level"
-            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.Level"
+            app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
             android:defaultValue="COURSES" />
         <argument
             android:name="dataId"

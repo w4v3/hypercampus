@@ -1,4 +1,4 @@
-package onion.w4v3xrmknycexlsd.app.hypercampus
+package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 import android.app.Dialog
 import android.content.Context
@@ -12,21 +12,26 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import onion.w4v3xrmknycexlsd.app.hypercampus.*
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DeckdataListBinding
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DialogAddCourseBinding
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DialogAddLessonBinding
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
+import javax.inject.Inject
 
-open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
-    private val args: DeckDataListArgs by navArgs()
+open class DeckDataListFragment : Fragment(),
+    DeckDataAdapter.OnItemClickListener {
+    private val args: DeckDataListFragmentArgs by navArgs()
 
     private lateinit var label: String
 
     private var currentCourse: Course? = null
     private var currentLesson: Lesson? = null
 
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var viewModel: HyperViewModel
     private lateinit var binding: DeckdataListBinding
     private lateinit var adapter: DeckDataAdapter
@@ -37,28 +42,40 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
     private var intro = false
 
+    override fun onAttach(context: Context) {
+        (activity as HyperActivity).hyperComponent.inject(this)
+        super.onAttach(context)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = DeckdataListBinding.inflate(layoutInflater, container, false)
 
-        adapter = DeckDataAdapter(this)
+        adapter =
+            DeckDataAdapter(this)
         binding.list.adapter = adapter
 
         setHasOptionsMenu(true)
 
         label = when (args.level) {
-            Level.COURSES -> getString(R.string.course)
-            Level.LESSONS -> getString(R.string.lesson)
-            Level.CARDS -> getString(R.string.card)
+            Level.COURSES -> getString(
+                R.string.course
+            )
+            Level.LESSONS -> getString(
+                R.string.lesson
+            )
+            Level.CARDS -> getString(
+                R.string.card
+            )
         }
 
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProvider(this).get(HyperViewModel::class.java)
+        viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
         updateCounts()
 
@@ -67,11 +84,11 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
                 Level.COURSES -> {}
                 Level.LESSONS -> {
                     currentCourse = viewModel.getCourseAsync(args.dataId).await()
-                    (activity as MainActivity).binding.appBar.title = currentCourse?.name
+                    (activity as HyperActivity).binding.appBar.title = currentCourse?.name
                 }
                 Level.CARDS -> {
                     currentLesson = viewModel.getLessonAsync(args.dataId).await()
-                    (activity as MainActivity).binding.appBar.title = "${viewModel.getCourseAsync(currentLesson!!.course_id).await().symbol} > ${currentLesson?.name}"
+                    (activity as HyperActivity).binding.appBar.title = "${viewModel.getCourseAsync(currentLesson!!.course_id).await().symbol} > ${currentLesson?.name}"
                 }
             }
         }
@@ -118,6 +135,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
         findNavController().addOnDestinationChangedListener { _, _, _ -> selected.clear(); selectionMode?.invalidate() }
 
+
         super.onActivityCreated(savedInstanceState)
     }
 
@@ -134,8 +152,12 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
             else -> {
                 val action =
                     when (args.level) {
-                        Level.COURSES -> CoursesListDirections.nextAction((item as Course).id)
-                        Level.LESSONS -> LessonsListDirections.nextAction((item as Lesson).id)
+                        Level.COURSES -> CoursesListDirections.nextAction(
+                            (item as Course).id
+                        )
+                        Level.LESSONS -> LessonsListDirections.nextAction(
+                            (item as Lesson).id
+                        )
                         Level.CARDS -> CardsListDirections.nextAction(
                             (item as Card).id,
                             lessonId = currentLesson!!.id,
@@ -149,8 +171,14 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
     override fun onButtonClick(item: DeckData) {
         val action = when (args.level) {
-            Level.COURSES -> CoursesListDirections.actionToSrs(intArrayOf((item as Course).id), Level.COURSES)
-            Level.LESSONS -> LessonsListDirections.actionToSrs(intArrayOf((item as Lesson).id), Level.LESSONS)
+            Level.COURSES -> CoursesListDirections.actionToSrs(
+                intArrayOf((item as Course).id),
+                Level.COURSES
+            )
+            Level.LESSONS -> LessonsListDirections.actionToSrs(
+                intArrayOf((item as Lesson).id),
+                Level.LESSONS
+            )
             Level.CARDS -> null
         }
         action?.let { findNavController().navigate(it) }
@@ -235,10 +263,11 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
         when (item.itemId) {
             R.id.app_bar_add -> {
                 if (args.level == Level.CARDS) {
-                    val action = CardsListDirections.nextAction(
-                        courseId = currentLesson!!.course_id,
-                        lessonId = currentLesson!!.id
-                    )
+                    val action =
+                        CardsListDirections.nextAction(
+                            courseId = currentLesson!!.course_id,
+                            lessonId = currentLesson!!.id
+                        )
                     findNavController().navigate(action)
                     return true
                 }
@@ -250,9 +279,15 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
                 }
 
                 when (args.level) {
-                    Level.COURSES -> (cardBinding as DialogAddCourseBinding).editCourse = Course(0)
+                    Level.COURSES -> (cardBinding as DialogAddCourseBinding).editCourse =
+                        Course(0)
                     Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson =
-                        currentCourse?.let { Lesson(0, it.id) }
+                        currentCourse?.let {
+                            Lesson(
+                                0,
+                                it.id
+                            )
+                        }
                     Level.CARDS -> {}
                 }
 
@@ -301,11 +336,12 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
     fun editSelected() {
         if (args.level == Level.CARDS) {
-            val action = CardsListDirections.nextAction(
-                (selected[0] as Card).id,
-                courseId = currentLesson!!.course_id,
-                lessonId = currentLesson!!.id
-            )
+            val action =
+                CardsListDirections.nextAction(
+                    (selected[0] as Card).id,
+                    courseId = currentLesson!!.course_id,
+                    lessonId = currentLesson!!.id
+                )
             findNavController().navigate(action)
             return
         }
@@ -359,27 +395,89 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
     }
 
     private fun insertSamples() {
-        val geo = Course(1,"🌍","Geography")
+        val geo = Course(
+            1,
+            "🌍",
+            "Geography"
+        )
         viewModel.add(geo)
-        val cap = Lesson(1,geo.id,"🏰","Capitals")
+        val cap = Lesson(
+            1,
+            geo.id,
+            "🏰",
+            "Capitals"
+        )
         viewModel.add(cap)
-        viewModel.add(Card(0,geo.id,cap.id,"Spain","Madrid"))
-        viewModel.add(Card(0,geo.id,cap.id,"Egypt","Kairo"))
-        viewModel.add(Card(0,geo.id,cap.id,"India","New Delhi"))
+        viewModel.add(
+            Card(
+                0,
+                geo.id,
+                cap.id,
+                "Spain",
+                "Madrid"
+            )
+        )
+        viewModel.add(
+            Card(
+                0,
+                geo.id,
+                cap.id,
+                "Egypt",
+                "Kairo"
+            )
+        )
+        viewModel.add(
+            Card(
+                0,
+                geo.id,
+                cap.id,
+                "India",
+                "New Delhi"
+            )
+        )
 
-        val eng = Course(2,"🔤","Fancy English Words")
+        val eng = Course(
+            2,
+            "🔤",
+            "Fancy English Words"
+        )
         viewModel.add(eng)
-        val shak = Lesson(2,eng.id,"1","Shakespeare")
+        val shak = Lesson(
+            2,
+            eng.id,
+            "1",
+            "Shakespeare"
+        )
         viewModel.add(shak)
-        viewModel.add(Card(0,eng.id,shak.id,"simular","false, counterfeit"))
-        viewModel.add(Card(0,eng.id,shak.id,"to perpend","to ponder"))
+        viewModel.add(
+            Card(
+                0,
+                eng.id,
+                shak.id,
+                "simular",
+                "false, counterfeit"
+            )
+        )
+        viewModel.add(
+            Card(
+                0,
+                eng.id,
+                shak.id,
+                "to perpend",
+                "to ponder"
+            )
+        )
         updateCounts()
     }
 
     fun intro() {
         if (intro) {
-            val bg = ContextCompat.getColor(activity as Context, R.color.colorIntroBg)
-            val fg = ContextCompat.getColor(activity as Context, R.color.colorIntroFg)
+            val bg = ContextCompat.getColor(activity as Context,
+                R.color.colorIntroBg
+            )
+            val fg = ContextCompat.getColor(activity as Context,
+                R.color.colorIntroFg
+            )
 
             val config = ShowcaseConfig()
             config.delay = 200
@@ -392,8 +490,8 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
             sequence.setConfig(config)
 
-            sequence.setOnItemShownListener { _, _ ->  (activity as MainActivity).showing = true }
-            sequence.setOnItemDismissedListener { _, _ ->  (activity as MainActivity).showing = false }
+            sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
+            sequence.setOnItemDismissedListener { _, _ ->  (activity as HyperActivity).showing = false }
 
             when (args.level) {
                 Level.COURSES -> {
@@ -417,7 +515,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
                     )
 
                     sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget((activity as MainActivity).binding.floatingActionButton)
+                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
                         .setDismissText(getString(R.string.got_it))
                         .setContentText(getString(R.string.intro3))
                         .setShapePadding(64)
@@ -469,7 +567,7 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
                     )
 
                     sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget((activity as MainActivity).binding.floatingActionButton)
+                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
                         .setDismissText(getString(R.string.got_it))
                         .setShapePadding(64)
                         .setContentText(getString(R.string.intro8))
@@ -487,6 +585,6 @@ open class DeckDataList : Fragment(), DeckDataAdapter.OnItemClickListener {
 
 enum class Level { COURSES, LESSONS, CARDS }
 
-class CoursesList : DeckDataList()
-class LessonsList : DeckDataList()
-class CardsList : DeckDataList()
+class CoursesList : DeckDataListFragment()
+class LessonsList : DeckDataListFragment()
+class CardsList : DeckDataListFragment()

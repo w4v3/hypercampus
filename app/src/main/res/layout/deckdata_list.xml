@@ -6,13 +6,13 @@
     <data>
         <variable
             name="viewmodel"
-            type="onion.w4v3xrmknycexlsd.app.hypercampus.HyperViewModel" />
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel" />
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".CoursesList">
+        tools:context=".browse.CoursesList">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
@@ -21,7 +21,7 @@
             android:layout_height="match_parent"
             android:background="?colorSurface"
             app:layoutManager="LinearLayoutManager"
-            tools:context=".CoursesList"
+            tools:context=".browse.CoursesList"
             tools:listitem="@layout/courses_list_item" />
     </FrameLayout>
 </layout>

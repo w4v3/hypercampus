@@ -1,4 +1,4 @@
-package onion.w4v3xrmknycexlsd.app.hypercampus
+package onion.w4v3xrmknycexlsd.app.hypercampus.review
 
 import android.content.Context
 import android.os.Bundle
@@ -13,19 +13,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
+import onion.w4v3xrmknycexlsd.app.hypercampus.*
+import onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModelFactory
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentSrsBinding
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.math.ceil
-import kotlin.math.ln
+import javax.inject.Inject
 import kotlin.random.Random
 
-class Srs : Fragment() {
-    private val args: SrsArgs by navArgs()
+class SrsFragment : Fragment() {
+    private val args: SrsFragmentArgs by navArgs()
 
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var binding: FragmentSrsBinding
     private lateinit var viewModel: HyperViewModel
 
@@ -36,6 +39,11 @@ class Srs : Fragment() {
     private var algorithm: SrsAlgorithm? = null
 
     private var selectedGrade: Int = 50
+
+    override fun onAttach(context: Context) {
+        (activity as HyperActivity).hyperComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,7 +85,7 @@ class Srs : Fragment() {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProvider(this).get(HyperViewModel::class.java)
+        viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
         viewModel.runAsync {
             fillCardSet()
@@ -95,7 +103,7 @@ class Srs : Fragment() {
             Level.CARDS -> emptySet<Card>().toMutableSet()
         }
 
-        if (!args.full && args.level==Level.COURSES) {
+        if (!args.full && args.level== Level.COURSES) {
             newCardList = viewModel.getNewCardsAsync(args.units).await().toMutableList()
         }
     }
@@ -154,17 +162,23 @@ class Srs : Fragment() {
 
     private fun intro() {
         if (newCardList.isNotEmpty() || reviewCardSet.isNotEmpty()) {
-            val bg = ContextCompat.getColor(activity as Context, R.color.colorIntroBg)
-            val fg = ContextCompat.getColor(activity as Context, R.color.colorIntroFg)
+            val bg = ContextCompat.getColor(activity as Context,
+                R.color.colorIntroBg
+            )
+            val fg = ContextCompat.getColor(activity as Context,
+                R.color.colorIntroFg
+            )
 
             val config = ShowcaseConfig()
             config.delay = 200
 
-            val sequence = MaterialShowcaseSequence(activity, SRS_SHOW)
+            val sequence = MaterialShowcaseSequence(activity,
+                SRS_SHOW
+            )
 
             sequence.setConfig(config)
 
-            sequence.setOnItemShownListener { _, _ ->  (activity as MainActivity).showing = true }
+            sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
 
             sequence.addSequenceItem(
                 MaterialShowcaseView.Builder(activity)
@@ -218,56 +232,10 @@ class Srs : Fragment() {
                     binding.questionLayout.visibility = View.INVISIBLE
                     binding.answerLayout.visibility = View.VISIBLE
                 }
-                (activity as MainActivity).showing = false
+                (activity as HyperActivity).showing = false
             }
 
             sequence.start()
         }
-    }
-}
-
-sealed class SrsAlgorithm {
-    var fi: Double = 0.9
-
-    abstract suspend fun calculateInterval(card: Card, grade: Float): Card
-
-    /*
-    fun forgettingCurve(t: Double, S: Double): Double {
-        return exp(-t/S)
-    }
-     */
-
-    fun invertForgetting(R: Double, S: Double): Double {
-        return -ln(R)*S
-    }
-
-    fun nextDue(interval: Int): Int {
-        val currentDate = Calendar.getInstance(Locale.US)
-        currentDate.add(Calendar.DATE,interval)
-        return SimpleDateFormat("yyyyMMdd", Locale.US).format(currentDate.time).toInt()
-    }
-}
-
-object SM2: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float): Card {
-        val q = grade * 5
-
-        val newEf = (card.eFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))).let { if (it < 1.3) 1.3 else it }
-        val newInt = if (grade < 0.5) 1 else when (card.last_interval) {
-            0 -> 1
-            1 -> ceil(invertForgetting(fi,40.0)).toInt()
-            else -> ceil(card.last_interval*newEf).toInt()
-        }
-
-        card.eFactor = newEf.toFloat()
-        card.due = nextDue(newInt)
-
-        return card
-    }
-}
-
-object HC1: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float): Card {
-        return card
     }
 }

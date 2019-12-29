@@ -1,7 +1,9 @@
-package onion.w4v3xrmknycexlsd.app.hypercampus
+package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import onion.w4v3xrmknycexlsd.app.hypercampus.MODE_LEARNT
+import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_ENABLED
 
 sealed class DeckData
 
@@ -38,6 +40,13 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "hc1_stability") var stability: Float = 1f
                 , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
+
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 1)
+abstract class HyperRoom : RoomDatabase() {
+    abstract fun courseDao(): CourseDAO
+    abstract fun lessonDao(): LessonDAO
+    abstract fun cardDao(): CardDAO
+}
 
 @Dao
 interface CourseDAO {
@@ -143,4 +152,3 @@ interface CardDAO {
     @Update
     suspend fun update(vararg card: Card)
 }
-

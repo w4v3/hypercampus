@@ -1,6 +1,7 @@
-package onion.w4v3xrmknycexlsd.app.hypercampus
+package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +11,24 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import onion.w4v3xrmknycexlsd.app.hypercampus.HyperActivity
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentEditCardBinding
+import onion.w4v3xrmknycexlsd.app.hypercampus.hideSoftKeyboard
+import javax.inject.Inject
 
-class EditCard : Fragment() {
-    private val args: EditCardArgs by navArgs()
+class EditCardFragment : Fragment() {
+    private val args: EditCardFragmentArgs by navArgs()
 
+    @Inject lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var viewModel: HyperViewModel
     private lateinit var binding: FragmentEditCardBinding
+
+    override fun onAttach(context: Context) {
+        (activity as HyperActivity).hyperComponent.inject(this)
+        super.onAttach(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,23 +42,34 @@ class EditCard : Fragment() {
             } else {
                 viewModel.update(binding.editCard!!)
             }
-            val action = EditCardDirections.backToCards(args.lessonId)
+            val action =
+                EditCardFragmentDirections.backToCards(
+                    args.lessonId
+                )
             findNavController().navigate(action)
         }
 
         //setMenuOnClickListeners()
 
-        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let { hideSoftKeyboard(it) } }
+        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let {
+            hideSoftKeyboard(
+                it
+            )
+        } }
 
         setHasOptionsMenu(true)
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProvider(this).get(HyperViewModel::class.java)
+        viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
         if (args.cardId == -1) {
-            binding.editCard = Card(0,args.courseId,args.lessonId)
+            binding.editCard = Card(
+                0,
+                args.courseId,
+                args.lessonId
+            )
         } else {
             viewModel.getCard(args.cardId).observe(viewLifecycleOwner, Observer { data ->
                 binding.editCard = data

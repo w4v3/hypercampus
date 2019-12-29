@@ -5,11 +5,7 @@
 
     <item
         android:drawable="@drawable/ic_logo"
-        android:top="200dp"
-        android:bottom="200dp"
-        android:left="125dp"
-        android:right="125dp"
-        android:gravity="fill_horizontal">
+        android:gravity="center">
     </item>
 
 </layer-list>

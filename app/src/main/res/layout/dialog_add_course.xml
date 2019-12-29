@@ -6,7 +6,7 @@
     <data>
         <variable
             name="editCourse"
-            type="onion.w4v3xrmknycexlsd.app.hypercampus.Course" />
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Course" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,11 +25,11 @@
             android:layout_margin="@dimen/text_margin"
             android:gravity="center"
             android:hint="@string/course_symbol_hint"
+            android:importantForAutofill="no"
+            android:inputType="text"
             android:maxLength="4"
             android:text="@={editCourse.symbol}"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:importantForAutofill="no"
-            android:inputType="textEmailAddress"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,12 +43,13 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
             android:hint="@string/course_label_hint"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences"
+            android:minHeight="48dp"
             android:text="@={editCourse.name}"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:importantForAutofill="no"
-            android:inputType="textCapSentences"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textView4"
             app:layout_constraintStart_toEndOf="@+id/label_short"
@@ -59,12 +60,14 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical|end"
             android:hint="@string/course_newperday_hint"
-            android:inputType="number"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:text="@={``+editCourse.new_per_day}"
             android:importantForAutofill="no"
+            android:inputType="number"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:text="@={``+editCourse.new_per_day}"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/textView5"
             app:layout_constraintTop_toTopOf="parent" />

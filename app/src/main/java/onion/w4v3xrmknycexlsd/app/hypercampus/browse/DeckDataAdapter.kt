@@ -1,4 +1,4 @@
-package onion.w4v3xrmknycexlsd.app.hypercampus
+package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 import android.content.Context
 import android.util.TypedValue
@@ -10,6 +10,11 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import onion.w4v3xrmknycexlsd.app.hypercampus.R
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.Course
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.DeckData
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.Lesson
 import java.util.*
 
 class DeckDataAdapter(
@@ -73,7 +78,9 @@ class DeckDataAdapter(
     open inner class DeckDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val shortLabelView: TextView = itemView.findViewById(R.id.label_short)
         val fullLabelView: TextView = itemView.findViewById(R.id.label_full)
-        val reviewButton: TextView? = if (deckData[0] !is Card) itemView.findViewById(R.id.review_button) else null
+        val reviewButton: TextView? = if (deckData[0] !is Card) itemView.findViewById(
+            R.id.review_button
+        ) else null
 
         fun bind(data: DeckData){
             itemView.setOnClickListener(mOnClickListener)
@@ -100,13 +107,15 @@ class DeckDataAdapter(
             is Course -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
-                holder.reviewButton?.text = holder.reviewButton?.context?.getString(R.string.due_new,dueCounts.getOrElse(dataCopy.indexOf(current)) {0},
+                holder.reviewButton?.text = holder.reviewButton?.context?.getString(
+                    R.string.due_new,dueCounts.getOrElse(dataCopy.indexOf(current)) {0},
                newCounts.getOrElse(dataCopy.indexOf(current)) {0})
             }
             is Lesson -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
-                holder.reviewButton?.text = holder.reviewButton?.context?.getString(R.string.due,dueCounts.getOrElse(dataCopy.indexOf(current)) {0})
+                holder.reviewButton?.text = holder.reviewButton?.context?.getString(
+                    R.string.due,dueCounts.getOrElse(dataCopy.indexOf(current)) {0})
             }
             is Card -> {
                 holder.shortLabelView.text = current.question
@@ -117,7 +126,7 @@ class DeckDataAdapter(
 
         if (position == 0) {
             firstView = holder
-            (listener as DeckDataList).intro()
+            (listener as DeckDataListFragment).intro()
         }
     }
 

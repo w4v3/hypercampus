@@ -4,7 +4,7 @@
     <data>
         <variable
             name="editCard"
-            type="onion.w4v3xrmknycexlsd.app.hypercampus.Card" />
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Card" />
     </data>
 
     <!--

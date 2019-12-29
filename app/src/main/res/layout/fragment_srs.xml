@@ -7,13 +7,13 @@
 
         <variable
             name="currentCard"
-            type="onion.w4v3xrmknycexlsd.app.hypercampus.Card" />
+            type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Card" />
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".Srs">
+        tools:context=".review.SrsFragment">
 
         <ScrollView
             android:id="@+id/answer_layout"
