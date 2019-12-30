@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import onion.w4v3xrmknycexlsd.app.hypercampus.HyperActivity
+import onion.w4v3xrmknycexlsd.app.hypercampus.HyperApp
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentEditCardBinding
@@ -26,7 +26,7 @@ class EditCardFragment : Fragment() {
     private lateinit var binding: FragmentEditCardBinding
 
     override fun onAttach(context: Context) {
-        (activity as HyperActivity).hyperComponent.inject(this)
+        (context.applicationContext as HyperApp).hyperComponent.inject(this)
         super.onAttach(context)
     }
 

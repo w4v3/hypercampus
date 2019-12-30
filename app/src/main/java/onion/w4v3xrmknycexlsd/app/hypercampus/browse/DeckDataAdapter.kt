@@ -30,8 +30,6 @@ class DeckDataAdapter(
 
     private var selectedViews: MutableList<View> = mutableListOf()
 
-    lateinit var firstView: DeckDataViewHolder
-
     init {
         mOnClickListener = View.OnClickListener { v ->
             val item = v.tag as DeckData
@@ -108,14 +106,14 @@ class DeckDataAdapter(
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
-                    R.string.due_new,dueCounts.getOrElse(dataCopy.indexOf(current)) {0},
-               newCounts.getOrElse(dataCopy.indexOf(current)) {0})
+                    R.string.due_new, dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…",
+               newCounts.getOrNull(dataCopy.indexOf(current)) ?: "…" )
             }
             is Lesson -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
-                    R.string.due,dueCounts.getOrElse(dataCopy.indexOf(current)) {0})
+                    R.string.due,dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…")
             }
             is Card -> {
                 holder.shortLabelView.text = current.question
@@ -123,11 +121,6 @@ class DeckDataAdapter(
             }
         }
         holder.bind(deckData[position])
-
-        if (position == 0) {
-            firstView = holder
-            (listener as DeckDataListFragment).intro()
-        }
     }
 
     internal fun setData(data: List<DeckData>) {

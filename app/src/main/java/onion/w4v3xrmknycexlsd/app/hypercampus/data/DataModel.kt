@@ -128,14 +128,14 @@ interface CardDAO {
     @Query("SELECT * FROM cards WHERE lesson_id=:lessonId AND due<=:by")
     suspend fun getAllFromLessonDueBy(lessonId: Int, by: Int): List<Card>
 
-    @Query("SELECT COUNT(*) FROM cards WHERE course_id=:courseId AND due<=:by")
-    suspend fun countDueInCourse(courseId: Int,by: Int): Int
+    @Query("SELECT COUNT(*) FROM cards WHERE course_id IN (:courseIds) AND due<=:by")
+    suspend fun countDueInCourses(courseIds: List<Int>,by: Int): List<Int>
 
-    @Query("SELECT COUNT(*) FROM cards WHERE lesson_id=:lessonId AND due<=:by")
-    suspend fun countDueInLesson(lessonId: Int, by: Int): Int
+    @Query("SELECT COUNT(*) FROM cards WHERE lesson_id IN (:lessonIds) AND due<=:by")
+    suspend fun countDueInLessons(lessonIds: List<Int>, by: Int): List<Int>
 
     @Query("SELECT * FROM cards WHERE due IS NULL AND course_id=:courseId LIMIT :n")
-    suspend fun getNewCards(courseId: Int, n: Int): List<Card>
+    suspend fun getNewCardsAsync(courseId: Int, n: Int): List<Card>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun add(card: Card)

@@ -22,8 +22,6 @@ class HyperActivity : AppCompatActivity() {
 
     var showing = false
 
-    val hyperComponent = DaggerHyperComponent.builder().context(this).build()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,7 +47,6 @@ class HyperActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         binding.floatingActionButton.setOnClickListener { navController.navigate(R.id.action_to_srs) }
-
     }
 
     private fun setMenuVisible(visible: Boolean) {

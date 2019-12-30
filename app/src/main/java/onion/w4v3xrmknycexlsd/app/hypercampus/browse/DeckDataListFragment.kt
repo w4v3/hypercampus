@@ -9,9 +9,13 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import onion.w4v3xrmknycexlsd.app.hypercampus.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.DeckdataListBinding
@@ -40,10 +44,8 @@ open class DeckDataListFragment : Fragment(),
     private var selected: MutableList<DeckData> = mutableListOf()
     private var selectionMode: ActionMode? = null
 
-    private var intro = false
-
     override fun onAttach(context: Context) {
-        (activity as HyperActivity).hyperComponent.inject(this)
+        (context.applicationContext as HyperApp).hyperComponent.inject(this)
         super.onAttach(context)
     }
 
@@ -77,64 +79,63 @@ open class DeckDataListFragment : Fragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
-        updateCounts()
+        lifecycleScope.launch {
+            val toObserve = when (args.level) {
+                Level.COURSES -> viewModel.allCourses
+                Level.LESSONS -> viewModel.getCourseLessons(args.dataId)
+                Level.CARDS -> viewModel.getLessonCards(args.dataId)
+            }
 
-        viewModel.runAsync {
+            toObserve.observe(viewLifecycleOwner, Observer { data ->
+                data?.let { adapter.setData(it); updateCounts() }
+            })
+
             when (args.level) {
                 Level.COURSES -> {}
                 Level.LESSONS -> {
-                    currentCourse = viewModel.getCourseAsync(args.dataId).await()
+                    currentCourse = viewModel.getCourseAsync(args.dataId)
                     (activity as HyperActivity).binding.appBar.title = currentCourse?.name
                 }
                 Level.CARDS -> {
-                    currentLesson = viewModel.getLessonAsync(args.dataId).await()
-                    (activity as HyperActivity).binding.appBar.title = "${viewModel.getCourseAsync(currentLesson!!.course_id).await().symbol} > ${currentLesson?.name}"
+                    currentLesson = viewModel.getLessonAsync(args.dataId)
+                    (activity as HyperActivity).binding.appBar.title =
+                        "${viewModel.getCourseAsync(currentLesson!!.course_id).symbol} > ${currentLesson?.name}"
                 }
             }
-        }
-
-        val toObserve = when (args.level) {
-            Level.COURSES -> viewModel.allCourses
-            Level.LESSONS -> viewModel.getCourseLessons(args.dataId)
-            Level.CARDS -> viewModel.getLessonCards(args.dataId)
-        }
-
-        toObserve.observe(viewLifecycleOwner, Observer { data ->
-            data?.let { adapter.setData(it); }
-        })
 
 
-        // app intro
-        val pref = activity?.getSharedPreferences("material_showcaseview_prefs",Context.MODE_PRIVATE)
-        if (pref?.getBoolean("first_time", true) == true) {
-            val builder = activity?.let { MaterialAlertDialogBuilder(it) }
-            builder?.setTitle(R.string.app_name)
-                ?.setMessage(R.string.welcome)
-                ?.setIcon(R.drawable.ic_logo)
-                ?.setPositiveButton(getString(R.string.start_tour)) { _, _ ->
-                    intro = true
-                    insertSamples()
-                }
-                ?.setNegativeButton(getString(R.string.no_thx)) { _, _ ->
-                    with(pref.edit()) {
-                        for (s in SHOWCASE) putInt("status_$s", -1)
-                        apply()
-                    }
+            // app intro
+            val pref = withContext(Dispatchers.IO) { activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE) }
+            if (pref?.getBoolean("first_time_$label", true) == true) {
+                if (args.level == Level.COURSES) {
+                    val builder = activity?.let { MaterialAlertDialogBuilder(it) }
+                    builder?.setTitle(R.string.app_name)
+                        ?.setMessage(R.string.welcome)
+                        ?.setIcon(R.drawable.ic_logo)
+                        ?.setPositiveButton(getString(R.string.start_tour)) { _, _ ->
+                            intro()
+                        }
+                        ?.setNegativeButton(getString(R.string.no_thx)) { _, _ ->
+                            with(pref.edit()) {
+                                for (s in SHOWCASE) putInt("status_$s", -1)
+                                apply()
+                            }
+                        }
+
+                    val dialog: Dialog? = builder?.create()
+                    dialog?.show()
+                } else {
+                    intro()
                 }
 
-            val dialog: Dialog? = builder?.create()
-            dialog?.show()
-
-            with(pref.edit()) {
-                putBoolean("first_time", false)
-                apply()
+                with(pref.edit()) {
+                    putBoolean("first_time_$label", false)
+                    apply()
+                }
             }
-        } else {
-            intro = true
         }
 
         findNavController().addOnDestinationChangedListener { _, _, _ -> selected.clear(); selectionMode?.invalidate() }
-
 
         super.onActivityCreated(savedInstanceState)
     }
@@ -298,11 +299,9 @@ open class DeckDataListFragment : Fragment(),
                         when (args.level) {
                             Level.COURSES -> (cardBinding as DialogAddCourseBinding).editCourse?.let {
                                 viewModel.add(it)
-                                updateCounts()
                             }
                             Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson?.let {
                                 viewModel.add(it)
-                                updateCounts()
                             }
                             Level.CARDS -> {}
                         }
@@ -323,10 +322,8 @@ open class DeckDataListFragment : Fragment(),
             ?.setPositiveButton(getString(R.string.ok)) { _, _ ->
                 for (i in selected) {
                     viewModel.delete(i)
-                    updateCounts()
                 }
                 selectionMode?.finish()
-                updateCounts()
             }
             ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
 
@@ -368,11 +365,9 @@ open class DeckDataListFragment : Fragment(),
                 when (args.level) {
                     Level.COURSES -> (cardBinding as DialogAddCourseBinding).editCourse?.let {
                         viewModel.update(it)
-                        updateCounts()
                     }
                     Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson?.let {
                         viewModel.update(it)
-                        updateCounts()
                     }
                     Level.CARDS -> {}
                 }
@@ -383,203 +378,144 @@ open class DeckDataListFragment : Fragment(),
         dialog?.show()
     }
 
-    private fun updateCounts() = viewModel.runAsync {
+    private fun updateCounts() = lifecycleScope.launch {
         when (args.level) {
             Level.COURSES -> {
-                viewModel.getDueAsync().await().let { adapter.setDueCounts(it) }
-                viewModel.getNewAsync().await().let { adapter.setNewCounts(it) }
+                adapter.setDueCounts(viewModel.countDuePerCourseAsync())
+                adapter.setNewCounts(viewModel.countNewPerCourseAsync())
             }
-            Level.LESSONS -> viewModel.getCourseDueAsync(args.dataId).await().let { adapter.setDueCounts(it) }
+            Level.LESSONS -> adapter.setNewCounts(viewModel.countDuePerLessonAsync(args.dataId))
             Level.CARDS -> {}
-        }
-    }
+        }}
 
     private fun insertSamples() {
-        val geo = Course(
-            1,
-            "🌍",
-            "Geography"
-        )
-        viewModel.add(geo)
-        val cap = Lesson(
-            1,
-            geo.id,
-            "🏰",
-            "Capitals"
-        )
-        viewModel.add(cap)
-        viewModel.add(
-            Card(
-                0,
-                geo.id,
-                cap.id,
-                "Spain",
-                "Madrid"
-            )
-        )
-        viewModel.add(
-            Card(
-                0,
-                geo.id,
-                cap.id,
-                "Egypt",
-                "Kairo"
-            )
-        )
-        viewModel.add(
-            Card(
-                0,
-                geo.id,
-                cap.id,
-                "India",
-                "New Delhi"
-            )
-        )
-
-        val eng = Course(
-            2,
-            "🔤",
-            "Fancy English Words"
-        )
-        viewModel.add(eng)
-        val shak = Lesson(
-            2,
-            eng.id,
-            "1",
-            "Shakespeare"
-        )
-        viewModel.add(shak)
-        viewModel.add(
-            Card(
-                0,
-                eng.id,
-                shak.id,
-                "simular",
-                "false, counterfeit"
-            )
-        )
-        viewModel.add(
-            Card(
-                0,
-                eng.id,
-                shak.id,
-                "to perpend",
-                "to ponder"
-            )
-        )
-        updateCounts()
+        viewModel.add(Course( 1, "🌍", "Geography" ))
+        viewModel.add(Course( 2, "🔤", "Fancy English Words" ))
+        viewModel.add(Lesson( 1, 1, "🏰", "Capitals" ))
+        viewModel.add(Lesson(2, 2, "1", "Shakespeare" ))
+        viewModel.add(Card( 0, 1, 1, "Spain", "Madrid" ))
+        viewModel.add(Card( 0, 1, 1, "Egypt", "Kairo" ))
+        viewModel.add(Card( 0, 1, 1, "India", "New Delhi" ))
+        viewModel.add(Card( 0, 2, 2, "simular", "false, counterfeit" ) )
+        viewModel.add(Card( 0, 2, 2, "to perpend", "to ponder" ) )
     }
 
-    fun intro() {
-        if (intro) {
-            val bg = ContextCompat.getColor(activity as Context,
-                R.color.colorIntroBg
-            )
-            val fg = ContextCompat.getColor(activity as Context,
-                R.color.colorIntroFg
-            )
+    private fun intro() {
+        val bg = ContextCompat.getColor(activity as Context, R.color.colorIntroBg )
+        val fg = ContextCompat.getColor(activity as Context, R.color.colorIntroFg )
 
-            val config = ShowcaseConfig()
-            config.delay = 200
+        val config = ShowcaseConfig()
+        config.delay = 200
 
-            val sequence = MaterialShowcaseSequence(activity, when (args.level) {
-                Level.COURSES -> COURSE_SHOW
-                Level.LESSONS -> LESSON_SHOW
-                Level.CARDS -> CARD_SHOW
-            })
+        val sequence = MaterialShowcaseSequence(activity, when (args.level) {
+            Level.COURSES -> COURSE_SHOW
+            Level.LESSONS -> LESSON_SHOW
+            Level.CARDS -> CARD_SHOW
+        })
 
-            sequence.setConfig(config)
+        sequence.setConfig(config)
 
-            sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
-            sequence.setOnItemDismissedListener { _, _ ->  (activity as HyperActivity).showing = false }
+        sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
+        sequence.setOnItemDismissedListener { _, _ ->  (activity as HyperActivity).showing = false }
 
-            when (args.level) {
-                Level.COURSES -> {
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(activity?.findViewById(R.id.app_bar_add))
-                        .setContentText(getString(R.string.intro1))
-                        .setDismissText(getString(R.string.got_it))
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
+        when (args.level) {
+            Level.COURSES -> {
+                val item = binding.dummyCourse
 
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(adapter.firstView.reviewButton)
-                        .setContentText(getString(R.string.intro2))
-                        .setDismissText(getString(R.string.got_it))
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .withOvalShape()
-                        .build()
-                    )
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(activity?.findViewById(R.id.app_bar_add))
+                    .setContentText(getString(R.string.intro1))
+                    .setMaskColour(bg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
+                    .build()
+                )
 
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
-                        .setDismissText(getString(R.string.got_it))
-                        .setContentText(getString(R.string.intro3))
-                        .setShapePadding(64)
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(adapter.firstView.fullLabelView)
-                        .setDismissText(getString(R.string.got_it))
-                        .setContentText(getString(R.string.intro4))
-                        .withOvalShape()
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(item.findViewById(R.id.review_button))
+                    .setContentText(getString(R.string.intro2))
+                    .setDismissText(getString(R.string.got_it))
+                    .setMaskColour(bg)
+                    .setDismissTextColor(fg)
+                    .withOvalShape()
+                    .build()
+                )
 
-                }
-                Level.LESSONS -> {
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(adapter.firstView.fullLabelView)
-                        .setDismissText(getString(R.string.got_it))
-                        .setContentText(getString(R.string.intro5))
-                        .withRectangleShape(true)
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
-                }
-                Level.CARDS -> {
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(adapter.firstView.shortLabelView)
-                        .setDismissText(getString(R.string.got_it))
-                        .withRectangleShape()
-                        .setContentText(getString(R.string.intro6))
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget((activity as HyperActivity).binding.floatingActionButton)
+                    .setDismissText(getString(R.string.got_it))
+                    .setContentText(getString(R.string.intro3))
+                    .setShapePadding(64)
+                    .setMaskColour(bg)
+                    .setDismissTextColor(fg)
+                    .build()
+                )
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(item)
+                    .setContentText(getString(R.string.intro4))
+                    .withRectangleShape(true)
+                    .setMaskColour(bg)
+                    .setDismissOnTargetTouch(true)
+                    .setDismissOnTouch(true)
+                    .build()
+                )
 
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget(adapter.firstView.fullLabelView)
-                        .setDismissText(getString(R.string.got_it))
-                        .withRectangleShape()
-                        .setContentText(getString(R.string.intro7))
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
-
-                    sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
-                        .setDismissText(getString(R.string.got_it))
-                        .setShapePadding(64)
-                        .setContentText(getString(R.string.intro8))
-                        .setMaskColour(bg)
-                        .setDismissTextColor(fg)
-                        .build()
-                    )
+                sequence.setOnItemDismissedListener { _, position ->
+                    when (position) {
+                        0 -> insertSamples()
+                        3 -> findNavController().navigate(R.id.next_action)
+                    }
                 }
             }
-            sequence.start()
-            intro = false
+            Level.LESSONS -> {
+                val item = binding.dummyCourse
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(item)
+                    .setContentText(getString(R.string.intro5))
+                    .withRectangleShape(true)
+                    .setMaskColour(bg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
+                    .build()
+                )
+
+                sequence.setOnItemDismissedListener { _, _ -> findNavController().navigate(R.id.next_action) }
+            }
+            Level.CARDS -> {
+                val item = binding.dummyWord
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(item.findViewById(R.id.label_short))
+                    .setDismissText(getString(R.string.got_it))
+                    .withRectangleShape()
+                    .setContentText(getString(R.string.intro6))
+                    .setMaskColour(bg)
+                    .setDismissTextColor(fg)
+                    .build()
+                )
+
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget(item.findViewById(R.id.label_full))
+                    .setDismissText(getString(R.string.got_it))
+                    .withRectangleShape()
+                    .setContentText(getString(R.string.intro7))
+                    .setMaskColour(bg)
+                    .setDismissTextColor(fg)
+                    .build()
+                )
+
+                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
+                    .setTarget((activity as HyperActivity).binding.floatingActionButton)
+                    .setShapePadding(64)
+                    .setContentText(getString(R.string.intro8))
+                    .setMaskColour(bg)
+                    .setDismissOnTargetTouch(true)
+                    .setDismissOnTouch(true)
+                    .build()
+                )
+                sequence.setOnItemDismissedListener { _, position -> if (position == 2) findNavController().navigate(R.id.action_to_srs) }
+            }
         }
+        sequence.start()
     }
 }
 

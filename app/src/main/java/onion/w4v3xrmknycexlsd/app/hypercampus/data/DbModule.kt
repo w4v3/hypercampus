@@ -1,6 +1,6 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
-import android.content.Context
+import android.app.Application
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -9,8 +9,8 @@ import javax.inject.Singleton
 @Module
 class DbModule {
     @Provides @Singleton
-    internal fun provideDatabase(context: Context): HyperRoom {
-        return Room.databaseBuilder(context, HyperRoom::class.java, "hypercampus_database")
+    internal fun provideDatabase(application: Application): HyperRoom {
+        return Room.databaseBuilder(application, HyperRoom::class.java, "hypercampus_database")
             .build()
     }
 

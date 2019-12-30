@@ -23,5 +23,15 @@
             app:layoutManager="LinearLayoutManager"
             tools:context=".browse.CoursesList"
             tools:listitem="@layout/courses_list_item" />
+
+        <include
+            android:id="@+id/dummy_course"
+            layout="@layout/courses_list_item"
+            android:visibility="invisible" />
+
+        <include
+            android:id="@+id/dummy_word"
+            layout="@layout/words_list_item"
+            android:visibility="invisible" />
     </FrameLayout>
 </layout>

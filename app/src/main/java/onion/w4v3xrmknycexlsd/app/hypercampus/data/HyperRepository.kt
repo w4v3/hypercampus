@@ -1,17 +1,22 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
+import kotlinx.coroutines.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class HyperRepository @Inject constructor(private val courseDao: CourseDAO, private val lessonDao: LessonDAO, private val cardDao: CardDAO) {
-    val allCourses: LiveData<List<Course>> = courseDao.getAll()
-    fun getLessons(courseId: Int) = lessonDao.getFrom(courseId)
-    fun getCards(lessonId: Int) = cardDao.getFrom(lessonId)
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    suspend fun getCourse(courseId: Int) = courseDao.getCourse(courseId)
-    suspend fun getLesson(lessonId: Int) = lessonDao.getLesson(lessonId)
-    fun getCard(cardId: Int) = cardDao.getCard(cardId)
+    val allCourses: LiveData<List<Course>> = courseDao.getAll()
+    fun getLessons(courseId: Int): LiveData<List<Lesson>> = lessonDao.getFrom(courseId)
+    fun getCards(lessonId: Int): LiveData<List<Card>> = cardDao.getFrom(lessonId)
+    fun getCard(cardId: Int): LiveData<Card> = cardDao.getCard(cardId)
+
+    suspend fun getCourse(courseId: Int): Course = courseDao.getCourse(courseId)
+    suspend fun getLesson(lessonId: Int): Lesson = lessonDao.getLesson(lessonId)
 
     suspend fun getAllCardsFromCourses(courses: IntArray?): List<Card> =
         if (courses==null) cardDao.getAllAsync()
@@ -49,6 +54,10 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
             result.toList()
         }
 
+    private suspend fun getNewCardsCourse(course: Course): List<Card> {
+        return cardDao.getNewCardsAsync(course.id,course.new_per_day - course.new_studied_today)
+    }
+
     suspend fun getNewCards(courses: IntArray?): List<Card> {
         val courseList = mutableListOf<Course>()
         if (courses==null) {
@@ -62,35 +71,14 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         return result.toList()
     }
 
-    private suspend fun getNewCardsCourse(course: Course): List<Card> {
-        return cardDao.getNewCards(course.id,course.new_per_day - course.new_studied_today)
-    }
+    suspend fun countDueCourses(): List<Int> = cardDao.countDueInCourses(courseDao.getAllAsync().map { it.id }, currentDate())
 
-    suspend fun countNewCards(): List<Int> {
-        return courseDao.getAllAsync().map { getNewCardsCourse(it).size }
-    }
+    suspend fun countNewCards(): List<Int> = courseDao.getAllAsync()
+        .map { cardDao.getNewCardsAsync(it.id, (it.new_per_day - it.new_studied_today).coerceAtLeast(0)).size }
 
-    suspend fun countDueCourses(): List<Int> {
-        val result = mutableListOf<Int>()
-        for (c in courseDao.getAllAsync()) {
-            result.add(cardDao.countDueInCourse(c.id,
-                currentDate()
-            ))
-        }
-        return result.toList()
-    }
+    suspend fun countDueLessons(courseId: Int): List<Int> = cardDao.countDueInLessons(lessonDao.getFromAsync(courseId).map { it.id }, currentDate())
 
-    suspend fun countDueLessons(courseId: Int): List<Int> {
-        val result = mutableListOf<Int>()
-        for (l in lessonDao.getFromAsync(courseId)) {
-            result.add(cardDao.countDueInLesson(l.id,
-                currentDate()
-            ))
-        }
-        return result.toList()
-    }
-
-    suspend fun add(data: DeckData) {
+    fun add(data: DeckData) = repositoryScope.launch {
         when (data) {
             is Course -> courseDao.add(data)
             is Lesson -> lessonDao.add(data)
@@ -98,7 +86,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
     }
 
-    suspend fun delete(data: DeckData){
+    fun delete(data: DeckData) = repositoryScope.launch {
         when (data) {
             is Course -> {
                 courseDao.delete(data.id)
@@ -113,7 +101,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
     }
 
-    suspend fun update(data: DeckData){
+    fun update(data: DeckData) = repositoryScope.launch {
         when (data) {
             is Course -> courseDao.update(data)
             is Lesson -> lessonDao.update(data)

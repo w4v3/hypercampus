@@ -26,8 +26,8 @@
     <string name="show_answer">Show answer</string>
     <string name="no_more_due">No more cards due today!</string>
     <string name="return_button">Return</string>
-    <string name="due_new">%d due | %d new</string>
-    <string name="due">%d due</string>
+    <string name="due_new">%s due | %s new</string>
+    <string name="due">%s due</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
     <string name="new_">New %s</string>

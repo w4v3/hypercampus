@@ -1,6 +1,6 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus
 
-import android.content.Context
+import android.app.Application
 import dagger.BindsInstance
 import dagger.Component
 import onion.w4v3xrmknycexlsd.app.hypercampus.browse.DeckDataListFragment
@@ -21,7 +21,7 @@ interface HyperComponent {
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun context(context: Context): Builder
+        fun application(application: Application): Builder
         fun build(): HyperComponent
     }
 }

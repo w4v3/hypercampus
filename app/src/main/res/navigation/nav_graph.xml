@@ -40,7 +40,8 @@
             app:popExitAnim="@anim/slide_out_right"/>
         <argument
             android:name="dataId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="1"/>
         <argument
             android:name="level"
             app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
@@ -54,7 +55,8 @@
             android:id="@+id/next_action"/>
         <argument
             android:name="dataId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="1"/>
         <argument
             android:name="level"
             app:argType="onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level"
@@ -121,6 +123,6 @@
         <argument
             android:name="dataId"
             app:argType="integer"
-            android:defaultValue="0" />
+            android:defaultValue="1" />
     </fragment>
 </navigation>

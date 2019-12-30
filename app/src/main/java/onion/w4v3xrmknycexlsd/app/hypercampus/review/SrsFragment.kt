@@ -10,14 +10,15 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
+import kotlinx.coroutines.launch
 import onion.w4v3xrmknycexlsd.app.hypercampus.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
-import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModelFactory
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentSrsBinding
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
@@ -33,7 +34,7 @@ class SrsFragment : Fragment() {
     private lateinit var viewModel: HyperViewModel
 
     private var newCardList = mutableListOf<Card>()
-    private var reviewCardSet = mutableSetOf<Card>()
+    private var dueCardList = mutableListOf<Card>()
 
     private var newCardMode: Int? = 0
     private var algorithm: SrsAlgorithm? = null
@@ -41,7 +42,7 @@ class SrsFragment : Fragment() {
     private var selectedGrade: Int = 50
 
     override fun onAttach(context: Context) {
-        (activity as HyperActivity).hyperComponent.inject(this)
+        (context.applicationContext as HyperApp).hyperComponent.inject(this)
         super.onAttach(context)
     }
 
@@ -49,7 +50,14 @@ class SrsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
         binding = FragmentSrsBinding.inflate(layoutInflater)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.showAnswerButton.setOnClickListener {
             binding.questionLayout.visibility = View.INVISIBLE
@@ -70,6 +78,9 @@ class SrsFragment : Fragment() {
             }
         })
 
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         newCardMode = MODE_LEARNT
 
@@ -81,13 +92,7 @@ class SrsFragment : Fragment() {
             else -> null
         }
 
-        return binding.root
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
-
-        viewModel.runAsync {
+        lifecycleScope.launch {
             fillCardSet()
             nextCard()
             intro()
@@ -97,14 +102,14 @@ class SrsFragment : Fragment() {
     }
 
     private suspend fun fillCardSet() {
-        reviewCardSet = when (args.level) {
-            Level.COURSES -> viewModel.getDueFromCoursesAsync(args.full,args.units).await().toMutableSet()
-            Level.LESSONS -> viewModel.getDueFromLessonsAsync(args.full,args.units).await().toMutableSet()
-            Level.CARDS -> emptySet<Card>().toMutableSet()
+        dueCardList = when (args.level) {
+            Level.COURSES -> viewModel.getDueFromCoursesAsync(args.full,args.units).toMutableList()
+            Level.LESSONS -> viewModel.getDueFromLessonsAsync(args.full,args.units).toMutableList()
+            Level.CARDS -> emptyList<Card>().toMutableList()
         }
 
         if (!args.full && args.level== Level.COURSES) {
-            newCardList = viewModel.getNewCardsAsync(args.units).await().toMutableList()
+            newCardList = viewModel.getNewCardsFromCoursesAsync(args.units).toMutableList()
         }
     }
 
@@ -122,8 +127,8 @@ class SrsFragment : Fragment() {
                 }
             }
 
-            reviewCardSet.isNotEmpty() -> {
-                binding.currentCard = reviewCardSet.elementAt(Random.nextInt(reviewCardSet.size))
+            dueCardList.isNotEmpty() -> {
+                binding.currentCard = dueCardList.elementAt(Random.nextInt(dueCardList.size))
             }
 
             else -> {
@@ -135,18 +140,18 @@ class SrsFragment : Fragment() {
     }
 
     private val runNextCard = Runnable { nextCard() }
-    private fun handleGrade(grade: Float) = viewModel.runAsync {
+    private fun handleGrade(grade: Float) = lifecycleScope.launch {
         val updatedCard = algorithm?.calculateInterval(binding.currentCard!!,grade)
 
         updatedCard?.let { viewModel.update(it) }
 
         if (binding.currentCard!! in newCardList) {
             newCardList.remove(binding.currentCard!!)
-            val course = viewModel.getCourseAsync(binding.currentCard!!.course_id).await()
+            val course = viewModel.getCourseAsync(binding.currentCard!!.course_id)
             course.new_studied_today++
             viewModel.update(course)
         } else {
-            reviewCardSet.remove(binding.currentCard!!)
+            dueCardList.remove(binding.currentCard!!)
         }
 
         Handler().postDelayed(runNextCard, 200)
@@ -161,7 +166,7 @@ class SrsFragment : Fragment() {
     }
 
     private fun intro() {
-        if (newCardList.isNotEmpty() || reviewCardSet.isNotEmpty()) {
+        if (newCardList.isNotEmpty() || dueCardList.isNotEmpty()) {
             val bg = ContextCompat.getColor(activity as Context,
                 R.color.colorIntroBg
             )
