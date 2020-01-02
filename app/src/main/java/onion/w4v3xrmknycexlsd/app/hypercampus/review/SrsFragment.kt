@@ -39,8 +39,6 @@ class SrsFragment : Fragment() {
     private var newCardMode: Int? = 0
     private var algorithm: SrsAlgorithm? = null
 
-    private var selectedGrade: Int = 50
-
     override fun onAttach(context: Context) {
         (context.applicationContext as HyperApp).hyperComponent.inject(this)
         super.onAttach(context)
@@ -59,10 +57,28 @@ class SrsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        var selectedGrade = 50
+        var selectedRecall = false
+
         binding.showAnswerButton.setOnClickListener {
             binding.questionLayout.visibility = View.INVISIBLE
             binding.answerLayout.visibility = View.VISIBLE
+            binding.recallFeedback.visibility = View.VISIBLE
+            binding.gradeSelector.visibility = View.INVISIBLE
+            binding.wrongTextView.text = getString(R.string.wrong)
+            binding.rightTextView.text = getString(R.string.right)
         }
+
+        fun recallListener(recall: Boolean) {
+            selectedRecall = recall
+            binding.recallFeedback.visibility = View.INVISIBLE
+            binding.gradeSelector.visibility = View.VISIBLE
+            binding.wrongTextView.text = getString(R.string.unfamiliar)
+            binding.rightTextView.text = getString(R.string.familiar)
+        }
+
+        binding.wrongButton.setOnClickListener { recallListener(false) }
+        binding.rightButton.setOnClickListener { recallListener(true) }
 
         binding.returnButton.setOnClickListener { findNavController().navigateUp() }
 
@@ -74,7 +90,7 @@ class SrsFragment : Fragment() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                seekBar?.let { handleGrade(selectedGrade/it.max.toFloat()) }
+                seekBar?.let { handleGrade(selectedGrade/it.max.toFloat(), selectedRecall) }
             }
         })
 
@@ -108,7 +124,7 @@ class SrsFragment : Fragment() {
             Level.CARDS -> emptyList<Card>().toMutableList()
         }
 
-        if (!args.full && args.level== Level.COURSES) {
+        if (!args.full && args.level == Level.COURSES) {
             newCardList = viewModel.getNewCardsFromCoursesAsync(args.units).toMutableList()
         }
     }
@@ -140,8 +156,8 @@ class SrsFragment : Fragment() {
     }
 
     private val runNextCard = Runnable { nextCard() }
-    private fun handleGrade(grade: Float) = lifecycleScope.launch {
-        val updatedCard = algorithm?.calculateInterval(binding.currentCard!!,grade)
+    private fun handleGrade(grade: Float, recall: Boolean) = lifecycleScope.launch {
+        val updatedCard = algorithm?.calculateInterval(binding.currentCard!!,grade,recall)
 
         updatedCard?.let { viewModel.update(it) }
 
@@ -158,11 +174,13 @@ class SrsFragment : Fragment() {
     }
 
     private fun showInfoFile() {
-        newCardList.clear()
+        binding.currentCard = newCardList[0]
+        //newCardList.clear()
     }
 
     private fun initiateDropout() {
-        newCardList.clear()
+        binding.currentCard = newCardList[0]
+        //newCardList.clear()
     }
 
     private fun intro() {

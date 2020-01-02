@@ -9,6 +9,7 @@
     <string name="title_review">Review</string>
     <string name="title_settings">Settings</string>
     <string name="title_edit_card">Edit card</string>
+    <string name="action_exp">Export</string>
 
     <!-- Courses, Lessons, Cards -->
     <string name="course_symbol_hint">📚</string>
@@ -23,6 +24,9 @@
     <string name="answer">Answer</string>
     <string name="wrong">wrong</string>
     <string name="right">right</string>
+    <string name="familiarity">familiarity</string>
+    <string name="unfamiliar">completely unfamiliar</string>
+    <string name="familiar">very familiar</string>
     <string name="show_answer">Show answer</string>
     <string name="no_more_due">No more cards due today!</string>
     <string name="return_button">Return</string>
@@ -35,9 +39,13 @@
     <string name="ok">OK</string>
     <string name="edit_">Edit %s</string>
     <string name="edit_dialog">Edit</string>
-    <plurals name="deleting_dialog">
-        <item quantity="one">Deleting one %2$s</item>
+    <plurals name="deleting_">
+        <item quantity="one">Deleting %2$s</item>
         <item quantity="other">Deleting %1$d %2$ss</item>
+    </plurals>
+    <plurals name="export_">
+        <item quantity="one">Export %2$s</item>
+        <item quantity="other">Export %1$d %2$ss</item>
     </plurals>
 
     <!-- Preferences -->
@@ -69,4 +77,6 @@
     <string name="course">course</string>
     <string name="lesson">lesson</string>
     <string name="card">card</string>
+    <string name="add_image">Add image</string>
+    <string name="add_audio">Add audio</string>
 </resources>

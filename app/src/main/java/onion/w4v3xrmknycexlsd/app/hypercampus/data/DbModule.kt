@@ -10,7 +10,8 @@ import javax.inject.Singleton
 class DbModule {
     @Provides @Singleton
     internal fun provideDatabase(application: Application): HyperRoom {
-        return Room.databaseBuilder(application, HyperRoom::class.java, "hypercampus_database")
+        return Room.databaseBuilder(application, HyperRoom::class.java, "hypercampus_database.db")
+            .fallbackToDestructiveMigrationFrom(1)
             .build()
     }
 

@@ -13,7 +13,7 @@ data class Course(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val 
                   , @ColumnInfo(name = "name") var name: String = ""
                   , @ColumnInfo(name = "new_per_day") var new_per_day: Int = 10
                   , @ColumnInfo(name = "new_studied_today") var new_studied_today: Int = 0
-                  , @ColumnInfo(name = "learning_mode") var learning_mode: Int = MODE_LEARNT
+                  , @ColumnInfo(name = "info_file") var info_file: String = ""
                   , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
@@ -22,7 +22,6 @@ data class Lesson(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val 
                   , @ColumnInfo(name = "course_id") val course_id: Int
                   , @ColumnInfo(name = "symbol") var symbol: String = ""
                   , @ColumnInfo(name = "name") var name: String = ""
-                  , @ColumnInfo(name = "info_file") var info_file: String = ""
                   , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
@@ -33,15 +32,18 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "question") var question: String = ""
                 , @ColumnInfo(name = "answer") var answer: String = ""
                 , @ColumnInfo(name = "due") var due: Int? = null
+                , @ColumnInfo(name = "learning_mode") var learning_mode: Int = MODE_LEARNT
                 , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
                 , @ColumnInfo(name = "last_interval") var last_interval: Int = 0
                 , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
-                , @ColumnInfo(name = "hc1_difficulty") var difficulty: Float = 1f
                 , @ColumnInfo(name = "hc1_stability") var stability: Float = 1f
+                , @ColumnInfo(name = "hc1_params") var params: List<Float> = listOf()
+                , @ColumnInfo(name = "hc1_sigma_params") var sigma_params: List<List<Float>> = listOf()
                 , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 1)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 2)
+@TypeConverters(Converters::class)
 abstract class HyperRoom : RoomDatabase() {
     abstract fun courseDao(): CourseDAO
     abstract fun lessonDao(): LessonDAO
@@ -61,13 +63,16 @@ interface CourseDAO {
     suspend fun getCourse(courseId: Int): Course
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun add(course: Course)
+    suspend fun add(course: Course): Long
 
     @Query("DELETE FROM courses WHERE id=:id")
     suspend fun delete(id: Int)
 
     @Update
-    suspend fun update(vararg course: Course)
+    suspend fun update(course: Course)
+
+    @Update
+    suspend fun updateAll(course: List<Course>)
 }
 
 @Dao
@@ -86,7 +91,7 @@ interface LessonDAO {
     suspend fun getFromAsync(courseId: Int): List<Lesson>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun add(lesson: Lesson)
+    suspend fun add(lesson: Lesson): Long
 
     @Query("DELETE FROM lessons WHERE id=:id")
     suspend fun delete(id: Int)
@@ -128,17 +133,17 @@ interface CardDAO {
     @Query("SELECT * FROM cards WHERE lesson_id=:lessonId AND due<=:by")
     suspend fun getAllFromLessonDueBy(lessonId: Int, by: Int): List<Card>
 
-    @Query("SELECT COUNT(*) FROM cards WHERE course_id IN (:courseIds) AND due<=:by")
-    suspend fun countDueInCourses(courseIds: List<Int>,by: Int): List<Int>
+    @Query("SELECT COUNT(*) FROM cards WHERE course_id=:courseId AND due<=:by")
+    suspend fun countDueInCourse(courseId: Int, by: Int): Int
 
-    @Query("SELECT COUNT(*) FROM cards WHERE lesson_id IN (:lessonIds) AND due<=:by")
-    suspend fun countDueInLessons(lessonIds: List<Int>, by: Int): List<Int>
+    @Query("SELECT COUNT(*) FROM cards WHERE lesson_id=:lessonId AND due<=:by")
+    suspend fun countDueInLessons(lessonId: Int, by: Int): Int
 
     @Query("SELECT * FROM cards WHERE due IS NULL AND course_id=:courseId LIMIT :n")
     suspend fun getNewCardsAsync(courseId: Int, n: Int): List<Card>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun add(card: Card)
+    suspend fun add(card: Card): Long
 
     @Query("DELETE FROM cards WHERE id=:id")
     suspend fun delete(id: Int)
@@ -151,4 +156,26 @@ interface CardDAO {
 
     @Update
     suspend fun update(vararg card: Card)
+}
+
+class Converters {
+    @TypeConverter
+    fun fromString(value: String?): List<Float?>? {
+        return value?.split(",")?.map { it.toFloatOrNull() }?.toList()
+    }
+
+    @TypeConverter
+    fun fromList(list: List<Float?>?): String? {
+        return list?.joinToString(",")
+    }
+
+    @TypeConverter
+    fun fromStringToMatrix(value: String?): List<List<Float?>?>? {
+        return value?.split(";")?.map { it.split(",").map { v -> v.toFloatOrNull() }.toList() }?.toList()
+    }
+
+    @TypeConverter
+    fun fromMatrixToList(list: List<List<Float?>?>?): String? {
+        return list?.map { it?.joinToString(",") }?.joinToString(";")
+    }
 }

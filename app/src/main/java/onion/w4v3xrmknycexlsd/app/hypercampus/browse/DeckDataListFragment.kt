@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,34 +80,44 @@ open class DeckDataListFragment : Fragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val toObserve = when (args.level) {
                 Level.COURSES -> viewModel.allCourses
                 Level.LESSONS -> viewModel.getCourseLessons(args.dataId)
                 Level.CARDS -> viewModel.getLessonCards(args.dataId)
             }
 
-            toObserve.observe(viewLifecycleOwner, Observer { data ->
-                data?.let { adapter.setData(it); updateCounts() }
-            })
+            withContext(Dispatchers.Main) {
+                toObserve.observe(viewLifecycleOwner, Observer { data ->
+                    data?.let { adapter.setData(it); updateCounts() }
+                })
 
-            when (args.level) {
-                Level.COURSES -> {}
-                Level.LESSONS -> {
-                    currentCourse = viewModel.getCourseAsync(args.dataId)
-                    (activity as HyperActivity).binding.appBar.title = currentCourse?.name
-                }
-                Level.CARDS -> {
-                    currentLesson = viewModel.getLessonAsync(args.dataId)
-                    (activity as HyperActivity).binding.appBar.title =
-                        "${viewModel.getCourseAsync(currentLesson!!.course_id).symbol} > ${currentLesson?.name}"
+                when (args.level) {
+                    Level.COURSES -> {}
+                    Level.LESSONS -> {
+                        currentCourse = viewModel.getCourseAsync(args.dataId)
+                        (activity as HyperActivity).binding.appBar.title = currentCourse?.name
+                    }
+                    Level.CARDS -> {
+                        currentLesson = viewModel.getLessonAsync(args.dataId)
+                        (activity as HyperActivity).binding.appBar.title =
+                            "${viewModel.getCourseAsync(currentLesson!!.course_id).symbol} > ${currentLesson?.name}"
+                    }
                 }
             }
 
+            // reset new cards if new day
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            val lastStudied = prefs.getInt("last_studied",19000000)
+            if (lastStudied != currentDate()) viewModel.resetStudied()
+            with(prefs.edit()) {
+                putInt("last_studied",currentDate())
+                apply()
+            }
 
             // app intro
-            val pref = withContext(Dispatchers.IO) { activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE) }
-            if (pref?.getBoolean("first_time_$label", true) == true) {
+            val pref = activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE)
+            if (pref?.getBoolean("first_time_$label", true) == true) withContext(Dispatchers.Main){
                 if (args.level == Level.COURSES) {
                     val builder = activity?.let { MaterialAlertDialogBuilder(it) }
                     builder?.setTitle(R.string.app_name)
@@ -221,6 +232,10 @@ open class DeckDataListFragment : Fragment(),
                     mode.finish()
                     true
                 }
+                R.id.app_bar_exp -> {
+                    exportSelected()
+                    true
+                }
                 else -> false
             }
         }
@@ -317,7 +332,7 @@ open class DeckDataListFragment : Fragment(),
 
     fun deleteSelected() {
         val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
-        builder?.setTitle(resources.getQuantityString(R.plurals.deleting_dialog, selected.size, selected.size, label))
+        builder?.setTitle(resources.getQuantityString(R.plurals.deleting_, selected.size, selected.size, label))
             ?.setMessage(getString(R.string.are_you_sure))
             ?.setPositiveButton(getString(R.string.ok)) { _, _ ->
                 for (i in selected) {
@@ -378,13 +393,32 @@ open class DeckDataListFragment : Fragment(),
         dialog?.show()
     }
 
+    private fun exportSelected() {
+        var withMedia = false
+        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
+        builder?.setTitle(resources.getQuantityString(R.plurals.export_, selected.size, selected.size, label))
+            ?.setMultiChoiceItems(R.array.export_options,null) { _,_,isChecked ->
+                withMedia = isChecked
+            }
+            ?.setPositiveButton(getString(R.string.action_exp)) { _, _ ->
+                lifecycleScope.launch {
+                    HyperDataConverter(requireActivity() as HyperActivity).collectionToFile(selected,withMedia)
+                    selectionMode?.finish()
+                }
+            }
+            ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
+
+        val dialog: Dialog? = builder?.create()
+        dialog?.show()
+    }
+
     private fun updateCounts() = lifecycleScope.launch {
         when (args.level) {
             Level.COURSES -> {
                 adapter.setDueCounts(viewModel.countDuePerCourseAsync())
                 adapter.setNewCounts(viewModel.countNewPerCourseAsync())
             }
-            Level.LESSONS -> adapter.setNewCounts(viewModel.countDuePerLessonAsync(args.dataId))
+            Level.LESSONS -> adapter.setDueCounts(viewModel.countDuePerLessonAsync(args.dataId))
             Level.CARDS -> {}
         }}
 

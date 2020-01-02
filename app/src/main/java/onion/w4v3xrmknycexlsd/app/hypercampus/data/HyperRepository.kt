@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class HyperRepository @Inject constructor(private val courseDao: CourseDAO, private val lessonDao: LessonDAO, private val cardDao: CardDAO) {
-    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     val allCourses: LiveData<List<Course>> = courseDao.getAll()
     fun getLessons(courseId: Int): LiveData<List<Lesson>> = lessonDao.getFrom(courseId)
@@ -17,6 +17,9 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
 
     suspend fun getCourse(courseId: Int): Course = courseDao.getCourse(courseId)
     suspend fun getLesson(lessonId: Int): Lesson = lessonDao.getLesson(lessonId)
+
+    suspend fun getLessonsFromCourseAsync(courseId: Int): List<Lesson> = lessonDao.getFromAsync(courseId)
+    suspend fun getCardsFromLessonAsync(lessonId: Int): List<Card> = cardDao.getAllFromLesson(lessonId)
 
     suspend fun getAllCardsFromCourses(courses: IntArray?): List<Card> =
         if (courses==null) cardDao.getAllAsync()
@@ -71,14 +74,22 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         return result.toList()
     }
 
-    suspend fun countDueCourses(): List<Int> = cardDao.countDueInCourses(courseDao.getAllAsync().map { it.id }, currentDate())
-
+    suspend fun countDueCourses(): List<Int> = courseDao.getAllAsync()
+        .map { cardDao.countDueInCourse(it.id, currentDate()) }
     suspend fun countNewCards(): List<Int> = courseDao.getAllAsync()
         .map { cardDao.getNewCardsAsync(it.id, (it.new_per_day - it.new_studied_today).coerceAtLeast(0)).size }
-
-    suspend fun countDueLessons(courseId: Int): List<Int> = cardDao.countDueInLessons(lessonDao.getFromAsync(courseId).map { it.id }, currentDate())
+    suspend fun countDueLessons(courseId: Int): List<Int> = lessonDao.getFromAsync(courseId)
+        .map { cardDao.countDueInLessons(it.id, currentDate()) }
 
     fun add(data: DeckData) = repositoryScope.launch {
+        when (data) {
+            is Course -> courseDao.add(data)
+            is Lesson -> lessonDao.add(data)
+            is Card -> cardDao.add(data)
+        }
+    }
+
+    fun addAsync(data: DeckData) = repositoryScope.async {
         when (data) {
             is Course -> courseDao.add(data)
             is Lesson -> lessonDao.add(data)
@@ -107,5 +118,9 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
             is Lesson -> lessonDao.update(data)
             is Card -> cardDao.update(data)
         }
+    }
+
+    fun resetStudied() = repositoryScope.launch {
+            courseDao.updateAll(courseDao.getAllAsync().map { it.apply { new_studied_today = 0 } })
     }
 }

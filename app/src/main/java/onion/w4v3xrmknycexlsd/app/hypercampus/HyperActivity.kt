@@ -1,6 +1,7 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -12,11 +13,14 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.onNavDestinationSelected
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
 
 class HyperActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     lateinit var binding: ActivityMainBinding
+
+    var onActivityResultListener: OnActivityResultListener? = null
 
     private var showMenu = true
 
@@ -47,6 +51,8 @@ class HyperActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         binding.floatingActionButton.setOnClickListener { navController.navigate(R.id.action_to_srs) }
+
+        intent.data?.also { HyperDataConverter(this).fileToCollection(it) }
     }
 
     private fun setMenuVisible(visible: Boolean) {
@@ -82,6 +88,15 @@ class HyperActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(ApplicationLanguageHelper.wrap(newBase!!, "en"))
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
+        onActivityResultListener?.onActivityResult(requestCode,resultCode,resultData)
+        super.onActivityResult(requestCode, resultCode, resultData)
+    }
+
+    interface OnActivityResultListener {
+        fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?)
     }
 }
 

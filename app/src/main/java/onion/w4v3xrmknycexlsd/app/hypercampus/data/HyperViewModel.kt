@@ -36,6 +36,8 @@ class HyperViewModel @Inject constructor(private val repository: HyperRepository
     fun add(data: DeckData) = repository.add(data)
     fun delete(data: DeckData) = repository.delete(data)
     fun update(data: DeckData) = repository.update(data)
+
+    fun resetStudied() = repository.resetStudied()
 }
 
 @Target(

@@ -6,6 +6,7 @@ import dagger.Component
 import onion.w4v3xrmknycexlsd.app.hypercampus.browse.DeckDataListFragment
 import onion.w4v3xrmknycexlsd.app.hypercampus.browse.EditCardFragment
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.DbModule
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.ViewModelModule
 import onion.w4v3xrmknycexlsd.app.hypercampus.review.SrsFragment
 import javax.inject.Singleton
@@ -17,6 +18,7 @@ interface HyperComponent {
     fun inject(fragment: DeckDataListFragment)
     fun inject(fragment: EditCardFragment)
     fun inject(fragment: SrsFragment)
+    fun inject(converter: HyperDataConverter)
 
     @Component.Builder
     interface Builder {

@@ -27,7 +27,7 @@ android {
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "onion.w4v3xrmknycexlsd.app.hypercampus"
-        minSdkVersion 14
+        minSdkVersion 19
         targetSdkVersion 29
         versionCode 2
         versionName "0.alpha"
@@ -35,22 +35,24 @@ android {
 
         kapt {
             arguments {
-                 arg("room.schemaLocation", "$projectDir/schemas".toString())
-                 arg("room.incremental", "true")
-                 arg("room.expandProjection", "true")
+                arg("room.schemaLocation", "$projectDir/schemas".toString())
+                arg("room.incremental", "true")
+                arg("room.expandProjection", "true")
+                arg("dagger.gradle.incremental", "true")
             }
         }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.releaseSign
         }
 
         debug {
             debuggable true
+            minifyEnabled false
             applicationIdSuffix ".debug"
             pseudoLocalesEnabled true
         }

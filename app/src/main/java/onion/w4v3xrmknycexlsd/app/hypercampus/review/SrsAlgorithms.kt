@@ -1,36 +1,27 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus.review
 
+import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.ceil
 import kotlin.math.ln
 
 sealed class SrsAlgorithm {
     var fi: Double = 0.9
 
-    abstract suspend fun calculateInterval(card: Card, grade: Float): Card
-
-    /*
-    fun forgettingCurve(t: Double, S: Double): Double {
-        return exp(-t/S)
-    }
-     */
+    abstract suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card
 
     fun invertForgetting(R: Double, S: Double): Double {
-        return -ln(R) *S
+        return -ln(R) * S
     }
 
     fun nextDue(interval: Int): Int {
-        val currentDate = Calendar.getInstance(Locale.US)
-        currentDate.add(Calendar.DATE,interval)
-        return SimpleDateFormat("yyyyMMdd", Locale.US).format(currentDate.time).toInt()
+        return currentDate() + interval
     }
 }
 
 object SM2: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float): Card {
-        val q = grade * 5
+    override suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card {
+        val q = grade * 2.5 + if (recall) 2.5 else .0
 
         val newEf = (card.eFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))).let { if (it < 1.3) 1.3 else it }
         val newInt = if (grade < 0.5) 1 else when (card.last_interval) {
@@ -47,7 +38,7 @@ object SM2: SrsAlgorithm() {
 }
 
 object HC1: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float): Card {
+    override suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card {
         return card
     }
 }

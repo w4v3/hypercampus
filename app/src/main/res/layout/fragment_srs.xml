@@ -21,8 +21,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
             android:orientation="vertical"
-            android:paddingTop="24dp"
             android:visibility="invisible"
+            android:paddingTop="19dp"
             android:layout_gravity="center"
             tools:visibility="visible">
 
@@ -59,47 +59,81 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <SeekBar
-                    android:id="@+id/grade_selector"
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/text_margin"
-                    android:max="100"
-                    android:maxHeight="36dp"
-                    android:minHeight="36dp"
-                    android:progress="50"
-                    android:progressDrawable="@drawable/grade_selector"
-                    android:thumb="@drawable/grade_selector_thumb" />
+                    android:layout_marginTop="@dimen/text_margin">
+
+                    <SeekBar
+                        android:id="@+id/grade_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/familiarity"
+                        android:maxHeight="36dp"
+                        android:minHeight="36dp"
+                        android:max="100"
+                        android:progress="50"
+                        android:progressDrawable="@drawable/grade_selector"
+                        android:thumb="@drawable/grade_selector_thumb" />
+
+                    <LinearLayout
+                        android:id="@+id/recall_feedback"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:minHeight="48dip"
+                        android:orientation="horizontal"
+                        android:visibility="invisible"
+                        tools:visibility="visible">
+
+                        <ImageButton
+                            android:id="@+id/wrong_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:contentDescription="@string/wrong"
+                            android:src="@drawable/ic_close_white_24dp"
+                            app:backgroundTint="@color/colorMain" />
+
+                        <ImageButton
+                            android:id="@+id/right_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:contentDescription="@string/right"
+                            android:src="@drawable/ic_check_white_24dp"
+                            android:tint="@color/colorContrastDark"
+                            app:backgroundTint="@color/colorAccent" />
+                    </LinearLayout>
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:id="@+id/imageView"
+                    <TextView
+                        android:id="@+id/wrong_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
                         android:contentDescription="@string/wrong"
-                        android:src="@drawable/ic_close_white_24dp"
-                        android:tint="?attr/colorPrimary" />
+                        android:text="@string/wrong"/>
 
                     <TextView
-                        android:id="@+id/textView3"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
-                    <ImageView
-                        android:id="@+id/imageView2"
+                    <TextView
+                        android:id="@+id/right_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:layout_weight="0"
                         android:contentDescription="@string/right"
-                        android:src="@drawable/ic_check_white_24dp"
-                        android:tint="?attr/colorSecondary" />
+                        android:text="@string/right"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -109,8 +143,8 @@
             android:id="@+id/question_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
             android:layout_gravity="center"
+            android:layout_margin="@dimen/text_margin"
             android:orientation="vertical"
             android:visibility="invisible"
             tools:visibility="visible">
@@ -141,8 +175,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:padding="24dp"
                         android:gravity="center"
+                        android:padding="24dp"
                         android:text="@{currentCard.question}"
                         android:textAppearance="?textAppearanceBody1"
                         tools:text="What is XXX?" />
@@ -171,7 +205,7 @@
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="invisible"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

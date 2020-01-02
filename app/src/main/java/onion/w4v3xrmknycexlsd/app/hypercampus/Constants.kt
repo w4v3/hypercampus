@@ -29,12 +29,19 @@ val SHOWCASE = arrayOf(COURSE_SHOW, LESSON_SHOW, CARD_SHOW, SRS_SHOW)
 // card status, for future features
 const val STATUS_ENABLED = 1
 
+// MIME file types
+const val FILE_IMAGE = "image/*"
+const val FILE_AUDIO = "audio/*"
+
+// private file directories
+const val DIR_MEDIA = "media"
+
 // utils
 
+const val NEW_DAY = 3 // start of new day in hours after midnight
 fun currentDate(): Int {
-    val date = Calendar.getInstance(Locale.US)
-    return date.get(Calendar.YEAR) * 10000 + (date.get(Calendar.MONTH) + 1) * 100 + date.get(
-        Calendar.DAY_OF_MONTH)
+    val date = Calendar.getInstance()
+    return ((date.timeInMillis / (1000 * 60 * 60) - date.timeZone.rawOffset - NEW_DAY) / 24).toInt()
 }
 
 fun hideSoftKeyboard(activity: Activity) {
@@ -52,29 +59,16 @@ class ApplicationLanguageHelper(base: Context) : ContextThemeWrapper(base, R.sty
                 val locale = Locale(language)
                 Locale.setDefault(locale)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    setSystemLocale(config, locale)
-                } else {
-                    setSystemLocaleLegacy(config, locale)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    config.setLayoutDirection(locale)
-                    mContext = mContext.createConfigurationContext(config)
+                    config.setLocale(locale)
                 } else {
                     @Suppress("DEPRECATION")
-                    mContext.resources.updateConfiguration(config, mContext.resources.displayMetrics)
+                    config.locale = locale
                 }
+                config.setLayoutDirection(locale)
+                mContext = mContext.createConfigurationContext(config)
             }
             return ApplicationLanguageHelper(mContext)
         }
 
-        @Suppress("DEPRECATION")
-        fun setSystemLocaleLegacy(config: Configuration, locale: Locale) {
-            config.locale = locale
-        }
-
-        @TargetApi(Build.VERSION_CODES.N)
-        fun setSystemLocale(config: Configuration, locale: Locale) {
-            config.setLocale(locale)
-        }
     }
 }

@@ -9,13 +9,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import onion.w4v3xrmknycexlsd.app.hypercampus.HyperApp
+import kotlinx.coroutines.launch
+import onion.w4v3xrmknycexlsd.app.hypercampus.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
+import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentEditCardBinding
-import onion.w4v3xrmknycexlsd.app.hypercampus.hideSoftKeyboard
 import javax.inject.Inject
 
 class EditCardFragment : Fragment() {
@@ -49,13 +51,24 @@ class EditCardFragment : Fragment() {
             findNavController().navigate(action)
         }
 
-        //setMenuOnClickListeners()
+        binding.addImage.setOnClickListener { lifecycleScope.launch {
+            if (binding.editAnswer.hasFocus()) {
+                binding.editCard!!.answer += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_IMAGE)
+            } else {
+                binding.editCard!!.question += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_IMAGE)
+            }
+            binding.invalidateAll()
+        }}
+        binding.addSound.setOnClickListener { lifecycleScope.launch {
+            if (binding.editAnswer.hasFocus()) {
+                binding.editCard!!.answer += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_AUDIO)
+            } else {
+                binding.editCard!!.question += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_AUDIO)
+            }
+            binding.invalidateAll()
+        }}
 
-        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let {
-            hideSoftKeyboard(
-                it
-            )
-        } }
+        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let { hideSoftKeyboard(it) } }
 
         setHasOptionsMenu(true)
         return binding.root
@@ -65,11 +78,7 @@ class EditCardFragment : Fragment() {
         viewModel = ViewModelProvider(this, modelFactory)[HyperViewModel::class.java]
 
         if (args.cardId == -1) {
-            binding.editCard = Card(
-                0,
-                args.courseId,
-                args.lessonId
-            )
+            binding.editCard = Card(0, args.courseId, args.lessonId)
         } else {
             viewModel.getCard(args.cardId).observe(viewLifecycleOwner, Observer { data ->
                 binding.editCard = data
@@ -79,75 +88,4 @@ class EditCardFragment : Fragment() {
 
         super.onActivityCreated(savedInstanceState)
     }
-
-/*
-    private fun setMenuOnClickListeners() {
-        binding.editQuestion.setOnTextChangeListener { binding.editCard?.question = it }
-
-        binding.actionUndo.setOnClickListener { binding.editQuestion.undo() }
-
-        binding.actionRedo.setOnClickListener { binding.editQuestion.redo() }
-
-        binding.actionBold.setOnClickListener { binding.editQuestion.setBold() }
-
-        binding.actionItalic.setOnClickListener { binding.editQuestion.setItalic() }
-
-        binding.actionSubscript.setOnClickListener { binding.editQuestion.setSubscript() }
-
-        binding.actionSuperscript.setOnClickListener { binding.editQuestion.setSuperscript() }
-
-        binding.actionStrikethrough.setOnClickListener { binding.editQuestion.setStrikeThrough() }
-
-        binding.actionUnderline.setOnClickListener { binding.editQuestion.setUnderline() }
-
-        binding.actionTxtColor.setOnClickListener(object :
-            View.OnClickListener {
-            private var isChanged = false
-            override fun onClick(v: View) {
-                binding.editQuestion.setTextColor(if (isChanged) Color.BLACK else Color.RED)
-                isChanged = !isChanged
-            }
-        })
-
-        binding.actionBgColor.setOnClickListener(object :
-            View.OnClickListener {
-            private var isChanged = false
-            override fun onClick(v: View) {
-                binding.editQuestion.setTextBackgroundColor(if (isChanged) Color.TRANSPARENT else Color.YELLOW)
-                isChanged = !isChanged
-            }
-        })
-
-        binding.actionIndent.setOnClickListener { binding.editQuestion.setIndent() }
-
-        binding.actionOutdent.setOnClickListener { binding.editQuestion.setOutdent() }
-
-        binding.actionAlignLeft.setOnClickListener { binding.editQuestion.setAlignLeft() }
-
-        binding.actionAlignCenter.setOnClickListener { binding.editQuestion.setAlignCenter() }
-
-        binding.actionAlignRight.setOnClickListener { binding.editQuestion.setAlignRight() }
-
-        binding.actionBlockquote.setOnClickListener { binding.editQuestion.setBlockquote() }
-
-        binding.actionInsertBullets.setOnClickListener { binding.editQuestion.setBullets() }
-
-        binding.actionInsertNumbers.setOnClickListener { binding.editQuestion.setNumbers() }
-
-        binding.actionInsertImage.setOnClickListener {
-            binding.editQuestion.insertImage(
-                "http://www.1honeywan.com/dachshund/image/7.21/7.21_3_thumb.JPG",
-                "dachshund"
-            )
-        }
-
-        binding.actionInsertLink.setOnClickListener {
-            binding.editQuestion.insertLink(
-                "https://github.com/wasabeef",
-                "wasabeef"
-            )
-        }
-    }
-
- */
 }
