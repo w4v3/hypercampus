@@ -1,11 +1,35 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -15,10 +39,14 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.onNavDestinationSelected
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
+import java.util.*
+
 
 class HyperActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     lateinit var binding: ActivityMainBinding
+
+    var mediaPlayer: MediaPlayer? = null
 
     var onActivityResultListener: OnActivityResultListener? = null
 
@@ -44,6 +72,7 @@ class HyperActivity : AppCompatActivity() {
                 R.id.cardsList -> setMenuVisible(true)
                 else -> setMenuVisible(false)
             }
+            mediaPlayer?.reset()
         }
 
         setSupportActionBar(binding.appBar)
@@ -53,6 +82,28 @@ class HyperActivity : AppCompatActivity() {
         binding.floatingActionButton.setOnClickListener { navController.navigate(R.id.action_to_srs) }
 
         intent.data?.also { HyperDataConverter(this).fileToCollection(it) }
+    }
+
+    override fun onStart() {
+        mediaPlayer = MediaPlayer().apply {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                @Suppress("DEPRECATION")
+                setAudioStreamType(AudioManager.STREAM_MUSIC)
+            } else {
+                val attributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+                setAudioAttributes(attributes)
+            }
+        }
+        super.onStart()
+    }
+
+    override fun onStop() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+        super.onStop()
     }
 
     private fun setMenuVisible(visible: Boolean) {
@@ -72,6 +123,7 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.app_bar_help) { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/w4v3/hypercampus"))) }
         return item.onNavDestinationSelected(navController)
             || super.onOptionsItemSelected(item)
     }
@@ -87,7 +139,8 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(ApplicationLanguageHelper.wrap(newBase!!, "en"))
+        val locale = if (Locale.getDefault().language in SUPPORTED_LANG) Locale.getDefault().language else "en"
+        super.attachBaseContext(ApplicationLanguageHelper.wrap(newBase!!, locale))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {

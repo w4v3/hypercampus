@@ -1,3 +1,22 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
@@ -8,7 +27,7 @@ import javax.inject.Singleton
 
 @Singleton
 class HyperRepository @Inject constructor(private val courseDao: CourseDAO, private val lessonDao: LessonDAO, private val cardDao: CardDAO) {
-    val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val allCourses: LiveData<List<Course>> = courseDao.getAll()
     fun getLessons(courseId: Int): LiveData<List<Lesson>> = lessonDao.getFrom(courseId)
@@ -57,6 +76,9 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
             result.toList()
         }
 
+    suspend fun getAllCards() = cardDao.getAllAsync()
+    suspend fun getCardsFromIdsAsync(ids: List<Int>) = cardDao.getCardsFromIdsAsync(ids)
+
     private suspend fun getNewCardsCourse(course: Course): List<Card> {
         return cardDao.getNewCardsAsync(course.id,course.new_per_day - course.new_studied_today)
     }
@@ -85,15 +107,45 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         when (data) {
             is Course -> courseDao.add(data)
             is Lesson -> lessonDao.add(data)
-            is Card -> cardDao.add(data)
+            is Card -> {
+                val withinCourse = (cardDao.getWithinCourseIndex(data.course_id) ?: 0) + 1
+                cardDao.add(data.apply { within_course_id = withinCourse })
+            }
         }
     }
 
-    fun addAsync(data: DeckData) = repositoryScope.async {
-        when (data) {
-            is Course -> courseDao.add(data)
-            is Lesson -> lessonDao.add(data)
-            is Card -> cardDao.add(data)
+    fun addAsync(data: DeckData, onlyIfNew: Boolean = false) = repositoryScope.async {
+        if (onlyIfNew) {
+            when (data) {
+                is Course -> {
+                    val all = courseDao.getAllAsync()
+                    val ind = all.map { it.name }.indexOf(data.name)
+                    if (ind == -1) courseDao.add(data) else all[ind].id.toLong()
+                }
+                is Lesson -> {
+                    val all = lessonDao.getFromAsync(data.course_id)
+                    val ind = all.map { it.name }.indexOf(data.name)
+                    if (ind == -1) lessonDao.add(data) else all[ind].id.toLong()
+                }
+                is Card -> {
+                    val all = cardDao.getAllFromCourse(data.course_id)
+                    val ind = all.map { it.within_course_id }.indexOf(data.within_course_id)
+                    if (ind == -1) cardDao.add(data) else {
+                        val id = all[ind].id
+                        cardDao.updateContent(CardContent(id, data.lesson_id, data.question, data.answer))
+                        id.toLong()
+                    }
+                }
+            }
+        } else {
+            when (data) {
+                is Course -> courseDao.add(data)
+                is Lesson -> lessonDao.add(data)
+                is Card -> {
+                    val withinCourse = (cardDao.getWithinCourseIndex(data.course_id) ?: 0) + 1
+                    cardDao.add(data.apply { within_course_id = withinCourse })
+                }
+            }
         }
     }
 
@@ -120,7 +172,12 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
     }
 
+    fun updateAll(cards: List<Card>) = repositoryScope.launch {
+        cardDao.updateAll(cards)
+    }
+
     fun resetStudied() = repositoryScope.launch {
             courseDao.updateAll(courseDao.getAllAsync().map { it.apply { new_studied_today = 0 } })
     }
+
 }

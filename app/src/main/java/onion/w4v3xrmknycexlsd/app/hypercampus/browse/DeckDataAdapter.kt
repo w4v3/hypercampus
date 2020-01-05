@@ -1,20 +1,36 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
-import android.content.Context
-import android.util.TypedValue
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
 import onion.w4v3xrmknycexlsd.app.hypercampus.R
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Course
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.DeckData
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Lesson
+import onion.w4v3xrmknycexlsd.app.hypercampus.getThemeColor
 import java.util.*
 
 class DeckDataAdapter(
@@ -69,9 +85,6 @@ class DeckDataAdapter(
         selectedViews.remove(v)
         v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
     }
-
-    @ColorInt
-    fun Context.getThemeColor(@AttrRes attribute: Int) = TypedValue().let { theme.resolveAttribute(attribute, it, true); it.data }
 
     open inner class DeckDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val shortLabelView: TextView = itemView.findViewById(R.id.label_short)

@@ -20,3 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# for jetpack navigation
+-keep class * extends androidx.fragment.app.Fragment{}
+-keepnames class onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level

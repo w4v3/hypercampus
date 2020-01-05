@@ -17,23 +17,7 @@ The [SuperMemo](https://www.supermemo.com/) algorithms are developed by Piotr Wo
 
 ## How to use it?
 
-When you open the HyperCampus app, you should see the (initially empty) list of your _courses_, which are collections of cards that deal with the same topic. You can choose an icon (for example an emoji, or just a letter), a name and how many new cards you would like to study per day. I would recommend to study between 5 and 20 new cards for each course per day, but note that obviously you have to add some cards first before you can study any.
-
-Courses consist of _lessons_, and the lessons contain your cards. New cards are added to your studies in the order that they are displayed in the app, progressing from the first to the last lesson. For each card, you can specify the contents of the "question" side and the "answer" side.
-
-You can enter your daily review by pressing the floating button with the HyperCampus icon. First, new cards are displayed to you for studying. Then, cards due for review are shown and you should try to recall the answers on them. When you think you know the answer, or decide that you don't know it any more, reveal the answer side and grade your performance using the scale from purple (completely forgotten) to yellow (very easy). Try to assess nuances in your performance. For example, if you knew it, but it took you a long time, tap a bit right from the bittle. If you forgot it, but it was on the tip of your tongue, tap a bit left from the middle.
-
-Apart from a complete review, you can choose to study a course or a lesson in isolation by tapping on the button indicating how many cards are due in the respective course or lesson. Note that new cards are only displayed when reviewing a course (i.e., not for a specific lesson). You should review all due cards every day as due cards will pile up when you don't review them, but the algorithm is adapted to work even if you review a card later than you should.
-
-In the settings, you can choose which spaced repetition algorithm to use. Of course I recommend the native HyperCampus algorithm, but as it is still experimental, I will allow you to use [SM-2](#the-supermemo-2-algorithm), on which Anki is based, as well. Note that when changing the algorithm, it will take some time to adapt it to your data, depending on how long you have used the other algorithm. For this reason, changing the algorithm frequently is not encouraged.
-
-You can also set the _forgetting index_, which determines how much of the content learnt you want to keep in memory during any time. The default is 10%, meaning that the algorithms schedule cards such that you should be able to remember around 90% of the contents. Setting it higher is not recommended as it increases the workload without much benefit. If you are happy with a lower retention rate, let's say remembering around 80%, you can set the forgetting index to 20% to reduce workload. In fact, a lower retention rate leads to a much more effective acquisition; but this effect only works up to a forgetting index of 60%, after which the probability of recall is too low to allow memories to be acquired.
-
-### Features released in the near future
-- [ ] import/export of flashcard collections (including Anki files)
-- [ ] cram mode
-- [ ] customize the review process and how new cards are learnt
-- [ ] inspect your learning statistics
+Please refer to the [user manual](docs/user_guide.md).
 
 ## How does it work?
 
@@ -49,15 +33,33 @@ The algorithm can also account for differences in learning difficulty across ite
 
 The discussion involves a lot of maths and is thus moved to [this document](/docs/model.ipynb).
 
-## Release notes
+## Some pre-made collections
 
+coming soon.
+
+## Release notes
+### 20200105: version 1.beta
+- implemented HC 1 algorithm
+- import/export of flashcard collections
+- multimedia support for flashcards
+- fixed major bugs
 ### 20191223: version 0.alpha
 - implemented SM 2 algorithm
 - several stress tests passed
 ### 20191222: version 0.0
 - basic app functionality implemented
 
+### Features released in the near future
+- [x] adding multimedia files to flashcards
+- [x] import/export of flashcard collections
+- [ ] Anki collection import
+- [ ] cram mode
+- [ ] customize the review process and how new cards are learnt
+- [ ] inspect your learning statistics
+
 ## Licences
+
+This project is licenced under the [GNU General Public Licence v3](http://www.gnu.org/licenses/gpl-3.0.html).
 
 The app includes the SuperMemo-2 algorithm, with modifications detailed [above](#the-supermemo-2-algorithm).
 ```
@@ -66,6 +68,6 @@ Algorithm SM-2, (C) Copyright SuperMemo World, 1991.
 * https://www.supermemo.com
 * https://www.supermemo.eu
 
-It also uses the [MaterialShowcaseView](https://github.com/deano2390/MaterialShowcaseView) library by Dean Wild, licensed under Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+For a list of licences of the libraries used in the app, open `Settings > Library licences …` in the app.
 
 <img align="right" src="/logo.svg"/>

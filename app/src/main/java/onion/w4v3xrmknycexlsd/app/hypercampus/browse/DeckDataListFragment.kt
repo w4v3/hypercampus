@@ -1,3 +1,22 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 import android.app.Dialog
@@ -87,7 +106,7 @@ open class DeckDataListFragment : Fragment(),
                 Level.CARDS -> viewModel.getLessonCards(args.dataId)
             }
 
-            withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main) { // needs to run on main
                 toObserve.observe(viewLifecycleOwner, Observer { data ->
                     data?.let { adapter.setData(it); updateCounts() }
                 })
@@ -108,7 +127,7 @@ open class DeckDataListFragment : Fragment(),
 
             // reset new cards if new day
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-            val lastStudied = prefs.getInt("last_studied",19000000)
+            val lastStudied = prefs.getInt("last_studied",0)
             if (lastStudied != currentDate()) viewModel.resetStudied()
             with(prefs.edit()) {
                 putInt("last_studied",currentDate())
@@ -401,10 +420,8 @@ open class DeckDataListFragment : Fragment(),
                 withMedia = isChecked
             }
             ?.setPositiveButton(getString(R.string.action_exp)) { _, _ ->
-                lifecycleScope.launch {
-                    HyperDataConverter(requireActivity() as HyperActivity).collectionToFile(selected,withMedia)
-                    selectionMode?.finish()
-                }
+                HyperDataConverter(requireActivity() as HyperActivity).collectionToFile(selected.toList(),withMedia)
+                selectionMode?.finish()
             }
             ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
 
@@ -422,16 +439,16 @@ open class DeckDataListFragment : Fragment(),
             Level.CARDS -> {}
         }}
 
-    private fun insertSamples() {
-        viewModel.add(Course( 1, "🌍", "Geography" ))
-        viewModel.add(Course( 2, "🔤", "Fancy English Words" ))
-        viewModel.add(Lesson( 1, 1, "🏰", "Capitals" ))
-        viewModel.add(Lesson(2, 2, "1", "Shakespeare" ))
-        viewModel.add(Card( 0, 1, 1, "Spain", "Madrid" ))
-        viewModel.add(Card( 0, 1, 1, "Egypt", "Kairo" ))
-        viewModel.add(Card( 0, 1, 1, "India", "New Delhi" ))
-        viewModel.add(Card( 0, 2, 2, "simular", "false, counterfeit" ) )
-        viewModel.add(Card( 0, 2, 2, "to perpend", "to ponder" ) )
+    private fun insertSamples() = lifecycleScope.launch {
+        viewModel.addAsync(Course( 1, "🌍", "Geography" )).await()
+        viewModel.addAsync(Course( 2, "🔤", "Fancy English Words" )).await()
+        viewModel.addAsync(Lesson( 1, 1, "🏰", "Capitals" )).await()
+        viewModel.addAsync(Lesson(2, 2, "1", "Shakespeare" )).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Spain", "Madrid" )).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Egypt", "Kairo" )).await()
+        viewModel.addAsync(Card( 0, 1, 1, "India", "New Delhi" )).await()
+        viewModel.addAsync(Card( 0, 2, 2, "simular", "false, counterfeit" ) ).await()
+        viewModel.addAsync(Card( 0, 2, 2, "to perpend", "to ponder" ) ).await()
     }
 
     private fun intro() {

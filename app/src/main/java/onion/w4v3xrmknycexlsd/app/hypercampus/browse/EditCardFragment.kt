@@ -1,3 +1,22 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 
@@ -20,6 +39,7 @@ import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperViewModel
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.FragmentEditCardBinding
 import javax.inject.Inject
 
+
 class EditCardFragment : Fragment() {
     private val args: EditCardFragmentArgs by navArgs()
 
@@ -39,34 +59,39 @@ class EditCardFragment : Fragment() {
         binding = FragmentEditCardBinding.inflate(layoutInflater)
 
         binding.submitButton.setOnClickListener {
-            if (args.cardId == -1) {
+            if (binding.editCard!!.id == 0) {
                 viewModel.add(binding.editCard!!)
             } else {
                 viewModel.update(binding.editCard!!)
             }
-            val action =
-                EditCardFragmentDirections.backToCards(
-                    args.lessonId
-                )
+            val action = EditCardFragmentDirections.backToCards(args.lessonId)
             findNavController().navigate(action)
         }
 
-        binding.addImage.setOnClickListener { lifecycleScope.launch {
-            if (binding.editAnswer.hasFocus()) {
-                binding.editCard!!.answer += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_IMAGE)
-            } else {
-                binding.editCard!!.question += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_IMAGE)
+        binding.addImage.setOnClickListener {
+            lifecycleScope.launch {
+                val name = viewModel.getCourseAsync(args.courseId).name+"_"+viewModel.getLessonAsync(args.lessonId).name+"_0"
+                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(name, FILE_IMAGE)
+                if (binding.editAnswer.hasFocus()) {
+                    binding.editCard!!.answer += "\n" + tag
+                } else {
+                    binding.editCard!!.question += "\n" + tag
+                }
+                binding.invalidateAll()
             }
-            binding.invalidateAll()
-        }}
-        binding.addSound.setOnClickListener { lifecycleScope.launch {
-            if (binding.editAnswer.hasFocus()) {
-                binding.editCard!!.answer += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_AUDIO)
-            } else {
-                binding.editCard!!.question += "\n" + HyperDataConverter(requireActivity() as HyperActivity).addMedia(binding.editCard!!.id,FILE_AUDIO)
+        }
+        binding.addSound.setOnClickListener {
+            lifecycleScope.launch {
+                val name = viewModel.getCourseAsync(args.courseId).name+"_"+viewModel.getLessonAsync(args.lessonId).name+"_0"
+                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(name, FILE_AUDIO)
+                if (binding.editAnswer.hasFocus()) {
+                    binding.editCard!!.answer += "\n" + tag
+                } else {
+                    binding.editCard!!.question += "\n" + tag
+                }
+                binding.invalidateAll()
             }
-            binding.invalidateAll()
-        }}
+        }
 
         findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let { hideSoftKeyboard(it) } }
 
@@ -82,7 +107,6 @@ class EditCardFragment : Fragment() {
         } else {
             viewModel.getCard(args.cardId).observe(viewLifecycleOwner, Observer { data ->
                 binding.editCard = data
-                //binding.editQuestion.html = data.question
             })
         }
 

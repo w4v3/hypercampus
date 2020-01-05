@@ -1,3 +1,22 @@
+<!--
+  ~     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+  ~
+  ~     This file is part of HyperCampus.
+  ~
+  ~     HyperCampus is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     HyperCampus is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <resources>
     <!-- App bar -->
     <string name="app_name">HyperCampus</string>
@@ -12,6 +31,9 @@
     <string name="action_exp">Export</string>
 
     <!-- Courses, Lessons, Cards -->
+    <string name="course">course</string>
+    <string name="lesson">lesson</string>
+    <string name="card">card</string>
     <string name="course_symbol_hint">📚</string>
     <string name="course_label_hint">Title</string>
     <string name="course_newperday_hint">10</string>
@@ -47,15 +69,23 @@
         <item quantity="one">Export %2$s</item>
         <item quantity="other">Export %1$d %2$ss</item>
     </plurals>
+    <string name="add_image">Add image</string>
+    <string name="add_audio">Add audio</string>
+    <string name="import_dialog">Would you like to update cards in existing courses with the same index? Your learning progress will not be lost, but information from overwritten cards cannot be recovered.</string>
+    <string name="import_overwrite">Overwrite</string>
+    <string name="import_addnew">Add new courses instead</string>
+    <string name="title_import">Importing collection</string>
 
     <!-- Preferences -->
     <string name="srs_header">Spaced Repetition System</string>
     <string name="other_header">Other</string>
     <string name="algo_title">Algorithm</string>
     <string name="fi_title">Forgetting Index</string>
+    <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
+    <string name="licence_title">Library licences …</string>
 
-    <string name="about">HyperCampus uses a spaced repetition algorithm to determine when to show a card the next time based on your grading. For more information on how and why it works, visit the <a href="https://www.github.com/w4v3/hypercampus">project github page.</a></string>
+    <string name="about">HyperCampus uses a machine learning based spaced repetition algorithm to determine when to show a card the next time based on your grading. For more information on how and why it works, please visit the <a href="https://www.github.com/w4v3/hypercampus">project github page.</a></string>
 
     <!-- Intro -->
     <string name="welcome">Welcome to the HyperCampus app! Use it to learn whatever you want. Would you like an introduction?</string>
@@ -73,10 +103,16 @@
     <string name="intro9">During your (hopefully) daily review, I will present some questions from your collection</string>
     <string name="intro10">Try to find the answer, and tap this button</string>
     <string name="intro11">I will reveal the answer, and you have to judge how well you knew it</string>
-    <string name="intro12">Tap in the yellow region if it was easy for you, or in the violet region if you didn\'t know it at all. Or somewhere in between if, well, it was something in between. That\'s all!</string>
-    <string name="course">course</string>
-    <string name="lesson">lesson</string>
-    <string name="card">card</string>
-    <string name="add_image">Add image</string>
-    <string name="add_audio">Add audio</string>
+    <string name="intro12">Tap right if you knew it and left if you didn\'t.</string>
+    <string name="intro13">Also, please indicate how familiar you feel with the item, regardless of whether you got it correct right now or not. That\'s all!</string>
+
+    <!-- Snackbar messages -->
+    <string name="fnf_exception">Could not write to file. Maybe it is in use?</string>
+    <string name="io_exception">Something went wrong. Make sure external storage is available.</string>
+    <string name="exp_success">Export successful!</string>
+    <string name="imp_success">Import successful!</string>
+    <string name="action_help">Help</string>
+    <string name="not_recognized_exception">Cannot recognize file type. Wrong extension?</string>
+    <string name="delete_unused_success">Successfully deleted unused media!</string>
+    <string name="dismiss">dismiss</string>
 </resources>

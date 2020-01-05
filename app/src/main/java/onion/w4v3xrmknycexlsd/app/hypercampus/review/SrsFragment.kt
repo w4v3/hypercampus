@@ -1,3 +1,22 @@
+/*
+ *     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+ *
+ *     This file is part of HyperCampus.
+ *
+ *     HyperCampus is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     HyperCampus is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package onion.w4v3xrmknycexlsd.app.hypercampus.review
 
 import android.content.Context
@@ -14,7 +33,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.preference.PreferenceManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import onion.w4v3xrmknycexlsd.app.hypercampus.*
 import onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
@@ -100,7 +121,7 @@ class SrsFragment : Fragment() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         newCardMode = MODE_LEARNT
 
-        val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_SM2") ?: "$ALG_SM2")
+        val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
         val fi: Double = (prefs?.getInt("forgetting_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
             ALG_SM2 -> SM2.also { SM2.fi = fi }
@@ -157,7 +178,9 @@ class SrsFragment : Fragment() {
 
     private val runNextCard = Runnable { nextCard() }
     private fun handleGrade(grade: Float, recall: Boolean) = lifecycleScope.launch {
-        val updatedCard = algorithm?.calculateInterval(binding.currentCard!!,grade,recall)
+        val updatedCard = withContext(Dispatchers.Default) {
+            algorithm?.calculateInterval(binding.currentCard!!, grade, recall)
+        }
 
         updatedCard?.let { viewModel.update(it) }
 
@@ -239,9 +262,21 @@ class SrsFragment : Fragment() {
 
             sequence.addSequenceItem(
                 MaterialShowcaseView.Builder(activity)
-                    .setTarget(binding.gradeSelector)
+                    .setTarget(binding.recallFeedback)
                     .withRectangleShape()
                     .setContentText(getString(R.string.intro12))
+                    .setMaskColour(bg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
+                    .setDismissTextColor(fg)
+                    .build()
+            )
+
+            sequence.addSequenceItem(
+                MaterialShowcaseView.Builder(activity)
+                    .setTarget(binding.gradeSelector)
+                    .withRectangleShape()
+                    .setContentText(getString(R.string.intro13))
                     .setMaskColour(bg)
                     .setDismissText(getString(R.string.got_it))
                     .setDismissOnTouch(true)
@@ -252,8 +287,9 @@ class SrsFragment : Fragment() {
 
             sequence.setOnItemDismissedListener { _, pos ->
                 if (pos == 1) {
-                    binding.questionLayout.visibility = View.INVISIBLE
-                    binding.answerLayout.visibility = View.VISIBLE
+                    binding.showAnswerButton.callOnClick()
+                } else if (pos == 3) {
+                    binding.wrongButton.callOnClick()
                 }
                 (activity as HyperActivity).showing = false
             }
