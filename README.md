@@ -21,7 +21,7 @@ Please refer to the [user manual](docs/user_guide.md).
 
 ## How does it work?
 
-HyperCampus implements a _spaced repetition system_, which is often considered to be the most efficient way to put facts into long-term memory. Spaced repetition relies on the [https://en.wikipedia.org/wiki/Spacing_effect](Spacing effect), stating that learning increases when study sessions are spaced out rather than massed. HyperCampus uses a computational model of long-term memory to predict the point in time when the probabiliy of forgetting an item rises above the requested _forgetting index_ (10% by default). Most of the algorithm is then concerned with improving the memory model in order to make more accurate predictions. Before diving into the details, let me explain some general concepts of spaced repetition by looking at how the SuperMemo-2 algorithm is implemented in HyperCampus.
+HyperCampus implements a _spaced repetition system_, which is often considered to be the most efficient way to put facts into long-term memory. Spaced repetition relies on the [Spacing effect](https://en.wikipedia.org/wiki/Spacing_effect), stating that learning increases when study sessions are spaced out rather than massed. HyperCampus uses a computational model of long-term memory to predict the point in time when the probabiliy of forgetting an item rises above the requested _forgetting index_ (10% by default). Most of the algorithm is then concerned with improving the memory model in order to make more accurate predictions. Before diving into the details, let me explain some general concepts of spaced repetition by looking at how the SuperMemo-2 algorithm is implemented in HyperCampus.
 
 ### The SuperMemo 2 Algorithm
 
