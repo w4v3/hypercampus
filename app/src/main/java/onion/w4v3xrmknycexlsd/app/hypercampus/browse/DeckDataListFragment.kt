@@ -136,7 +136,7 @@ open class DeckDataListFragment : Fragment(),
 
             // app intro
             val pref = activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE)
-            if (pref?.getBoolean("first_time_$label", true) == true) withContext(Dispatchers.Main){
+            if (pref?.getBoolean("first_time_${args.level.ordinal}", true) == true) withContext(Dispatchers.Main){
                 if (args.level == Level.COURSES) {
                     val builder = activity?.let { MaterialAlertDialogBuilder(it) }
                     builder?.setTitle(R.string.app_name)
@@ -159,7 +159,7 @@ open class DeckDataListFragment : Fragment(),
                 }
 
                 with(pref.edit()) {
-                    putBoolean("first_time_$label", false)
+                    putBoolean("first_time_${args.level.ordinal}", false)
                     apply()
                 }
             }
@@ -444,11 +444,11 @@ open class DeckDataListFragment : Fragment(),
         viewModel.addAsync(Course( 2, "🔤", "Fancy English Words" )).await()
         viewModel.addAsync(Lesson( 1, 1, "🏰", "Capitals" )).await()
         viewModel.addAsync(Lesson(2, 2, "1", "Shakespeare" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Spain", "Madrid" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Egypt", "Kairo" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "India", "New Delhi" )).await()
-        viewModel.addAsync(Card( 0, 2, 2, "simular", "false, counterfeit" ) ).await()
-        viewModel.addAsync(Card( 0, 2, 2, "to perpend", "to ponder" ) ).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Capital of Spain", "Madrid" )).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Capital of Egypt", "Kairo" )).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Capital of India", "New Delhi" )).await()
+        viewModel.addAsync(Card( 0, 2, 2, "Meaning of \"simular\"", "false, counterfeit" ) ).await()
+        viewModel.addAsync(Card( 0, 2, 2, "Meaning of \"to perpend\"", "to ponder" ) ).await()
     }
 
     private fun intro() {
@@ -489,6 +489,8 @@ open class DeckDataListFragment : Fragment(),
                     .setMaskColour(bg)
                     .setDismissTextColor(fg)
                     .withOvalShape()
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
                 )
 
@@ -499,6 +501,8 @@ open class DeckDataListFragment : Fragment(),
                     .setShapePadding(64)
                     .setMaskColour(bg)
                     .setDismissTextColor(fg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
                 )
                 sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
@@ -541,6 +545,8 @@ open class DeckDataListFragment : Fragment(),
                     .setContentText(getString(R.string.intro6))
                     .setMaskColour(bg)
                     .setDismissTextColor(fg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
                 )
 
@@ -551,6 +557,8 @@ open class DeckDataListFragment : Fragment(),
                     .setContentText(getString(R.string.intro7))
                     .setMaskColour(bg)
                     .setDismissTextColor(fg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
                 )
 

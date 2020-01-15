@@ -23,7 +23,7 @@
     <PreferenceCategory app:title="@string/srs_header">
 
         <ListPreference
-            app:defaultValue="0"
+            app:defaultValue="1"
             app:entries="@array/srs_algorithms"
             app:entryValues="@array/srs_algorithm_values"
             app:key="srs_algorithm"
@@ -60,6 +60,11 @@
         <Preference
             app:key="licence"
             app:title="@string/licence_title"/>
+
+        <SwitchPreferenceCompat
+            app:key="set_lang"
+            app:title="@string/change_to_eng"
+            app:defaultValue="false"/>
 
     </PreferenceCategory>
 

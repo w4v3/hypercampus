@@ -37,6 +37,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.onNavDestinationSelected
+import androidx.preference.PreferenceManager
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
 import java.util.*
@@ -139,7 +140,11 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun attachBaseContext(newBase: Context?) {
-        val locale = if (Locale.getDefault().language in SUPPORTED_LANG) Locale.getDefault().language else "en"
+        val locale = when {
+            PreferenceManager.getDefaultSharedPreferences(newBase).getBoolean("set_lang",false) -> "en"
+            Locale.getDefault().language in SUPPORTED_LANG -> Locale.getDefault().language
+            else -> "en"
+        }
         super.attachBaseContext(ApplicationLanguageHelper.wrap(newBase!!, locale))
     }
 

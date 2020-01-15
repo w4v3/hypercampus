@@ -124,8 +124,8 @@ class SrsFragment : Fragment() {
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
         val fi: Double = (prefs?.getInt("forgetting_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
-            ALG_SM2 -> SM2.also { SM2.fi = fi }
-            ALG_HC1 -> HC1.also { HC1.fi = fi }
+            ALG_SM2 -> SM2.also { it.fi = fi }
+            ALG_HC1 -> HC1.also { it.fi = fi }
             else -> null
         }
 
@@ -218,9 +218,7 @@ class SrsFragment : Fragment() {
             val config = ShowcaseConfig()
             config.delay = 200
 
-            val sequence = MaterialShowcaseSequence(activity,
-                SRS_SHOW
-            )
+            val sequence = MaterialShowcaseSequence(activity, SRS_SHOW)
 
             sequence.setConfig(config)
 
@@ -229,11 +227,13 @@ class SrsFragment : Fragment() {
             sequence.addSequenceItem(
                 MaterialShowcaseView.Builder(activity)
                     .setTarget(binding.questionCard)
-                    .setDismissText(getString(R.string.got_it))
                     .withRectangleShape()
                     .setContentText(getString(R.string.intro9))
                     .setMaskColour(bg)
+                    .setDismissText(getString(R.string.got_it))
                     .setDismissTextColor(fg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
             )
 
@@ -257,6 +257,8 @@ class SrsFragment : Fragment() {
                     .setContentText(getString(R.string.intro11))
                     .setMaskColour(bg)
                     .setDismissTextColor(fg)
+                    .setDismissOnTouch(true)
+                    .setDismissOnTargetTouch(true)
                     .build()
             )
 

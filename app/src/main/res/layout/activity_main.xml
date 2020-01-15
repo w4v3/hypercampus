@@ -29,17 +29,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floating_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="32dp"
-            android:src="@drawable/ic_logo"
-            app:fabSize="normal"
-            app:maxImageSize="48dp" />
-
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/main_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -68,5 +59,17 @@
                 app:defaultNavHost="true"
                 app:navGraph="@navigation/nav_graph" />
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floating_action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="32dp"
+            style="@style/Widget.Design.FloatingActionButton"
+            android:src="@drawable/ic_logo"
+            app:fabSize="normal"
+            app:maxImageSize="48dp" />
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

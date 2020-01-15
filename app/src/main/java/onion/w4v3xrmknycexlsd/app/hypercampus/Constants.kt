@@ -78,8 +78,7 @@ tailrec fun Context?.activity(): HyperActivity? = when (this) { // sweet sweet k
 // utils
 
 const val NEW_DAY_HOURS = 3 // start of new day in hours after midnight
-fun currentDate(): Int {
-    val date = Calendar.getInstance()
+fun currentDate(date: Calendar = Calendar.getInstance()): Int {
     val utcmidnight = date.timeInMillis + TimeZone.getDefault().getOffset(date.timeInMillis)
     return ((utcmidnight / (1000 * 60 * 60) - NEW_DAY_HOURS)/24).toInt()
 }

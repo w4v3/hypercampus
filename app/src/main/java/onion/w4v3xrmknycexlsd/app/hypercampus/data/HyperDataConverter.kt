@@ -26,7 +26,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.Gravity
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -351,7 +350,7 @@ class HyperDataConverter (private val activity: HyperActivity){
     private fun getMediaAccess(dir: String = DIR_MEDIA): File {
         if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
             val parent = File(activity.applicationContext.getExternalFilesDir(null)?.absolutePath + "/$dir/")
-            if (parent.exists() || !parent.mkdirs()) {
+            if (parent.exists() || parent.mkdirs()) {
                 return parent
             } else throw FileNotFoundException()
         } else throw IOException()
@@ -472,8 +471,6 @@ class HyperDataConverter (private val activity: HyperActivity){
 
         // if files were renamed, we have to change the corresponding cards too
         val newlyAddedCards = repository.getCardsFromIdsAsync(newlyAdded)
-        Log.e("cards","are"+newlyAddedCards.joinToString(","))
-        Log.e("files","are"+renamedFiles.toList().joinToString(","))
         for (f in renamedFiles) {
             newlyAddedCards.map { card ->
                 card.apply {

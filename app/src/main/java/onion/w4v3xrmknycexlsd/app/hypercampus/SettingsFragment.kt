@@ -26,6 +26,7 @@ import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
@@ -47,6 +48,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
         findPreference<Preference>("remove_media")?.setOnPreferenceClickListener {
             HyperDataConverter(activity as HyperActivity).deleteUnusedMediaFiles()
+            true
+        }
+        findPreference<SwitchPreferenceCompat>("set_lang")?.setOnPreferenceChangeListener { _, _ ->
+            startActivity(Intent(activity,HyperActivity::class.java))
             true
         }
         findPreference<Preference>("licence")?.setOnPreferenceClickListener {

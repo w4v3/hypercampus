@@ -56,9 +56,9 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
                 , @ColumnInfo(name = "last_interval") var last_interval: Int = 0
                 , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
-                , @ColumnInfo(name = "hc1_last_stability") var former_stability: Float = 3f
+                , @ColumnInfo(name = "hc1_last_stability") var former_stability: Float = 3.6f
                 , @ColumnInfo(name = "hc1_last_retrievability") var former_retrievability: Float = 0.9f
-                , @ColumnInfo(name = "hc1_params") var params: List<Float> = listOf(5f, -5f, -0.25f, 0.25f)
+                , @ColumnInfo(name = "hc1_params") var params: List<Float> = listOf(0.7f, 0f, 0f, 0f)
                 , @ColumnInfo(name = "hc1_sigma_params") var sigma_params: List<Float>
                                                                            = listOf(1f, 0f, 0f, 0f,
                                                                                     0f, 1f, 0f, 0f,

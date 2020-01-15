@@ -17,21 +17,22 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     signingConfigs {
         releaseSign {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties["keyAlias"]
+            keyPassword keystoreProperties["keyPassword"]
+            storeFile file(keystoreProperties["storeFile"])
+            storePassword keystoreProperties["storePassword"]
         }
     }
 
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
+
     defaultConfig {
         applicationId "onion.w4v3xrmknycexlsd.app.hypercampus"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 3
-        versionName "1.beta"
+        versionCode 4
+        versionName "1.beta-01"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         kapt {
@@ -76,6 +77,10 @@ android {
     dataBinding {
         enabled true
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -91,7 +96,7 @@ dependencies {
     def nav_version = "2.2.0-rc04"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation "androidx.fragment:fragment:1.2.0-rc04"
+    implementation "androidx.fragment:fragment:1.2.0-rc05"
 
     // Room components
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"

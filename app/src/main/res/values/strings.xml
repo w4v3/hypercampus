@@ -23,12 +23,13 @@
     <string name="action_set">Settings</string>
     <string name="action_search">Search</string>
     <string name="action_add">Add</string>
+    <string name="action_exp">Export</string>
+    <string name="action_help">Help</string>
     <string name="action_del">Delete</string>
     <string name="action_edit">Edit</string>
     <string name="title_review">Review</string>
     <string name="title_settings">Settings</string>
     <string name="title_edit_card">Edit card</string>
-    <string name="action_exp">Export</string>
 
     <!-- Courses, Lessons, Cards -->
     <string name="course">course</string>
@@ -84,6 +85,7 @@
     <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
     <string name="licence_title">Library licences …</string>
+    <string name="change_to_eng">English as default language</string>
 
     <string name="about">HyperCampus uses a machine learning based spaced repetition algorithm to determine when to show a card the next time based on your grading. For more information on how and why it works, please visit the <a href="https://www.github.com/w4v3/hypercampus">project github page.</a></string>
 
@@ -107,11 +109,10 @@
     <string name="intro13">Also, please indicate how familiar you feel with the item, regardless of whether you got it correct right now or not. That\'s all!</string>
 
     <!-- Snackbar messages -->
-    <string name="fnf_exception">Could not write to file. Maybe it is in use?</string>
+    <string name="fnf_exception">Could not write to file: File not found.</string>
     <string name="io_exception">Something went wrong. Make sure external storage is available.</string>
     <string name="exp_success">Export successful!</string>
     <string name="imp_success">Import successful!</string>
-    <string name="action_help">Help</string>
     <string name="not_recognized_exception">Cannot recognize file type. Wrong extension?</string>
     <string name="delete_unused_success">Successfully deleted unused media!</string>
     <string name="dismiss">dismiss</string>

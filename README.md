@@ -1,5 +1,5 @@
 # HyperCampus
-source and documentation of the HyperCampus learning app from Google Play store
+source and documentation of the HyperCampus learning app from Google Play store (currently in [beta](https://play.google.com/store/apps/details?id=onion.w4v3xrmknycexlsd.app.hypercampus))
 
 ## What is HyperCampus?
 
