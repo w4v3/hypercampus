@@ -26,7 +26,7 @@ import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.ln
 
-sealed class SrsAlgorithm(var fi: Double = 0.1, var calendar: Calendar = Calendar.getInstance()) {
+sealed class SrsAlgorithm(var ri: Double = 0.9, var calendar: Calendar = Calendar.getInstance()) {
     abstract suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card
 
     fun nextDue(interval: Int): Int {
@@ -87,7 +87,7 @@ object HC1: SrsAlgorithm() {
         val sigma_ = sigma + (h(rho,sigma) dot theta_)
 
         // project to interval
-        val newInt = ceil(exp(sigma_)*ln(1/(1-fi).coerceAtLeast(0.05))).toInt().coerceAtLeast(1)
+        val newInt = ceil(exp(sigma_)*ln(1/ri.coerceAtLeast(0.05))).toInt().coerceAtLeast(1)
         val nextDue = nextDue(newInt)
 
         // update card

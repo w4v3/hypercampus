@@ -21,7 +21,6 @@ package onion.w4v3xrmknycexlsd.app.hypercampus
 import kotlinx.coroutines.runBlocking
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.review.HC1
-import onion.w4v3xrmknycexlsd.app.hypercampus.review.SM2
 import org.junit.Test
 import java.util.*
 import kotlin.random.Random
@@ -29,11 +28,11 @@ import kotlin.random.Random
 class AlgorithmTest {
     private val MAX_REP = 10
     private val RECALL_PROB = 0.8f
-    private val FI = 0.1
+    private val RI = 0.9
 
     private val testCalendar = Calendar.getInstance()
     private val testAlgo = HC1.also {
-        it.fi = FI
+        it.ri = RI
         it.calendar = testCalendar
     }
     private val testCard = Card(0,0,0)

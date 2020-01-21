@@ -31,14 +31,14 @@ import kotlin.random.Random
 class InferenceConvergenceTest {
     private val MAX_REP = 40
     private val RECALL_PROB = 0.8f
-    private val FI = 0.1
+    private val RI = 0.9
 
     private val TRUE_PARAMS = arrayOf(0.7f,-0.02f,-0.03f,0.01f)
     private val TEST_SIGMAS = arrayOf(-1f,-0.5f,0f,0.5f,1f,1.5f,2f,3.6f,5f,10f)
 
     private val testCalendar = Calendar.getInstance()
     private val testAlgo = HC1.also {
-        it.fi = FI
+        it.ri = RI
         it.calendar = testCalendar
     }
     private val testCard = Card(0,0,0)
@@ -62,7 +62,7 @@ class InferenceConvergenceTest {
                 // simulate true stability derived from true parameters
                 val rho = grade
                 trueSigma += (TRUE_PARAMS[0] + TRUE_PARAMS[1] * rho + TRUE_PARAMS[2] * trueSigma + TRUE_PARAMS[3] * rho * trueSigma)
-                error = (error * (i - 1) + abs(rho - (1 - testAlgo.fi)))/i
+                error = (error * (i - 1) + abs(rho - testAlgo.ri))/i
                 testCalendar.timeInMillis = (testCard.due!! + 1) * 24L * 60 * 60 * 1000
             }
             assert(error < 0.1)

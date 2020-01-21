@@ -26,6 +26,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuItemCompat.setOnActionExpandListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -291,6 +292,18 @@ open class DeckDataListFragment : Fragment(),
                 }
             })
         }
+        (menu.findItem(R.id.app_bar_search)).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                menu.setGroupVisible(R.id.standard_menu_group,false)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                menu.setGroupVisible(R.id.standard_menu_group,true)
+                activity?.invalidateOptionsMenu()
+                return true
+            }
+    } )
         super.onCreateOptionsMenu(menu, inflater)
     }
 

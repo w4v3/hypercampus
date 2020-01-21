@@ -122,10 +122,10 @@ class SrsFragment : Fragment() {
         newCardMode = MODE_LEARNT
 
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
-        val fi: Double = (prefs?.getInt("forgetting_index",90) ?: 90).toDouble()/100.0
+        val ri: Double = (prefs?.getInt("retention_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
-            ALG_SM2 -> SM2.also { it.fi = fi }
-            ALG_HC1 -> HC1.also { it.fi = fi }
+            ALG_SM2 -> SM2.also { it.ri = ri }
+            ALG_HC1 -> HC1.also { it.ri = ri }
             else -> null
         }
 

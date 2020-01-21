@@ -86,6 +86,8 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
+        super.onStart()
+
         mediaPlayer = MediaPlayer().apply {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 @Suppress("DEPRECATION")
@@ -98,7 +100,6 @@ class HyperActivity : AppCompatActivity() {
                 setAudioAttributes(attributes)
             }
         }
-        super.onStart()
     }
 
     override fun onStop() {
@@ -120,6 +121,7 @@ class HyperActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         menu?.setGroupVisible(R.id.standard_menu_group,showMenu)
+        menu?.findItem(R.id.app_bar_search)?.isVisible = showMenu
         return super.onPrepareOptionsMenu(menu)
     }
 

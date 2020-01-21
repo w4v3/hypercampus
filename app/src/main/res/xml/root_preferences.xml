@@ -31,13 +31,13 @@
             app:useSimpleSummaryProvider="true" />
 
         <SeekBarPreference
-            app:key="forgetting_index"
-            app:min="5"
-            android:max="40"
-            app:defaultValue="10"
+            app:key="retention_index"
+            app:min="60"
+            android:max="95"
+            app:defaultValue="90"
             app:adjustable="true"
             app:showSeekBarValue="true"
-            app:title="@string/fi_title"/>
+            app:title="@string/ri_title"/>
 
     </PreferenceCategory>
 

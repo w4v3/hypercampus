@@ -39,7 +39,8 @@
     </style>
 
     <style name="popup" parent="Widget.AppCompat.PopupMenu.Overflow">
-        <item name="android:textColor">@color/colorContrastDark</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:colorBackground">?colorSurface</item>
     </style>
 
 </resources>

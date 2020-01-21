@@ -23,16 +23,38 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".*\\.md" />
-                <data android:pathPattern=".*\\.hcmd" />
-                <data android:pathPattern=".*\\.zip" />
-                <data android:pathPattern=".*\\.hczip" />
-                <data android:host="*" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.md" android:scheme="file" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.md" android:scheme="content" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.md" android:scheme="http" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.md" android:scheme="https" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hcmd" android:scheme="file" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hcmd" android:scheme="content" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hcmd" android:scheme="http" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hcmd" android:scheme="https" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.zip" android:scheme="file" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.zip" android:scheme="content" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.zip" android:scheme="http" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.zip" android:scheme="https" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hczip" android:scheme="file" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hczip" android:scheme="content" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hczip" android:scheme="http" />
+                <data android:host="*" android:mimeType="*/*"
+                    android:pathPattern=".*\\.hczip" android:scheme="https" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -41,6 +63,7 @@
                 <data android:mimeType="application/hcmd"/>
                 <data android:mimeType="application/zip" android:scheme="content"/>
                 <data android:mimeType="application/hczip" />
+                <data android:mimeType="application/octet-stream" android:scheme="content"/>
             </intent-filter>
         </activity>
     </application>

@@ -81,7 +81,7 @@
     <string name="srs_header">Spaced Repetition System</string>
     <string name="other_header">Other</string>
     <string name="algo_title">Algorithm</string>
-    <string name="fi_title">Forgetting Index</string>
+    <string name="ri_title">Retention Index</string>
     <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
     <string name="licence_title">Library licences …</string>
