@@ -21,6 +21,8 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import onion.w4v3xrmknycexlsd.app.hypercampus.MODE_LEARNT
 import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_ENABLED
 
@@ -58,8 +60,14 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
                 , @ColumnInfo(name = "hc1_last_stability") var former_stability: Float = 3.6f
                 , @ColumnInfo(name = "hc1_last_retrievability") var former_retrievability: Float = 0.9f
-                , @ColumnInfo(name = "hc1_params") var params: List<Float> = listOf(0.7f, 0f, 0f, 0f)
-                , @ColumnInfo(name = "hc1_sigma_params") var sigma_params: List<Float>
+                , @ColumnInfo(name = "hc1_params") var params_r: List<Float> = listOf(0.7f, 0f, 0f, 0f)
+                , @ColumnInfo(name = "hc1_sigma_params") var sigma_params_r: List<Float>
+                                                                           = listOf(1f, 0f, 0f, 0f,
+                                                                                    0f, 1f, 0f, 0f,
+                                                                                    0f, 0f, 1f, 0f,
+                                                                                    0f, 0f, 0f, 1f)
+                , @ColumnInfo(name = "hc1_params_incorrect") var params_w: List<Float>? = listOf(0.7f, 0f, 0f, 0f)
+                , @ColumnInfo(name = "hc1_sigma_params_incorrect") var sigma_params_w: List<Float>?
                                                                            = listOf(1f, 0f, 0f, 0f,
                                                                                     0f, 1f, 0f, 0f,
                                                                                     0f, 0f, 1f, 0f,
@@ -69,7 +77,7 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
 
 data class CardContent(val id: Int, val lesson_id: Int, val question: String, val answer: String) // for content only updates
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 4)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 5)
 @TypeConverters(Converters::class)
 abstract class HyperRoom : RoomDatabase() {
     abstract fun courseDao(): CourseDAO
@@ -206,5 +214,13 @@ class Converters {
     @TypeConverter
     fun fromList(list: List<Float?>?): String? {
         return list?.joinToString(",")
+    }
+}
+
+// MIGRATIONS
+val MIGRATION_4_5 = object : Migration(4,5) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_params_incorrect TEXT")
+        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_sigma_params_incorrect TEXT")
     }
 }

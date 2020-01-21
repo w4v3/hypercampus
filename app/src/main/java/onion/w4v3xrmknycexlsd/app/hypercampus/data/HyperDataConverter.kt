@@ -326,13 +326,13 @@ class HyperDataConverter (private val activity: HyperActivity){
     }
 
     private fun String.escape(): String = this
-        .replace("""\""","""\back;""")
-        .replace("""|""","""\pipe;""")
-        .replace("\n","""\n;""")
+        .replace("""&""","""&amp;""")
+        .replace("""|""","""&verbar;""")
+        .replace("\n","""&NewLine;""")
     private fun String.unescape(): String = this
-        .replace("""\back;""","""\""")
-        .replace("""\pipe;""","""|""")
-        .replace("""\n;""","\n")
+        .replace("""&amp;""","""&""")
+        .replace("""&verbar;""","""|""")
+        .replace("""&NewLine;""","\n")
 
     private fun linkActivityIntent(code: Int, cont: Continuation<Uri>) {
         activity.onActivityResultListener = object : HyperActivity.OnActivityResultListener {

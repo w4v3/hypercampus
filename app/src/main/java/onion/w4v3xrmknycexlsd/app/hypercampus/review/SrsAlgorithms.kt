@@ -70,8 +70,11 @@ object HC1: SrsAlgorithm() {
         val dSigma = sigma - _sigma
 
         // prior
-        val theta = card.params.toFloatArray()
-        val Psi = card.sigma_params.toFloatArray()
+        val theta = (if (recall) card.params_r else card.params_w ?: listOf(0.7f, 0f, 0f, 0f)).toFloatArray()
+        val Psi = (if (recall) card.sigma_params_r else card.sigma_params_w ?: listOf(1f, 0f, 0f, 0f,
+                                                                                      0f, 1f, 0f, 0f,
+                                                                                      0f, 0f, 1f, 0f,
+                                                                                      0f, 0f, 0f, 1f)).toFloatArray()
 
         // infer if not a new card, otherwise take default values
         val (Psi_,theta_) = if (card.due != null) {
@@ -95,8 +98,13 @@ object HC1: SrsAlgorithm() {
         card.last_interval = newInt
         card.former_stability = sigma
         card.former_retrievability = rho
-        card.params = theta_.toList()
-        card.sigma_params = Psi_.toList()
+        if (recall) {
+            card.params_r = theta_.toList()
+            card.sigma_params_r = Psi_.toList()
+        } else {
+            card.params_w = theta_.toList()
+            card.sigma_params_w = Psi_.toList()
+        }
 
         return card
     }
@@ -120,7 +128,7 @@ object HC1: SrsAlgorithm() {
         return result
     }
     // matrix inversion copied from android.opengl.Matrix, for testability
-    fun invertM(
+    private fun invertM(
         mInv: FloatArray, mInvOffset: Int, m: FloatArray,
         mOffset: Int
     ): Boolean { // Invert a 4 x 4 matrix using Cramer's Rule
