@@ -10,7 +10,11 @@ Courses consist of _lessons_, and the lessons contain your cards. New cards are 
 
 You can enter your daily review by pressing the floating button with the HyperCampus icon. First, new cards are displayed to you for studying. Then, cards due for review are shown and you should try to recall the answers on them. When you think you know the answer, or decide that you don't know it any more, reveal the answer side and grade your performance. First, indicate simply whether or not you knew the answer. Then, indicate how familiar you feel with that item, using the scale from purple (completely unfamiliar) to yellow (very familiar). Try to assess nuances in your performance. For example, if you knew it, but it took you a long time, tap "right" first and then towards the purple end. If you forgot it, but it was on the tip of your tongue, tap a "wrong" first and then towards the yellow end.
 
-Apart from a complete review, you can choose to study a course or a lesson in isolation by tapping on the button indicating how many cards are due in the respective course or lesson. Note that new cards are only displayed when reviewing a course (i.e., not for a specific lesson). You should review all due cards every day as due cards will pile up when you don't review them, but the algorithm is adapted to work even if you review a card later than you should.
+Apart from a complete review, you can choose to study a course or a lesson in isolation by tapping on the button indicating how many cards are due in the respective course or lesson. Note that new cards are only displayed when reviewing a course (i.e., not for a specific lesson). You should review all due cards every day as due cards will pile up when you don't review them, but the algorithm is adapted to work even if you review a card later than you should. You can also select some courses or lessons and tap on the (now black) HyperCampus button to review due cards from these courses or lessons only.
+
+Sometimes you might want to review all your cards in specific courses or lessons, for example right before an exam. For this scenario, HyperCampus offers a "Full review" option in the selection menu to review all cards from the selected courses or lessons independent of whether they are due or not. The fact that you will review some cards prematurely will be accounted for by the HyperCampus algorithm.
+
+You can also exclude certain cards from all reviews except full reviews. To do so, select the card(s) and choose "Disable" from the selection menu.
 
 ## Settings
 

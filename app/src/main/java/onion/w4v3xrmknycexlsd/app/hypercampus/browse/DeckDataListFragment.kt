@@ -21,11 +21,13 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 import android.app.Dialog
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -237,6 +239,26 @@ open class DeckDataListFragment : Fragment(),
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val inflater: MenuInflater = mode.menuInflater
             inflater.inflate(R.menu.selection_menu, menu)
+            (activity as HyperActivity).binding.floatingActionButton.isVisible = (args.level != Level.CARDS)
+            (activity as HyperActivity).binding.floatingActionButton.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(activity as Context, R.color.colorContrastDark))
+            (activity as HyperActivity).binding.floatingActionButton.setColorFilter(
+                ContextCompat.getColor(activity as Context, R.color.colorLight)
+            )
+            (activity as HyperActivity).binding.floatingActionButton.setOnClickListener {
+                val action = when (args.level) {
+                    Level.COURSES -> CoursesListDirections.actionToSrs(
+                        selected.map { item -> (item as Course).id }.toIntArray(),
+                        Level.COURSES
+                    )
+                    Level.LESSONS -> LessonsListDirections.actionToSrs(
+                        selected.map { item -> (item as Lesson).id }.toIntArray(),
+                        Level.LESSONS
+                    )
+                    Level.CARDS -> null
+                }
+                action?.let { findNavController().navigate(it) }
+            }
             return true
         }
 
@@ -255,6 +277,18 @@ open class DeckDataListFragment : Fragment(),
                     exportSelected()
                     true
                 }
+                R.id.app_bar_cram -> {
+                    cramSelected()
+                    true
+                }
+                R.id.app_bar_disable -> {
+                    disableSelected()
+                    true
+                }
+                R.id.app_bar_enable -> {
+                    enableSelected()
+                    true
+                }
                 else -> false
             }
         }
@@ -265,6 +299,9 @@ open class DeckDataListFragment : Fragment(),
                 1 -> menu.findItem(R.id.app_bar_edit).isVisible = true
                 else -> menu.findItem(R.id.app_bar_edit).isVisible = false
             }
+            menu.findItem(R.id.app_bar_cram).isVisible = (args.level != Level.CARDS)
+            menu.findItem(R.id.app_bar_disable).isVisible = (args.level == Level.CARDS)
+            menu.findItem(R.id.app_bar_enable).isVisible = (args.level == Level.CARDS)
             return false
         }
 
@@ -273,6 +310,15 @@ open class DeckDataListFragment : Fragment(),
             adapter.deselectAll()
             multiSelect = false
             selectionMode = null
+            (activity as HyperActivity).binding.floatingActionButton.isVisible = true
+            (activity as HyperActivity).binding.floatingActionButton.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(activity as Context, R.color.colorAccent))
+            (activity as HyperActivity).binding.floatingActionButton.setColorFilter(
+                ContextCompat.getColor(activity as Context, R.color.colorContrastDark)
+            )
+            (activity as HyperActivity).binding.floatingActionButton.setOnClickListener {
+                findNavController().navigate(R.id.action_to_srs)
+            }
         }
     }
 
@@ -400,8 +446,7 @@ open class DeckDataListFragment : Fragment(),
                 selected[0] as Course
             Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson =
                 selected[0] as Lesson
-            Level.CARDS -> {
-            }
+            Level.CARDS -> {}
         }
 
         val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
@@ -439,6 +484,37 @@ open class DeckDataListFragment : Fragment(),
 
         val dialog: Dialog? = builder?.create()
         dialog?.show()
+    }
+
+    private fun cramSelected() {
+        val action = when (args.level) {
+            Level.COURSES -> CoursesListDirections.actionToSrs(
+                selected.map { item -> (item as Course).id }.toIntArray(),
+                Level.COURSES,
+                true
+            )
+            Level.LESSONS -> LessonsListDirections.actionToSrs(
+                selected.map { item -> (item as Lesson).id }.toIntArray(),
+                Level.LESSONS,
+                true
+            )
+            Level.CARDS -> null
+        }
+        action?.let { findNavController().navigate(it) }
+    }
+
+    private fun disableSelected() {
+        for (card in selected) {
+            (card as Card).status = STATUS_DISABLED
+            viewModel.update(card)
+        }
+    }
+
+    private fun enableSelected() {
+        for (card in selected) {
+            (card as Card).status = STATUS_ENABLED
+            viewModel.update(card)
+        }
     }
 
     private fun updateCounts() = lifecycleScope.launch {

@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import onion.w4v3xrmknycexlsd.app.hypercampus.R
+import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_DISABLED
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Course
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.DeckData
@@ -76,16 +77,6 @@ class DeckDataAdapter(
         }
     }
 
-    private fun select(v: View){
-        selectedViews.add(v)
-        v.setBackgroundColor(v.context.getThemeColor(R.attr.colorControlHighlight))
-    }
-
-    private fun deselect(v: View){
-        selectedViews.remove(v)
-        v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
-    }
-
     open inner class DeckDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val shortLabelView: TextView = itemView.findViewById(R.id.label_short)
         val fullLabelView: TextView = itemView.findViewById(R.id.label_full)
@@ -97,6 +88,7 @@ class DeckDataAdapter(
             itemView.setOnClickListener(mOnClickListener)
             itemView.setOnLongClickListener(mOnLongClickListener)
             itemView.tag = data
+            checkDisableColor(data,itemView)
             reviewButton?.setOnClickListener(mOnClickListener)
             reviewButton?.tag = data
         }
@@ -152,9 +144,29 @@ class DeckDataAdapter(
         notifyDataSetChanged()
     }
 
+    private fun select(v: View){
+        selectedViews.add(v)
+        v.setBackgroundColor(v.context.getThemeColor(R.attr.colorControlHighlight))
+    }
+
+    private fun deselect(v: View){
+        selectedViews.remove(v)
+        v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
+        checkDisableColor(v.tag as DeckData,v)
+    }
+
     fun deselectAll() {
-        for (v in selectedViews) v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
+        // need to handle one by one to prevet ConcurrentModificationException
+        for (v in selectedViews) {
+            v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
+            checkDisableColor(v.tag as DeckData,v)
+        }
         selectedViews.clear()
+    }
+
+    private fun checkDisableColor(data: DeckData, v: View) {
+        if (data is Card && data.status == STATUS_DISABLED)
+            v.setBackgroundColor(v.context.getThemeColor(R.attr.colorError))
     }
 
     interface OnItemClickListener {

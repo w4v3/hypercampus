@@ -53,6 +53,7 @@ val SHOWCASE = arrayOf(COURSE_SHOW, LESSON_SHOW, CARD_SHOW, SRS_SHOW)
 
 // card status, for future features
 const val STATUS_ENABLED = 1
+const val STATUS_DISABLED = 0
 
 // MIME file types
 const val FILE_IMAGE = "image/*"

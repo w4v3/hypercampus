@@ -37,10 +37,28 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/app_bar_cram"
+        android:title="@string/action_cram"
+        android:menuCategory="secondary"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/app_bar_exp"
         android:icon="@drawable/ic_file_upload_white_24dp"
         android:title="@string/action_exp"
         android:menuCategory="secondary"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/app_bar_disable"
+        android:title="@string/action_disable"
+        android:menuCategory="secondary"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/app_bar_enable"
+        android:title="@string/action_enable"
+        android:menuCategory="secondary"
+        app:showAsAction="never" />
 
 </menu>

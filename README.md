@@ -52,10 +52,14 @@ coming soon.
 ### Features released in the near future
 - [x] adding multimedia files to flashcards
 - [x] import/export of flashcard collections
-- [ ] Anki collection import
-- [ ] cram mode
+- [x] cram mode
 - [ ] customize the review process and how new cards are learnt
 - [ ] inspect your learning statistics
+
+### Features that might be released upon request
+- [ ] Anki collection import
+- [ ] Review reminder notifications
+- [ ] Widget for quick overview and review
 
 ## Licences
 

@@ -26,4 +26,5 @@
     <color name="colorContrastDark">#373737</color>
     <color name="colorIntroBg">#DD7200CA</color>
     <color name="colorIntroFg">#FFAA00</color>
+    <color name="colorLight">#FFFFFF</color>
 </resources>

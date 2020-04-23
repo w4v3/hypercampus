@@ -159,13 +159,13 @@ interface CardDAO {
     @Query("SELECT * FROM cards WHERE lesson_id=:lessonId")
     suspend fun getAllFromLesson(lessonId: Int): List<Card>
 
-    @Query("SELECT * FROM cards WHERE due<=:by")
+    @Query("SELECT * FROM cards WHERE due<=:by AND status=$STATUS_ENABLED")
     suspend fun getAllDueBy(by: Int): List<Card>
 
-    @Query("SELECT * FROM cards WHERE course_id=:courseId AND due<=:by")
+    @Query("SELECT * FROM cards WHERE course_id=:courseId AND due<=:by AND status=$STATUS_ENABLED")
     suspend fun getAllFromCourseDueBy(courseId: Int, by: Int): List<Card>
 
-    @Query("SELECT * FROM cards WHERE lesson_id=:lessonId AND due<=:by")
+    @Query("SELECT * FROM cards WHERE lesson_id=:lessonId AND due<=:by AND status=$STATUS_ENABLED")
     suspend fun getAllFromLessonDueBy(lessonId: Int, by: Int): List<Card>
 
     @Query("SELECT COUNT(*) FROM cards WHERE course_id=:courseId AND due<=:by")
@@ -174,7 +174,7 @@ interface CardDAO {
     @Query("SELECT COUNT(*) FROM cards WHERE lesson_id=:lessonId AND due<=:by")
     suspend fun countDueInLessons(lessonId: Int, by: Int): Int
 
-    @Query("SELECT * FROM cards WHERE due IS NULL AND course_id=:courseId LIMIT :n")
+    @Query("SELECT * FROM cards WHERE due IS NULL AND course_id=:courseId AND status=$STATUS_ENABLED LIMIT :n")
     suspend fun getNewCardsAsync(courseId: Int, n: Int): List<Card>
 
     @Query("SELECT within_course_id FROM cards WHERE course_id=:courseId ORDER BY within_course_id DESC LIMIT 1")
