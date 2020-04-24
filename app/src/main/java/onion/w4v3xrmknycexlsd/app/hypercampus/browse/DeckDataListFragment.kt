@@ -310,7 +310,6 @@ open class DeckDataListFragment : Fragment(),
             adapter.deselectAll()
             multiSelect = false
             selectionMode = null
-            (activity as HyperActivity).binding.floatingActionButton.isVisible = true
             (activity as HyperActivity).binding.floatingActionButton.backgroundTintList =
                 ColorStateList.valueOf(ContextCompat.getColor(activity as Context, R.color.colorAccent))
             (activity as HyperActivity).binding.floatingActionButton.setColorFilter(

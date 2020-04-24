@@ -135,10 +135,18 @@ class HyperActivity : AppCompatActivity() {
         return navController.navigateUp()
     }
 
-    override fun onBackPressed() {
-        if (!showing) {
-            super.onBackPressed()
+    interface OnBackPressedListener {
+        fun doOnBackPressed(): Boolean
+    }
+
+    var onBackPressedListener = object : OnBackPressedListener {
+        override fun doOnBackPressed(): Boolean {
+            return !showing
         }
+    }
+
+    override fun onBackPressed() {
+        if (onBackPressedListener.doOnBackPressed()) super.onBackPressed()
     }
 
     override fun attachBaseContext(newBase: Context?) {

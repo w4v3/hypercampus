@@ -56,9 +56,12 @@ class SrsFragment : Fragment() {
 
     private var newCardList = mutableListOf<Card>()
     private var dueCardList = mutableListOf<Card>()
+    private var saveCardList = mutableListOf<Card>()
 
     private var newCardMode: Int? = 0
     private var algorithm: SrsAlgorithm? = null
+
+    private var repeatUntil: Int = 0
 
     override fun onAttach(context: Context) {
         (context.applicationContext as HyperApp).hyperComponent.inject(this)
@@ -135,6 +138,24 @@ class SrsFragment : Fragment() {
             intro()
         }
 
+        (activity as HyperActivity).onBackPressedListener = object : HyperActivity.OnBackPressedListener {
+            override fun doOnBackPressed(): Boolean {
+                val lastCard = saveCardList.lastOrNull()
+                lastCard?.let {
+                    if (lastCard.due == null) {
+                        newCardList.add(0, lastCard)
+                    } else {
+                        dueCardList.add(0, lastCard)
+                    }
+                    saveCardList.remove(lastCard)
+                    repeatUntil++
+                    nextCard()
+                    return false
+                }
+                return true
+            }
+        }
+
         super.onActivityCreated(savedInstanceState)
     }
 
@@ -153,6 +174,7 @@ class SrsFragment : Fragment() {
     private fun nextCard() {
         binding.questionLayout.visibility = View.VISIBLE
         binding.answerLayout.visibility = View.INVISIBLE
+        binding.noMoreQuestions.visibility = View.INVISIBLE
         binding.gradeSelector.progress = binding.gradeSelector.max/2
 
         when {
@@ -160,12 +182,21 @@ class SrsFragment : Fragment() {
                 when (newCardMode) {
                     MODE_INFO -> showInfoFile()
                     MODE_DROPOUT -> initiateDropout()
-                    MODE_LEARNT -> { binding.currentCard = newCardList[0]; return }
+                    MODE_LEARNT -> { binding.currentCard = newCardList[0]}
                 }
+                lifecycleScope.launch {
+                    binding.currentLessonName =
+                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}"
+                }
+                return
             }
 
             dueCardList.isNotEmpty() -> {
-                binding.currentCard = dueCardList.elementAt(Random.nextInt(dueCardList.size))
+                binding.currentCard = if (repeatUntil > 0) dueCardList[0] else dueCardList.elementAt(Random.nextInt(dueCardList.size))
+                lifecycleScope.launch {
+                    binding.currentLessonName =
+                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}"
+                }
             }
 
             else -> {
@@ -178,6 +209,8 @@ class SrsFragment : Fragment() {
 
     private val runNextCard = Runnable { nextCard() }
     private fun handleGrade(grade: Float, recall: Boolean) = lifecycleScope.launch {
+        saveCardList.add(binding.currentCard!!)
+        if (repeatUntil > 0) repeatUntil--
         val updatedCard = withContext(Dispatchers.Default) {
             algorithm?.calculateInterval(binding.currentCard!!, grade, recall)
         }
