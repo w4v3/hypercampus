@@ -39,15 +39,17 @@
             app:showSeekBarValue="true"
             app:title="@string/ri_title"/>
 
+        <ListPreference
+            app:defaultValue="2"
+            app:entries="@array/srs_newcards"
+            app:entryValues="@array/srs_newcards_values"
+            app:key="srs_newcards"
+            app:title="@string/newcards_title"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/other_header">
-
-        <!--
-        <Preference
-            app:key="color_theme"
-            app:title="@string/color_title"/>
-            -->
 
         <Preference
             app:key="remove_media"

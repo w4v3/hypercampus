@@ -51,7 +51,7 @@ const val CARD_SHOW = "card_show"
 const val SRS_SHOW = "srs_show"
 val SHOWCASE = arrayOf(COURSE_SHOW, LESSON_SHOW, CARD_SHOW, SRS_SHOW)
 
-// card status, for future features
+// card status
 const val STATUS_ENABLED = 1
 const val STATUS_DISABLED = 0
 

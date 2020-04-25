@@ -28,6 +28,18 @@
         <item>1</item>
     </string-array>
 
+    <string-array name="srs_newcards">
+        <item>treat as already learnt (default)</item>
+        <item>self-paced dropout</item>
+        <item>show info file</item>
+    </string-array>
+
+    <string-array name="srs_newcards_values">
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
     <string-array name="export_options">
         <item>Include media?</item>
     </string-array>

@@ -92,7 +92,13 @@
     <string name="srs_header">Spaced Repetition System</string>
     <string name="other_header">Other</string>
     <string name="algo_title">Algorithm</string>
+    <string name="algo_sm">SuperMemo 2</string>
+    <string name="algo_hc">HyperCampus 1 (recommended)</string>
     <string name="ri_title">Retention Index</string>
+    <string name="newcards_title">New cards learning mode</string>
+    <string name="newcards_learnt">treat as already learnt (default)</string>
+    <string name="newcards_dropout">self-paced dropout</string>
+    <string name="newcards_info">show info file</string>
     <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
     <string name="licence_title">Library licences …</string>

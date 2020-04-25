@@ -80,7 +80,10 @@ class SrsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        resetOnClickListeners()
+    }
 
+    private fun resetOnClickListeners() {
         var selectedGrade = 50
         var selectedRecall = false
 
@@ -117,13 +120,12 @@ class SrsFragment : Fragment() {
                 seekBar?.let { handleGrade(selectedGrade/it.max.toFloat(), selectedRecall) }
             }
         })
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        newCardMode = MODE_LEARNT
 
+        newCardMode = Integer.parseInt(prefs?.getString("srs_newcards","$MODE_LEARNT") ?: "$MODE_LEARNT")
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
         val ri: Double = (prefs?.getInt("retention_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
@@ -181,8 +183,8 @@ class SrsFragment : Fragment() {
             newCardList.isNotEmpty() -> {
                 when (newCardMode) {
                     MODE_INFO -> showInfoFile()
-                    MODE_DROPOUT -> initiateDropout()
-                    MODE_LEARNT -> { binding.currentCard = newCardList[0]}
+                    MODE_DROPOUT -> doDropout()
+                    MODE_LEARNT -> { binding.currentCard = newCardList[0] }
                 }
                 lifecycleScope.launch {
                     binding.currentLessonName =
@@ -231,12 +233,20 @@ class SrsFragment : Fragment() {
 
     private fun showInfoFile() {
         binding.currentCard = newCardList[0]
-        //newCardList.clear()
     }
 
-    private fun initiateDropout() {
+    private fun doDropout() {
         binding.currentCard = newCardList[0]
-        //newCardList.clear()
+
+        binding.wrongButton.setOnClickListener {
+            binding.recallFeedback.visibility = View.INVISIBLE
+            binding.wrongTextView.text = ""
+            binding.rightTextView.text = ""
+            newCardList.remove(binding.currentCard!!)
+            newCardList.add(binding.currentCard!!)
+            resetOnClickListeners()
+            nextCard()
+        }
     }
 
     private fun intro() {

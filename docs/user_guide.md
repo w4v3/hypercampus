@@ -18,6 +18,16 @@ Sometimes you might want to review all your cards in specific courses or lessons
 
 You can also exclude certain cards from all reviews except full reviews. To do so, select the card(s) and choose "Disable" from the selection menu.
 
+## Learning new cards
+
+HyperCampus, and spaced repetition in general, works best for _reviewing_ things you already know as opposed to learning new things. It is therefore recommended to acquire the knowledge beforehand (e.g., in a lecture or by reading a book). However, HyperCampus allows you to customize how it should treat new cards in the settings.
+
+By default, HyperCampus treats new cards as if they were already learned and successfully reviewed four days ago. If _treat as already learnt_ is chosen in the settings, new cards will basically appear to you as any other card.
+
+The _self-paced dropout_ option will make HyperCampus ask you if you already know a new item, and will repeatedly show it to you until you indicate that you got it right.
+
+For _show info file_, at the beginning of each review session, for every course you are about to learn new cards from, an _info file_ is shown. This is only available if the course was imported using a `.hcmd` or `.hczip` file, see below. Then, a section of the `.hcmd` file corresponding to the cards you are about to study is shown beforehand.
+
 ## Settings
 
 In the settings, you can choose which spaced repetition algorithm to use. Of course I recommend the native HyperCampus algorithm, but as it is still experimental, I will allow you to use [SM-2](#the-supermemo-2-algorithm), on which Anki is based, as well. Note that when changing the algorithm, it will take some time to adapt it to your data, depending on how long you have used the other algorithm. For this reason, changing the algorithm frequently is not encouraged.

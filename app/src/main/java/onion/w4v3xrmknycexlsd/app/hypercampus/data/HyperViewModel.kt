@@ -45,9 +45,9 @@ class HyperViewModel @Inject constructor(private val repository: HyperRepository
     suspend fun getLessonAsync(lessonId: Int): Lesson = repository.getLesson(lessonId)
 
     suspend fun getDueFromCoursesAsync(premature: Boolean, courses: IntArray?): List<Card> =
-        if (premature) repository.getAllCardsFromCourses(courses) else repository.getAllDueCardsFromCourses(courses)
+        if (premature) repository.getAllCardsFromCourses(courses).filter { card -> card.due != null } else repository.getAllDueCardsFromCourses(courses)
     suspend fun getDueFromLessonsAsync(premature: Boolean, lessons: IntArray?): List<Card> =
-        if (premature) repository.getAllCardsFromLessons(lessons) else repository.getAllDueCardsFromLessons(lessons)
+        if (premature) repository.getAllCardsFromLessons(lessons).filter { card -> card.due != null } else repository.getAllDueCardsFromLessons(lessons)
     suspend fun getNewCardsFromCoursesAsync(courses: IntArray?): List<Card> =
         repository.getNewCards(courses)
 
