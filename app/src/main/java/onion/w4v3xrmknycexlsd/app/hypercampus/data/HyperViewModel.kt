@@ -28,6 +28,7 @@ import dagger.MapKey
 import dagger.Module
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.async
+import onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -61,6 +62,9 @@ class HyperViewModel @Inject constructor(private val repository: HyperRepository
     fun addAsync(data: DeckData) = viewModelScope.async { repository.addAsync(data).await() }
 
     fun resetStudied() = repository.resetStudied()
+
+    suspend fun getStatsAsync(level: Level, dataId: Int): List<IntArray>? =
+        if (level == Level.CARDS) null else repository.getStats(level,dataId)
 }
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)

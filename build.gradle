@@ -1,14 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.3.61'
+    ext.kotlin_version = '1.3.71'
     ext {
-        roomVersion = '2.2.3'
-        archLifecycleVersion = '2.2.0-rc03'
+        roomVersion = '2.2.5'
+        archLifecycleVersion = '2.2.0'
         androidxArchVersion = '2.1.0'
         coreTestingVersion = "2.1.0"
         coroutines = '1.3.2'
-        materialVersion = "1.2.0-alpha03"
+        materialVersion = "1.2.0-alpha06"
     }
 
     repositories {
@@ -20,7 +20,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         def nav_version = "2.1.0"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
-        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.0'
+        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.2'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

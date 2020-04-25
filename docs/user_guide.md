@@ -6,6 +6,8 @@ When you open the HyperCampus app, you should see the (initially empty) list of 
 
 Courses consist of _lessons_, and the lessons contain your cards. New cards are added to your studies in the order that they are displayed in the app, progressing from the first to the last lesson. For each card, you can specify the contents of the "question" side and the "answer" side.
 
+You can display some statistics for each course and lesson, like the number of learned and new cards using the _Statistics_ button from the menu. For cards, this will display when the card is next due as well as some parameters used by the SRS algorithms, in particular the [E-factor](https://supermemo.guru/wiki/SuperMemo_1.0_for_DOS_(1987)#Algorithm_SM-2) for SuperMemo 2 and the [theta parameter](model.ipynb) for the HyperCampus algorithm.
+
 ## Reviewing your cards
 
 You can enter your daily review by pressing the floating button with the HyperCampus icon. First, new cards are displayed to you for studying. Then, cards due for review are shown and you should try to recall the answers on them. When you think you know the answer, or decide that you don't know it any more, reveal the answer side and grade your performance. First, indicate simply whether or not you knew the answer. Then, indicate how familiar you feel with that item, using the scale from purple (completely unfamiliar) to yellow (very familiar). Try to assess nuances in your performance. For example, if you knew it, but it took you a long time, tap "right" first and then towards the purple end. If you forgot it, but it was on the tip of your tongue, tap a "wrong" first and then towards the yellow end. You can undo the reviews from the current session one by one by using the system back button.

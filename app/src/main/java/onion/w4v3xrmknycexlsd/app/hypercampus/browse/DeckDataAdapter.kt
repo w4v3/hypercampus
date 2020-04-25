@@ -19,6 +19,7 @@
 
 package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
+import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +28,7 @@ import android.widget.Button
 import android.widget.TextView
 import onion.w4v3xrmknycexlsd.app.hypercampus.R
 import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_DISABLED
+import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Course
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.DeckData
@@ -38,6 +40,7 @@ class DeckDataAdapter(
     private val listener: OnItemClickListener
 ): RecyclerView.Adapter<DeckDataAdapter.DeckDataViewHolder>() {
     private var deckData = mutableListOf<DeckData>()
+    private var statData = mutableListOf<IntArray>()
     private var dataCopy = mutableListOf<DeckData>()
     private var newCounts = mutableListOf<Int>()
     private var dueCounts = mutableListOf<Int>()
@@ -46,6 +49,8 @@ class DeckDataAdapter(
     private val mOnLongClickListener: View.OnLongClickListener
 
     private var selectedViews: MutableList<View> = mutableListOf()
+
+    var showingStats = false
 
     init {
         mOnClickListener = View.OnClickListener { v ->
@@ -83,14 +88,16 @@ class DeckDataAdapter(
         val reviewButton: TextView? = if (deckData[0] !is Card) itemView.findViewById(
             R.id.review_button
         ) else null
+        val statsView: View = itemView.findViewById(R.id.stats_view)
 
         fun bind(data: DeckData){
             itemView.setOnClickListener(mOnClickListener)
             itemView.setOnLongClickListener(mOnLongClickListener)
             itemView.tag = data
-            checkDisableColor(data,itemView)
             reviewButton?.setOnClickListener(mOnClickListener)
             reviewButton?.tag = data
+            statsView.visibility = if (showingStats) View.VISIBLE else View.GONE
+            checkDisableColor(data,itemView)
         }
     }
 
@@ -105,6 +112,7 @@ class DeckDataAdapter(
         return DeckDataViewHolder(itemView)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: DeckDataViewHolder, position: Int) {
         when(val current = deckData[position]){
             is Course -> {
@@ -113,16 +121,42 @@ class DeckDataAdapter(
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
                     R.string.due_new, dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…",
                newCounts.getOrNull(dataCopy.indexOf(current)) ?: "…" )
+                if (showingStats) {
+                    val stats = statData[position]
+                    val totalnum = stats[0]
+                    val newnum = stats[1]
+                    val disablenum = stats[2]
+                    val learntnum = totalnum - newnum - disablenum
+                    holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text = "%.1f/%.1f/%.1f".format(learntnum*100f/totalnum,newnum*100f/totalnum,disablenum*100f/totalnum)
+                }
             }
             is Lesson -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
                     R.string.due,dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…")
+                if (showingStats) {
+                    val stats = statData[position]
+                    val totalnum = stats[0]
+                    val newnum = stats[1]
+                    val disablenum = stats[2]
+                    val learntnum = totalnum - newnum - disablenum
+                    holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text = "%.1f/%.1f/%.1f".format(learntnum*100f/totalnum,newnum*100f/totalnum,disablenum*100f/totalnum)
+                }
             }
             is Card -> {
                 holder.shortLabelView.text = current.question
                 holder.fullLabelView.text = current.answer
+                if (showingStats) {
+                    holder.statsView.findViewById<TextView>(R.id.label_due).text = if (current.due != null) "${current.due!! - currentDate()}d" else "-"
+                    holder.statsView.findViewById<TextView>(R.id.label_rhosig).text = "%.1f/%.1f".format(current.former_retrievability,current.former_stability)
+                    holder.statsView.findViewById<TextView>(R.id.label_hcparams).text = "%.1f/%.1f/%.1f/%.1f".format(current.params_r[0],current.params_r[1],current.params_r[2],current.params_r[3])
+                    holder.statsView.findViewById<TextView>(R.id.label_smparams).text = "%.1f".format(current.eFactor)
+                }
             }
         }
         holder.bind(deckData[position])
@@ -144,6 +178,15 @@ class DeckDataAdapter(
         notifyDataSetChanged()
     }
 
+    internal fun toggleStats(data: List<IntArray>? = null) {
+        showingStats = !showingStats
+        if (data != null) {
+            statData.clear()
+            statData.addAll(data)
+        }
+        notifyDataSetChanged()
+    }
+
     private fun select(v: View){
         selectedViews.add(v)
         v.setBackgroundColor(v.context.getThemeColor(R.attr.colorControlHighlight))
@@ -156,7 +199,7 @@ class DeckDataAdapter(
     }
 
     fun deselectAll() {
-        // need to handle one by one to prevet ConcurrentModificationException
+        // need to handle one by one to prevent ConcurrentModificationException
         for (v in selectedViews) {
             v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
             checkDisableColor(v.tag as DeckData,v)
@@ -166,7 +209,7 @@ class DeckDataAdapter(
 
     private fun checkDisableColor(data: DeckData, v: View) {
         if (data is Card && data.status == STATUS_DISABLED)
-            v.setBackgroundColor(v.context.getThemeColor(R.attr.colorError))
+            v.setBackgroundColor(v.context.getThemeColor(R.attr.colorAccent))
     }
 
     interface OnItemClickListener {

@@ -21,6 +21,9 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
 import kotlinx.coroutines.*
+import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_DISABLED
+import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_ENABLED
+import onion.w4v3xrmknycexlsd.app.hypercampus.browse.Level
 import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -177,7 +180,19 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
     }
 
     fun resetStudied() = repositoryScope.launch {
-            courseDao.updateAll(courseDao.getAllAsync().map { it.apply { new_studied_today = 0 } })
+        courseDao.updateAll(courseDao.getAllAsync().map { it.apply { new_studied_today = 0 } })
     }
 
+    suspend fun getStats(level: Level, dataId: Int): List<IntArray> {
+        val result = mutableListOf<IntArray>()
+        val totraverse = if (level == Level.COURSES) courseDao.getAllAsync() else lessonDao.getFromAsync(dataId)
+        for (unit in totraverse) {
+            val unitcards = cardDao.getAllFromCourse(if (unit is Course) unit.id else (unit as Lesson).id)
+            val totalnum = unitcards.size
+            val newnum = unitcards.filter { card -> card.due == null && card.status == STATUS_ENABLED }.size
+            val disablenum = unitcards.filter { card -> card.status == STATUS_DISABLED }.size
+            result.add(intArrayOf(totalnum,newnum,disablenum))
+        }
+        return result
+    }
 }

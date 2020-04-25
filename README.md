@@ -54,7 +54,7 @@ coming soon.
 - [x] import/export of flashcard collections
 - [x] cram mode
 - [ ] customize the review process and how new cards are learnt
-- [ ] inspect your learning statistics
+- [x] inspect your learning statistics
 
 ### Features that might be released upon request
 - [ ] Anki collection import

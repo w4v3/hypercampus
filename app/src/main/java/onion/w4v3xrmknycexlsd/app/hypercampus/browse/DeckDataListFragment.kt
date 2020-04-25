@@ -283,10 +283,12 @@ open class DeckDataListFragment : Fragment(),
                 }
                 R.id.app_bar_disable -> {
                     disableSelected()
+                    mode.finish()
                     true
                 }
                 R.id.app_bar_enable -> {
                     enableSelected()
+                    mode.finish()
                     true
                 }
                 else -> false
@@ -401,6 +403,14 @@ open class DeckDataListFragment : Fragment(),
 
                 val dialog: Dialog? = builder?.create()
                 dialog?.show()
+            }
+            R.id.app_bar_stats -> {
+                if (!adapter.showingStats) {
+                    lifecycleScope.launch {
+                        val statData = viewModel.getStatsAsync(args.level,args.dataId)
+                        adapter.toggleStats(statData)
+                    }
+                } else adapter.toggleStats()
             }
         }
         return super.onOptionsItemSelected(item)

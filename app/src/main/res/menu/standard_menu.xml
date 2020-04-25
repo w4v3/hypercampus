@@ -44,6 +44,13 @@
             app:showAsAction="ifRoom" />
 
         <item
+            android:id="@+id/app_bar_stats"
+            android:icon="@drawable/ic_insert_chart_black_24dp"
+            android:menuCategory="secondary"
+            android:title="@string/action_stats"
+            app:showAsAction="ifRoom" />
+
+        <item
             android:icon="@drawable/ic_settings_white_24dp"
             android:id="@+id/settings"
             android:menuCategory="secondary"
