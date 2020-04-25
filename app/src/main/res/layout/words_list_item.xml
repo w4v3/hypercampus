@@ -59,8 +59,9 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
@@ -134,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="@color/colorMainDark"
-                tools:text="0.1/0.2/0.3/0.4" />
+                tools:text="0.1/0.2/0.3/0.4\n0.1/0.2/0.3/0.4" />
         </androidx.appcompat.widget.LinearLayoutCompat>
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"

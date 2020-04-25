@@ -34,8 +34,6 @@ data class Course(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val 
                   , @ColumnInfo(name = "name") var name: String = ""
                   , @ColumnInfo(name = "new_per_day") var new_per_day: Int = 10
                   , @ColumnInfo(name = "new_studied_today") var new_studied_today: Int = 0
-                  , @ColumnInfo(name = "info_file") var info_file: String = ""
-                  , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
 @Entity(tableName = "lessons")
@@ -43,7 +41,6 @@ data class Lesson(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val 
                   , @ColumnInfo(name = "course_id") val course_id: Int
                   , @ColumnInfo(name = "symbol") var symbol: String = ""
                   , @ColumnInfo(name = "name") var name: String = ""
-                  , @ColumnInfo(name = "user_order") var user_order: Int = id
 ): DeckData()
 
 @Entity(tableName = "cards")
@@ -54,7 +51,6 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "answer") var answer: String = ""
                 , @ColumnInfo(name = "within_course_id") var within_course_id: Int = 0
                 , @ColumnInfo(name = "due") var due: Int? = null
-                , @ColumnInfo(name = "learning_mode") var learning_mode: Int = MODE_LEARNT
                 , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
                 , @ColumnInfo(name = "last_interval") var last_interval: Int = 0
                 , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
@@ -66,18 +62,18 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                                                                                     0f, 1f, 0f, 0f,
                                                                                     0f, 0f, 1f, 0f,
                                                                                     0f, 0f, 0f, 1f)
-                , @ColumnInfo(name = "hc1_params_incorrect") var params_w: List<Float>? = listOf(0.7f, 0f, 0f, 0f)
-                , @ColumnInfo(name = "hc1_sigma_params_incorrect") var sigma_params_w: List<Float>?
+                , @ColumnInfo(name = "hc1_params_incorrect") var params_w: List<Float> = listOf(0.7f, 0f, 0f, 0f)
+                , @ColumnInfo(name = "hc1_sigma_params_incorrect") var sigma_params_w: List<Float>
                                                                            = listOf(1f, 0f, 0f, 0f,
                                                                                     0f, 1f, 0f, 0f,
                                                                                     0f, 0f, 1f, 0f,
                                                                                     0f, 0f, 0f, 1f)
-                , @ColumnInfo(name = "user_order") var user_order: Int = id
+                , @ColumnInfo(name = "info_file") var info_file: String? = null
 ): DeckData()
 
-data class CardContent(val id: Int, val lesson_id: Int, val question: String, val answer: String) // for content only updates
+data class CardContent(val id: Int, val lesson_id: Int, val question: String, val answer: String, val info_file: String?) // for content only updates
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 5)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 8)
 @TypeConverters(Converters::class)
 abstract class HyperRoom : RoomDatabase() {
     abstract fun courseDao(): CourseDAO
@@ -218,9 +214,14 @@ class Converters {
 }
 
 // MIGRATIONS
-val MIGRATION_4_5 = object : Migration(4,5) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_params_incorrect TEXT")
-        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_sigma_params_incorrect TEXT")
-    }
-}
+//val MIGRATION_4_5 = object : Migration(4,5) {
+//    override fun migrate(database: SupportSQLiteDatabase) {
+//        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_params_incorrect TEXT")
+//        database.execSQL("ALTER TABLE cards ADD COLUMN hc1_sigma_params_incorrect TEXT")
+//    }
+//}
+//val MIGRATION_5_6 = object : Migration(5,6) {
+//    override fun migrate(database: SupportSQLiteDatabase) {
+//        database.execSQL("ALTER TABLE cards ADD COLUMN info_file TEXT")
+//    }
+//}

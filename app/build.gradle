@@ -134,6 +134,12 @@ dependencies {
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
 
+    // Markwon for markdown rendering
+    implementation "io.noties.markwon:core:4.3.1"
+    implementation  "io.noties.markwon:recycler-table:4.3.1"
+    implementation  "io.noties.markwon:recycler:4.3.1"
+    implementation  "io.noties.markwon:image-picasso:4.3.1"
+
     // automatic licences
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
 }

@@ -49,6 +49,7 @@ import kotlin.coroutines.suspendCoroutine
 
 // private file directories
 const val DIR_MEDIA = "media"
+const val DIR_HCMD = "hcmd"
 
 // intent codes
 const val CREATE_FILE = 1
@@ -176,7 +177,7 @@ class HyperDataConverter (private val activity: HyperActivity){
             val from = uri?.let { contentResolver.openInputStream(it) }
             val to = getUniqueFile(toParent,requestName)
             from?.let { writeFromTo(from, to.outputStream()) }
-            return "![${if (type == FILE_AUDIO) "audio" else "image"}]{${to.name}}"
+            return "![${if (type == FILE_AUDIO) "audio" else "image"}](${to.name})"
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
             return ""
@@ -186,8 +187,21 @@ class HyperDataConverter (private val activity: HyperActivity){
         }
     }
 
+    fun getInfoFile(name: String): String {
+        return try {
+            val fileInputStream = File(getMediaAccess(DIR_HCMD),name).inputStream()
+            readStringFrom(fileInputStream)
+        } catch (e: FileNotFoundException) {
+            activity.badSnack(activity.getString(R.string.fnf_exception))
+            ""
+        } catch (e: IOException) {
+            activity.badSnack(activity.getString(R.string.io_exception))
+            ""
+        }
+    }
+
     fun convertToViews(toConvert: String, root: LinearLayout) {
-        val mediaRegex = Regex("""!\[(.*)\]\{(.*)\}""")
+        val mediaRegex = Regex("""!\[(.*)\]\((.*)\)""")
         val groups: MutableList<String> = toConvert.split(mediaRegex).toMutableList()
         for ((i,s) in mediaRegex.findAll(toConvert).withIndex()) {
             groups.add(2*i+1,s.value)
@@ -251,13 +265,18 @@ class HyperDataConverter (private val activity: HyperActivity){
 
     fun deleteUnusedMediaFiles() = repository.repositoryScope.launch {
         try {
-            val parent = getMediaAccess()
-            val mediaRegex = Regex("!\\[.*\\]\\{(.*)\\}")
-            val usedMedia = repository.getAllCards().joinToString(";") { card ->
+            val allcards = repository.getAllCards()
+            val medParent = getMediaAccess(DIR_MEDIA)
+            val mediaRegex = Regex("!\\[.*\\]\\((.*)\\)")
+            val usedMedia = allcards.joinToString(";") { card ->
                 mediaRegex.findAll(card.question).map { it.groups[1] }.joinToString(";") +
                 mediaRegex.findAll(card.answer).map { it.groups[1] }.joinToString(";")
             }
-            parent.listFiles()?.let { for (f in it) if (f.name !in usedMedia) f.delete() }
+            medParent.listFiles()?.let { for (f in it) if (f.name !in usedMedia) f.delete() }
+
+            val hcmdParent = getMediaAccess(DIR_HCMD)
+            val hcmdUsed = allcards.map { card -> card.info_file }
+            hcmdParent.listFiles()?.let { for (f in it) if (f.name !in hcmdUsed) f.delete() }
             activity.goodSnack(activity.getString(R.string.delete_unused_success))
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
@@ -271,13 +290,23 @@ class HyperDataConverter (private val activity: HyperActivity){
 
         for (d in data) {
             result += when (d) {
-                is Course -> "# [${d.symbol}] ${d.name}\n" +
+                is Course -> "\n# [${d.symbol}] ${d.name}" +
                         collectionToMd(repository.getLessonsFromCourseAsync(d.id))
-                is Lesson -> "## [${d.symbol}] ${d.name}\n" +
-                        "n|Q|A\n" +
-                        "---|---|---\n" +
+                is Lesson -> "\n## [${d.symbol}] ${d.name}" +
+                        "\nn|Q|A1|A2|A3|A4|A5" +
+                        "\n---|---|---|---|---|---|---" +
                         collectionToMd(repository.getCardsFromLessonAsync(d.id))
-                is Card -> "${d.within_course_id}|${d.question.escape()}|${d.answer.escape()}\n"
+                is Card -> {
+                    when {
+                        d.within_course_id % 10 == 0 -> {
+                            "\n${d.within_course_id.div(10)}|${d.question.escape()}|${d.answer.escape()}"
+                        }
+                        d.within_course_id % 10 < 5 -> {
+                            "|${d.answer.escape()}"
+                        }
+                        else -> ""
+                    }
+                }
             }
         }
 
@@ -285,11 +314,24 @@ class HyperDataConverter (private val activity: HyperActivity){
     }
 
     private suspend fun mdToCollection(content: String, withOrder: Boolean = false, overwrite: Boolean = false) {
+        var infofile: String? = null
+        try {
+            val toParent = getMediaAccess(DIR_HCMD)
+            val to = getUniqueFile(toParent,"collection")
+            infofile = to.name
+            writeStringTo(content,to.outputStream())
+        } catch (e: FileNotFoundException) {
+            activity.badSnack(activity.getString(R.string.fnf_exception))
+        } catch (e: IOException) {
+            activity.badSnack(activity.getString(R.string.io_exception))
+        }
+
         val lines = content.split("\n")
 
-        var currentCourse = 0
-        var currentLesson = 0
+        var currentCourse: Int? = null
+        var currentLesson: Int? = null
         var tableLineCount = 0 // for skipping two first lines in markdown table
+        var twoway = false // add two cards for each entry (front-back and back-front)
         for (l in lines) {
             when {
                 l.matches(Regex("^# \\[(.*)] (.*)$")) -> Regex("^# \\[(.*)] (.*)$").find(l)?.groups?.let {
@@ -301,25 +343,79 @@ class HyperDataConverter (private val activity: HyperActivity){
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## \\[(.*)] (.*)$")) -> Regex("^## \\[(.*)] (.*)$").find(l)?.groups?.let {
-                    currentLesson = repository.addAsync(Lesson(course_id = currentCourse, symbol = it[1]!!.value, name = it[2]!!.value), overwrite).await().toInt()
+                    currentCourse?.let { cc ->
+                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = it[1]!!.value, name = it[2]!!.value), overwrite).await().toInt()
+                    }
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## (.*)$")) -> Regex("^## (.*)$").find(l)?.groups?.let {
-                    currentLesson = repository.addAsync(Lesson(course_id = currentCourse, symbol = "", name = it[1]!!.value), overwrite).await().toInt()
+                    currentCourse?.let { cc ->
+                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = "", name = it[1]!!.value), overwrite).await().toInt()
+                    }
                     tableLineCount = 0
                 }
                 l.matches(Regex("^(.*)\\|(.*)$")) ->
                     if (tableLineCount >= 2) {
                         if (withOrder) {
-                            Regex("^(\\d+)\\|(.*)\\|(.*)$").find(l)?.groups?.let {
-                                newlyAdded.add(repository.addAsync(Card(course_id = currentCourse, lesson_id = currentLesson, within_course_id = Integer.parseInt(it[1]!!.value), question = it[2]!!.value.unescape(), answer = it[3]!!.value.unescape()), overwrite).await().toInt())
+                            Regex("^(\\d+)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(l)?.groups?.let { grps ->
+                                currentCourse?.let { cc -> currentLesson?.let { cl ->
+                                    // allow one count column, one main and 5 pairings
+                                    // 10 values of within_course_id are now reserved per entry,
+                                    // one for each pairing and direction
+                                    grps.drop(3).take(5).mapIndexed { idx,answ ->
+                                        answ?.let {
+                                            newlyAdded.add(repository.addAsync(
+                                                Card(course_id = cc,
+                                                    lesson_id = cl,
+                                                    within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx,
+                                                    question = grps[2]!!.value.unescape(),
+                                                    answer = answ.value.unescape(),
+                                                    info_file = infofile),
+                                                overwrite).await().toInt())
+                                            if (twoway) {
+                                                newlyAdded.add(repository.addAsync(
+                                                    Card(course_id = cc,
+                                                        lesson_id = cl,
+                                                        within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx+5,
+                                                        question = answ.value.unescape(),
+                                                        answer = grps[2]!!.value.unescape(),
+                                                        info_file = infofile),
+                                                    overwrite).await().toInt())
+                                            }
+                                        }
+                                    }
+                                }}
                             }
                         } else {
-                            Regex("^(.*)\\|(.*)$").find(l)?.groups?.let {
-                                newlyAdded.add(repository.addAsync(Card(course_id = currentCourse, lesson_id = currentLesson, question = it[1]!!.value.unescape(), answer = it[2]!!.value.unescape()), onlyIfNew = false).await().toInt())
+                            Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(l)?.groups?.let { grps ->
+                                currentCourse?.let { cc -> currentLesson?.let { cl ->
+                                    // allow one main column and 5 pairings
+                                    grps.drop(2).take(5).map { answ ->
+                                        answ?.let {
+                                            newlyAdded.add(repository.addAsync(
+                                                Card(course_id = cc,
+                                                     lesson_id = cl,
+                                                     question = grps[1]!!.value.unescape(),
+                                                     answer = answ.value.unescape(),
+                                                     info_file = infofile),
+                                                onlyIfNew = false).await().toInt())
+                                            if (twoway) {
+                                                newlyAdded.add(repository.addAsync(
+                                                    Card(course_id = cc,
+                                                        lesson_id = cl,
+                                                        question = answ.value.unescape(),
+                                                        answer = grps[1]!!.value.unescape(),
+                                                        info_file = infofile),
+                                                    onlyIfNew = false).await().toInt())
+                                            }
+                                        }
+                                    }
+                                }}
                             }
                         }
                     } else tableLineCount++
+                l.matches(Regex("^\\[]\\(twoway\\)$")) -> twoway = true
+                l.matches(Regex("^\\[]\\(oneway\\)$")) -> twoway = false
                 else -> tableLineCount = 0
             }
         }
@@ -374,7 +470,7 @@ class HyperDataConverter (private val activity: HyperActivity){
         val usedMedia = mutableListOf<String>()
         usedMedia.addAll(mediaRegex.findAll(card.question).map { it.groups[1]?.value ?: "" })
         usedMedia.addAll(mediaRegex.findAll(card.answer).map { it.groups[1]?.value ?: "" })
-        return inParent.listFiles { _, name: String? -> name in usedMedia}
+        return inParent.listFiles { _, name: String? -> name in usedMedia }
     }
 
     private fun writeFromTo(from: InputStream, to: OutputStream) {

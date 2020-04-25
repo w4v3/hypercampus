@@ -82,7 +82,7 @@ class HyperActivity : AppCompatActivity() {
 
         binding.floatingActionButton.setOnClickListener { navController.navigate(R.id.action_to_srs) }
 
-        intent.data?.also { HyperDataConverter(this).fileToCollection(it) }
+        intent.data?.also { HyperDataConverter(this).fileToCollection(it); navHostFragment.view?.invalidate() }
     }
 
     override fun onStart() {
@@ -120,8 +120,11 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.setGroupVisible(R.id.standard_menu_group,showMenu)
         menu?.findItem(R.id.app_bar_search)?.isVisible = showMenu
+        menu?.findItem(R.id.app_bar_add)?.isVisible = showMenu
+        menu?.findItem(R.id.app_bar_stats)?.isVisible = showMenu
+        menu?.findItem(R.id.settings)?.isVisible = showMenu
+        menu?.findItem(R.id.app_bar_info)?.isVisible = false
         return super.onPrepareOptionsMenu(menu)
     }
 

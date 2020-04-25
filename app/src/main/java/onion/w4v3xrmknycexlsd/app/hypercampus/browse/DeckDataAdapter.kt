@@ -154,7 +154,9 @@ class DeckDataAdapter(
                 if (showingStats) {
                     holder.statsView.findViewById<TextView>(R.id.label_due).text = if (current.due != null) "${current.due!! - currentDate()}d" else "-"
                     holder.statsView.findViewById<TextView>(R.id.label_rhosig).text = "%.1f/%.1f".format(current.former_retrievability,current.former_stability)
-                    holder.statsView.findViewById<TextView>(R.id.label_hcparams).text = "%.1f/%.1f/%.1f/%.1f".format(current.params_r[0],current.params_r[1],current.params_r[2],current.params_r[3])
+                    holder.statsView.findViewById<TextView>(R.id.label_hcparams).text =
+                        "%.1f/%.1f/%.1f/%.1f\n".format(current.params_r[0],current.params_r[1],current.params_r[2],current.params_r[3]) +
+                        "%.1f/%.1f/%.1f/%.1f".format(current.params_w[0],current.params_w[1],current.params_w[2],current.params_w[3])
                     holder.statsView.findViewById<TextView>(R.id.label_smparams).text = "%.1f".format(current.eFactor)
                 }
             }

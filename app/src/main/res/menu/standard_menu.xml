@@ -28,36 +28,33 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|always" />
 
-    <group android:id="@+id/standard_menu_group">
-        <!--<item
-            android:id="@+id/action_to_stats"
-            android:title="@string/action_stat"
-            android:icon="@drawable/ic_insert_chart_white_24dp"
-            android:menuCategory="secondary"
-            app:showAsAction="ifRoom"/>-->
+    <item
+        android:id="@+id/app_bar_add"
+        android:icon="@drawable/ic_add_circle_outline_white_24dp"
+        android:menuCategory="secondary"
+        android:title="@string/action_add"
+        app:showAsAction="ifRoom" />
 
-        <item
-            android:id="@+id/app_bar_add"
-            android:icon="@drawable/ic_add_circle_outline_white_24dp"
-            android:menuCategory="secondary"
-            android:title="@string/action_add"
-            app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/app_bar_stats"
+        android:icon="@drawable/ic_insert_chart_white_24dp"
+        android:menuCategory="secondary"
+        android:title="@string/action_stats"
+        app:showAsAction="ifRoom" />
 
-        <item
-            android:id="@+id/app_bar_stats"
-            android:icon="@drawable/ic_insert_chart_black_24dp"
-            android:menuCategory="secondary"
-            android:title="@string/action_stats"
-            app:showAsAction="ifRoom" />
+    <item
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:id="@+id/settings"
+        android:menuCategory="secondary"
+        android:title="@string/action_set"
+        app:showAsAction="ifRoom" />
 
-        <item
-            android:icon="@drawable/ic_settings_white_24dp"
-            android:id="@+id/settings"
-            android:menuCategory="secondary"
-            android:title="@string/action_set"
-            app:showAsAction="ifRoom" />
-
-    </group>
+    <item
+        android:id="@+id/app_bar_info"
+        android:icon="@drawable/ic_info_outline_white_24dp"
+        android:menuCategory="secondary"
+        android:title="@string/action_info"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/app_bar_help"

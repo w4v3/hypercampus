@@ -31,6 +31,7 @@
     <string name="action_enable">Reenable</string>
     <string name="action_cram">Full review</string>
     <string name="action_stats">Statistics</string>
+    <string name="action_info">Info file</string>
     <string name="title_review">Review</string>
     <string name="title_settings">Settings</string>
     <string name="title_edit_card">Edit card</string>
@@ -133,4 +134,6 @@
     <string name="not_recognized_exception">Cannot recognize file type. Wrong extension?</string>
     <string name="delete_unused_success">Successfully deleted unused media!</string>
     <string name="dismiss">dismiss</string>
+    <string name="info_file_dialog">Info file</string>
+    <string name="snack_noinfo">No info file found for this card.</string>
 </resources>

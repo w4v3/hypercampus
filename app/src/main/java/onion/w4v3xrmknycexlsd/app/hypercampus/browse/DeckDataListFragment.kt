@@ -340,12 +340,16 @@ open class DeckDataListFragment : Fragment(),
         }
         (menu.findItem(R.id.app_bar_search)).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                menu.setGroupVisible(R.id.standard_menu_group,false)
+                menu.findItem(R.id.app_bar_add)?.isVisible = false
+                menu.findItem(R.id.app_bar_stats)?.isVisible = false
+                menu.findItem(R.id.settings)?.isVisible = false
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                menu.setGroupVisible(R.id.standard_menu_group,true)
+                menu.findItem(R.id.app_bar_add)?.isVisible = true
+                menu.findItem(R.id.app_bar_stats)?.isVisible = true
+                menu.findItem(R.id.settings)?.isVisible = true
                 activity?.invalidateOptionsMenu()
                 return true
             }

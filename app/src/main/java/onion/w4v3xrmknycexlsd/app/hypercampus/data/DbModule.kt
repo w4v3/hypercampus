@@ -30,8 +30,7 @@ class DbModule {
     @Provides @Singleton
     internal fun provideDatabase(application: Application): HyperRoom {
         return Room.databaseBuilder(application, HyperRoom::class.java, "hypercampus_database.db")
-            .fallbackToDestructiveMigrationFrom(1,2,3)
-            .addMigrations(MIGRATION_4_5)
+            .fallbackToDestructiveMigrationFrom(1,2,3,4,5,6,7)
             .build()
     }
 

@@ -111,7 +111,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
             is Course -> courseDao.add(data)
             is Lesson -> lessonDao.add(data)
             is Card -> {
-                val withinCourse = (cardDao.getWithinCourseIndex(data.course_id) ?: 0) + 1
+                val withinCourse = ((cardDao.getWithinCourseIndex(data.course_id) ?: 0).div(10) + 1)*10
                 cardDao.add(data.apply { within_course_id = withinCourse })
             }
         }
@@ -135,7 +135,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
                     val ind = all.map { it.within_course_id }.indexOf(data.within_course_id)
                     if (ind == -1) cardDao.add(data) else {
                         val id = all[ind].id
-                        cardDao.updateContent(CardContent(id, data.lesson_id, data.question, data.answer))
+                        cardDao.updateContent(CardContent(id, data.lesson_id, data.question, data.answer, data.info_file))
                         id.toLong()
                     }
                 }
@@ -145,7 +145,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
                 is Course -> courseDao.add(data)
                 is Lesson -> lessonDao.add(data)
                 is Card -> {
-                    val withinCourse = (cardDao.getWithinCourseIndex(data.course_id) ?: 0) + 1
+                    val withinCourse = ((cardDao.getWithinCourseIndex(data.course_id) ?: 0).div(10) + 1)*10
                     cardDao.add(data.apply { within_course_id = withinCourse })
                 }
             }

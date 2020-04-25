@@ -86,7 +86,9 @@
         android:focusable="true"
         android:background="?attr/selectableItemBackground"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:visibility="gone"
+        android:orientation="horizontal"
+        tools:visibility="visible">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
