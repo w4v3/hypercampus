@@ -80,7 +80,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
 
     suspend fun getAllCards() = cardDao.getAllAsync()
-    suspend fun getCardsFromIdsAsync(ids: List<Int>) = cardDao.getCardsFromIdsAsync(ids)
+    suspend fun getCardsFromIdsAsync(ids: List<Int>) = cardDao.getAllAsync().filter { it.id in ids }
 
     private suspend fun getNewCardsCourse(course: Course): List<Card> {
         return cardDao.getNewCardsAsync(course.id,course.new_per_day - course.new_studied_today)

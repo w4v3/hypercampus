@@ -178,9 +178,6 @@ interface CardDAO {
     @Query("SELECT within_course_id FROM cards WHERE course_id=:courseId ORDER BY within_course_id DESC LIMIT 1")
     suspend fun getWithinCourseIndex(courseId: Int): Int?
 
-    @Query("SELECT * FROM cards WHERE id IN (:ids)")
-    suspend fun getCardsFromIdsAsync(ids: List<Int>): List<Card>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(card: Card): Long
 

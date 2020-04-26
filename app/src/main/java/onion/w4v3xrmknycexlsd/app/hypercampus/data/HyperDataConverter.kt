@@ -134,7 +134,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                     unZipFile(uri)
                     activity.goodSnack(activity.getString(R.string.imp_success))
                 }
-                "hczip" -> withContext(Dispatchers.Main){
+                "hczip" -> withContext(Dispatchers.Main) {
                     val builder =  MaterialAlertDialogBuilder(activity)
                     builder.setTitle(activity.getString(R.string.title_import))
                         .setMessage(activity.getString(R.string.import_dialog))
