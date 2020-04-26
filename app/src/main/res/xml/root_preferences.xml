@@ -40,7 +40,7 @@
             app:title="@string/ri_title"/>
 
         <ListPreference
-            app:defaultValue="2"
+            app:defaultValue="-1"
             app:entries="@array/srs_newcards"
             app:entryValues="@array/srs_newcards_values"
             app:key="srs_newcards"

@@ -100,6 +100,7 @@
     <string name="newcards_learnt">treat as already learnt (default)</string>
     <string name="newcards_dropout">self-paced dropout</string>
     <string name="newcards_info">show info file</string>
+    <string name="newcards_info_dropout">both info file and dropout</string>
     <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
     <string name="licence_title">Library licences …</string>

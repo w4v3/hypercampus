@@ -27,7 +27,7 @@
             name="currentCard"
             type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Card" />
         <variable
-            name="currentLessonName"
+            name="currentColumnName"
             type="String" />
     </data>
 
@@ -65,7 +65,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
-                        android:text="@{currentLessonName + `: ` + @string/question}" />
+                        android:text="@{currentColumnName}" />
 
                     <LinearLayout
                         android:id="@+id/question_view"
@@ -123,7 +123,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="8dp"
-                        android:text="@{currentLessonName + `: ` + @string/answer}" />
+                        android:text="@{currentColumnName}" />
 
                     <LinearLayout
                         android:id="@+id/answer_view"
@@ -132,6 +132,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
+                        android:padding="24dp"
                         app:card_view_content="@{currentCard.answer}"/>
 
                 </com.google.android.material.card.MaterialCardView>

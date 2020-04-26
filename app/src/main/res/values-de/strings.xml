@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
+  ~
+  ~     This file is part of HyperCampus.
+  ~
+  ~     HyperCampus is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     HyperCampus is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- App bar -->
+    <string name="app_name">HyperCampus</string>
+    <string name="action_set">Einstellungen</string>
+    <string name="action_search">Suche</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_del">Löschen</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="action_disable">Deaktivieren</string>
+    <string name="action_enable">Reaktivieren</string>
+    <string name="action_cram">Vollständige Wiederholung</string>
+    <string name="action_exp">Exportieren</string>
+    <string name="action_stats">Statistiken anzeigen</string>
+    <string name="action_info">Info-Datei</string>
+    <string name="title_review">Lernen</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="title_edit_card">Karte bearbeiten</string>
+
+    <!-- Courses, Lessons, Cards -->
+    <string name="course">Kurs</string>
+    <string name="lesson">Lektion</string>
+    <string name="card">Karte</string>
+    <string name="course_symbol_hint">📚</string>
+    <string name="course_label_hint">Titel</string>
+    <string name="course_newperday_hint">10</string>
+    <string name="newperday_add_sign">+</string>
+    <string name="newperday_per_day">/Tag</string>
+    <string name="lesson_symbol_hint">📓</string>
+    <string name="lesson_label_hint">Titel</string>
+    <string name="submit">Eingeben</string>
+    <string name="question">Frage</string>
+    <string name="answer">Antwort</string>
+    <string name="wrong">falsch</string>
+    <string name="right">richtig</string>
+    <string name="familiarity">Vertrautheit</string>
+    <string name="unfamiliar">völlig unbekannt</string>
+    <string name="familiar">gut bekannt</string>
+    <string name="show_answer">Antwort zeigen</string>
+    <string name="no_more_due">Keine Karten mehr fällig!</string>
+    <string name="return_button">Zurück</string>
+    <string name="due_new">%s fällig | %s neu</string>
+    <string name="due">%s fällig</string>
+    <string name="add">Hinzufügen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="new_">%s</string>
+    <string name="are_you_sure">Bist du sicher? Das kann nicht rückgängig gemacht werden.</string>
+    <string name="ok">Ok</string>
+    <string name="edit_">%s bearbeiten</string>
+    <string name="edit_dialog">Bearbeiten</string>
+    <plurals name="deleting_">
+        <item quantity="one">Lösche %2$s</item>
+        <item quantity="other">Lösche %1$d Elemente</item>
+    </plurals>
+    <plurals name="export_">
+        <item quantity="one">Exportiere %2$s</item>
+        <item quantity="other">Exportiere %1$d Elemente</item>
+    </plurals>
+    <string name="add_image">Bild hinzufügen</string>
+    <string name="add_audio">Audio-Datei hinzufügen</string>
+    <string name="import_dialog">Möchtest du Karten in existierenden Kursen aktualisieren? Dein Lernfortschritt geht nicht verloren, aber Inhalte von überschriebenen Karten können nicht wiederhergestellt werden.</string>
+    <string name="import_overwrite">Überschreiben</string>
+    <string name="import_addnew">Als neue Kurse hinzufügen</string>
+    <string name="title_import">Sammlung importieren</string>
+    <string name="stats_numcards">#Karten</string>
+    <string name="stats_learned_new_disabled">#gelernt/neu/deaktiviert</string>
+    <string name="stats_perc_learned_new_disabled">%gelernt/neu/deaktiviert</string>
+    <string name="stats_due">fällig</string>
+    <string name="stats_rho_sigma">rho/sigma</string>
+    <string name="stats_hc_1">HC 1</string>
+    <string name="stats_sm_2">SM 2</string>
+
+    <!-- Preferences -->
+    <string name="srs_header">Spaced Repetition System</string>
+    <string name="other_header">Weitere</string>
+    <string name="algo_title">Algorithmus</string>
+    <string name="algo_sm">SuperMemo 2</string>
+    <string name="algo_hc">HyperCampus 1 (empfohlen)</string>
+    <string name="ri_title">Erinnerungsindex</string>
+    <string name="newcards_title">Lernmodus für neue Karten</string>
+    <string name="newcards_learnt">bereits gelernt (Standard)</string>
+    <string name="newcards_dropout">selbstbestimmtes Wiederholen</string>
+    <string name="newcards_info">zeige Info-Datei</string>
+    <string name="newcards_info_dropout">Info-Datei mit Wiederholen</string>
+    <string name="remove_media_title">Lösche unbenutzte Mediendateien …</string>
+    <string name="about_title">Über …</string>
+    <string name="licence_title">Lizenzen verwendeter Bibliotheken …</string>
+
+    <string name="about">HyperCampus benutzt einen machine-learning-basierten spaced-repetition-Algorithmus, um zu entscheiden, wann eine Karte das nächste Mal gezeigt wird, abhängig von deiner Beurteilung. Für mehr Informationen darüber, wie und warum es funktioniert, besuche die <a href="https://www.github.com/w4v3/hypercampus">Github-Seite</a> des Projektes (auf Englisch).</string>
+
+    <!-- Intro -->
+    <string name="welcome">Willkommen zur HyperCampus-App! Lerne mit ihr, was immer du willst. Möchtest du eine Einführung?</string>
+    <string name="start_tour">Tour beginnen</string>
+    <string name="no_thx">Nein, danke</string>
+    <string name="got_it">ALLES KLAR</string>
+    <string name="intro1">Eine Karteikartensammlung wird \"Kurs\" genannt. Tippe auf dieses Symbol, um einen neuen Kurs hinzuzufügen</string>
+    <string name="intro2">Sobald du Karteikarten zu deinem Kurs hinzugefügt hast, kümmere ich mich darum, welche Karten du an welchem Tag wieder anschauen solltest. Tippe hier, um einen einzelnen Kurs zu wiederholen …</string>
+    <string name="intro3">… oder benutze den HyperCampus-Button, um die fälligen Karten von allen Kursen anzuschauen</string>
+    <string name="intro4">Tippe auf einen Kurs, um ihn zu öffnen</string>
+    <string name="intro5">Jeder Kurs besteht aus Lektionen, die wie Kurse hinzugefügt und wiederholt werden können. Tippe auf eine Lektion, um all ihre Karteikarten zu sehen</string>
+    <string name="intro6">Jede Karte besteht aus einer Frage …</string>
+    <string name="intro7">… und einer Antwort. Füge neue Karten mit dem Plus-Button hinzu oder tippe auf eine existierende Karte, um sie zu bearbeiten</string>
+    <string name="intro8">Benutze jetzt den HyperCampus-Button, um herauszufinden, wie das Wiederholen der Karten funktioniert</string>
+    <string name="intro9">Während deines (hoffentlich) täglichen Lernens werde ich dir Fragen aus deiner Sammlung präsentieren</string>
+    <string name="intro10">Versuche, die Antwort herauszufinden, und drücke auf diesen Button</string>
+    <string name="intro11">Ich zeige dir die Antwort, und du musst überlegen, wie gut du sie wusstest</string>
+    <string name="intro12">Tippe rechts, wenn du es wusstest, und links, wenn nicht.</string>
+    <string name="intro13">Teile mir außerdem bitte mit, wie vertraut dir die Antwort vorkommt, unabhängig davon, ob du sie wusstest oder nicht. Das war\'s dann!</string>
+
+    <!-- Snackbar messages -->
+    <string name="fnf_exception">Auf die Datei(en) konnte nicht zugegriffen werden.</string>
+    <string name="io_exception">Etwas ist schief gegangen. Stelle sicher, dass externer Speicherplatz verfügbar ist.</string>
+    <string name="exp_success">Export erfolgreich!</string>
+    <string name="imp_success">Import erfolgreich!</string>
+    <string name="action_help">Hilfe</string>
+    <string name="not_recognized_exception">Dateiendung nicht erkannt.</string>
+    <string name="delete_unused_success">Nicht benutzte Medien erfolgreich gelöscht!</string>
+    <string name="dismiss">Ok</string>
+    <string name="info_file_dialog">Info file</string>
+</resources>

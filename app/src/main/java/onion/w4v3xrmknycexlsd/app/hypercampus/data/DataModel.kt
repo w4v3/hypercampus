@@ -49,6 +49,8 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "lesson_id") val lesson_id: Int
                 , @ColumnInfo(name = "question") var question: String = ""
                 , @ColumnInfo(name = "answer") var answer: String = ""
+                , @ColumnInfo(name = "question_column_name") var q_col_name: String = ""
+                , @ColumnInfo(name = "answer_column_name") var a_col_name: String = ""
                 , @ColumnInfo(name = "within_course_id") var within_course_id: Int = 0
                 , @ColumnInfo(name = "due") var due: Int? = null
                 , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
@@ -73,7 +75,7 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
 
 data class CardContent(val id: Int, val lesson_id: Int, val question: String, val answer: String, val info_file: String?) // for content only updates
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 8)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 9)
 @TypeConverters(Converters::class)
 abstract class HyperRoom : RoomDatabase() {
     abstract fun courseDao(): CourseDAO

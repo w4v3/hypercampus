@@ -19,8 +19,8 @@
 
 <resources>
     <string-array name="srs_algorithms">
-        <item>SuperMemo 2</item>
-        <item>HyperCampus 1</item>
+        <item>@string/algo_sm</item>
+        <item>@string/algo_hc</item>
     </string-array>
 
     <string-array name="srs_algorithm_values">
@@ -29,15 +29,17 @@
     </string-array>
 
     <string-array name="srs_newcards">
-        <item>treat as already learnt (default)</item>
-        <item>self-paced dropout</item>
-        <item>show info file</item>
+        <item>@string/newcards_learnt</item>
+        <item>@string/newcards_dropout</item>
+        <item>@string/newcards_info</item>
+        <item>@string/newcards_info_dropout</item>
     </string-array>
 
     <string-array name="srs_newcards_values">
-        <item>2</item>
-        <item>1</item>
+        <item>-1</item>
         <item>0</item>
+        <item>1</item>
+        <item>2</item>
     </string-array>
 
     <string-array name="export_options">

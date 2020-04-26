@@ -40,9 +40,10 @@ const val ALG_SM2 = 0
 const val ALG_HC1 = 1
 
 // new card learning modes
-const val MODE_INFO = 0 // show relevant lesson info file before learning
-const val MODE_DROPOUT = 1 // self-paced drop out before review
-const val MODE_LEARNT = 2 // treat as if learnt already
+const val MODE_LEARNT = -1 // treat as if learnt already
+const val MODE_DROPOUT = 0 // self-paced drop out before review
+const val MODE_INFO = 1 // show relevant lesson info file before learning
+const val MODE_INFO_DROPOUT = 2 // both
 
 // showcase ids
 const val COURSE_SHOW = "courses_show"

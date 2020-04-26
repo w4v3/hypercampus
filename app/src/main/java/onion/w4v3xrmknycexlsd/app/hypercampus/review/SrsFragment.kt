@@ -216,13 +216,16 @@ class SrsFragment : Fragment() {
             newCardList.isNotEmpty() -> {
                 binding.currentCard = newCardList[0]
                 when (newCardMode) {
+                    MODE_LEARNT -> {}
                     MODE_INFO -> checkShowInfoFile()
                     MODE_DROPOUT -> doDropout()
-                    MODE_LEARNT -> {}
+                    MODE_INFO_DROPOUT -> { checkShowInfoFile(); doDropout() }
                 }
                 lifecycleScope.launch {
-                    binding.currentLessonName =
-                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}"
+                    binding.currentColumnName =
+                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/" +
+                                "${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}: " +
+                                binding.currentCard!!.a_col_name
                 }
                 return
             }
@@ -230,8 +233,10 @@ class SrsFragment : Fragment() {
             dueCardList.isNotEmpty() -> {
                 binding.currentCard = if (repeatUntil > 0) dueCardList[0] else dueCardList.elementAt(Random.nextInt(dueCardList.size))
                 lifecycleScope.launch {
-                    binding.currentLessonName =
-                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}"
+                    binding.currentColumnName =
+                        "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/" +
+                                "${viewModel.getLessonAsync(binding.currentCard!!.lesson_id).name}: " +
+                                binding.currentCard!!.a_col_name
                 }
             }
 

@@ -26,11 +26,13 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.Gravity
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
@@ -268,11 +270,11 @@ class HyperDataConverter (private val activity: HyperActivity){
             val allcards = repository.getAllCards()
             val medParent = getMediaAccess(DIR_MEDIA)
             val mediaRegex = Regex("!\\[.*\\]\\((.*)\\)")
-            val usedMedia = allcards.joinToString(";") { card ->
-                mediaRegex.findAll(card.question).map { it.groups[1] }.joinToString(";") +
-                mediaRegex.findAll(card.answer).map { it.groups[1] }.joinToString(";")
+            val usedMedia = allcards.joinToString(";",postfix=";") { card ->
+                mediaRegex.findAll(card.question).map { it.groups[1]?.value ?: "" }.joinToString(";",postfix=";") +
+                mediaRegex.findAll(card.answer).map { it.groups[1]?.value ?: "" }.joinToString(";")
             }
-            medParent.listFiles()?.let { for (f in it) if (f.name !in usedMedia) f.delete() }
+            medParent.listFiles()?.let { for (f in it) if ("${f.name};" !in usedMedia) f.delete() }
 
             val hcmdParent = getMediaAccess(DIR_HCMD)
             val hcmdUsed = allcards.map { card -> card.info_file }
@@ -327,11 +329,14 @@ class HyperDataConverter (private val activity: HyperActivity){
         }
 
         val lines = content.split("\n")
+        val questionString = activity.getString(R.string.question)
+        val answerString = activity.getString(R.string.answer)
 
         var currentCourse: Int? = null
         var currentLesson: Int? = null
         var tableLineCount = 0 // for skipping two first lines in markdown table
         var twoway = false // add two cards for each entry (front-back and back-front)
+        var header = mutableListOf<String?>() // for the column names
         for (l in lines) {
             when {
                 l.matches(Regex("^# \\[(.*)] (.*)$")) -> Regex("^# \\[(.*)] (.*)$").find(l)?.groups?.let {
@@ -370,6 +375,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                     within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx,
                                                     question = grps[2]!!.value.unescape(),
                                                     answer = answ.value.unescape(),
+                                                    q_col_name = header.getOrNull(0) ?: questionString,
+                                                    a_col_name = header.getOrNull(idx+1) ?: answerString,
                                                     info_file = infofile),
                                                 overwrite).await().toInt())
                                             if (twoway) {
@@ -379,6 +386,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                         within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx+5,
                                                         question = answ.value.unescape(),
                                                         answer = grps[2]!!.value.unescape(),
+                                                        q_col_name = header.getOrNull(idx+1) ?: answerString,
+                                                        a_col_name = header.getOrNull(0) ?: questionString,
                                                         info_file = infofile),
                                                     overwrite).await().toInt())
                                             }
@@ -390,14 +399,16 @@ class HyperDataConverter (private val activity: HyperActivity){
                             Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(l)?.groups?.let { grps ->
                                 currentCourse?.let { cc -> currentLesson?.let { cl ->
                                     // allow one main column and 5 pairings
-                                    grps.drop(2).take(5).map { answ ->
+                                    grps.drop(2).take(5).mapIndexed { idx,answ ->
                                         answ?.let {
                                             newlyAdded.add(repository.addAsync(
                                                 Card(course_id = cc,
                                                      lesson_id = cl,
                                                      question = grps[1]!!.value.unescape(),
                                                      answer = answ.value.unescape(),
-                                                     info_file = infofile),
+                                                     q_col_name = header.getOrNull(0) ?: questionString,
+                                                     a_col_name = header.getOrNull(idx+1) ?: answerString,
+                                                    info_file = infofile),
                                                 onlyIfNew = false).await().toInt())
                                             if (twoway) {
                                                 newlyAdded.add(repository.addAsync(
@@ -405,6 +416,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                         lesson_id = cl,
                                                         question = answ.value.unescape(),
                                                         answer = grps[1]!!.value.unescape(),
+                                                        q_col_name = header.getOrNull(idx+1) ?: answerString,
+                                                        a_col_name = header.getOrNull(0) ?: questionString,
                                                         info_file = infofile),
                                                     onlyIfNew = false).await().toInt())
                                             }
@@ -413,6 +426,25 @@ class HyperDataConverter (private val activity: HyperActivity){
                                 }}
                             }
                         }
+                    } else if (tableLineCount == 0) { // reading a header
+                        if (withOrder) {
+                            header = Regex("^(.*?)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
+                                .find(l)
+                                ?.groups
+                                ?.drop(2)
+                                ?.map { it?.value }
+                                ?.toMutableList()
+                                ?: mutableListOf()
+                        } else {
+                            header = Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
+                                .find(l)
+                                ?.groups
+                                ?.drop(1)
+                                ?.map { it?.value }
+                                ?.toMutableList()
+                                ?: mutableListOf()
+                        }
+                        tableLineCount++
                     } else tableLineCount++
                 l.matches(Regex("^\\[]\\(twoway\\)$")) -> twoway = true
                 l.matches(Regex("^\\[]\\(oneway\\)$")) -> twoway = false
