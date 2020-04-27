@@ -26,13 +26,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
@@ -62,8 +61,11 @@ class HyperDataConverter (private val activity: HyperActivity){
     @Inject lateinit var repository: HyperRepository
     private val contentResolver = activity.applicationContext.contentResolver
 
-    private val newlyAdded = mutableListOf<Int>()
+    private val newlyAdded = mutableListOf<Card>()
+    private val newlyAddedIndices = mutableListOf<Long>()
     private val renamedFiles = mutableMapOf<String, String>()
+
+    private val monitor = ProgressMonitor(activity)
 
     init {
         (activity.applicationContext as HyperApp).hyperComponent.inject(this)
@@ -76,6 +78,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                 if (withMedia) createFile("collection.hczip") else createFile("collection.hcmd")
             }
 
+            monitor.init()
+            monitor.determination(false)
             if (withMedia) {
                 val files = prepareZip(data)
                 uri?.let { makeZipFile(files,it) }
@@ -88,6 +92,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                 }
                 activity.goodSnack(activity.getString(R.string.exp_success))
             }
+            monitor.stop()
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
         } catch (e: IOException) {
@@ -267,6 +272,9 @@ class HyperDataConverter (private val activity: HyperActivity){
 
     fun deleteUnusedMediaFiles() = repository.repositoryScope.launch {
         try {
+            monitor.init()
+            monitor.determination(false)
+
             val allcards = repository.getAllCards()
             val medParent = getMediaAccess(DIR_MEDIA)
             val mediaRegex = Regex("!\\[.*\\]\\((.*)\\)")
@@ -279,6 +287,8 @@ class HyperDataConverter (private val activity: HyperActivity){
             val hcmdParent = getMediaAccess(DIR_HCMD)
             val hcmdUsed = allcards.map { card -> card.info_file }
             hcmdParent.listFiles()?.let { for (f in it) if (f.name !in hcmdUsed) f.delete() }
+
+            monitor.stop()
             activity.goodSnack(activity.getString(R.string.delete_unused_success))
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
@@ -319,7 +329,7 @@ class HyperDataConverter (private val activity: HyperActivity){
         var infofile: String? = null
         try {
             val toParent = getMediaAccess(DIR_HCMD)
-            val to = getUniqueFile(toParent,"collection")
+            val to = getUniqueFile(toParent,"collection",false)
             infofile = to.name
             writeStringTo(content,to.outputStream())
         } catch (e: FileNotFoundException) {
@@ -332,8 +342,16 @@ class HyperDataConverter (private val activity: HyperActivity){
         val questionString = activity.getString(R.string.question)
         val answerString = activity.getString(R.string.answer)
 
+        newlyAdded.clear()
+        newlyAddedIndices.clear()
+
+        monitor.init()
+        monitor.determination(true)
+        monitor.reset(lines.size)
+
         var currentCourse: Int? = null
         var currentLesson: Int? = null
+        var currentWithinCourseId = 0
         var tableLineCount = 0 // for skipping two first lines in markdown table
         var twoway = false // add two cards for each entry (front-back and back-front)
         var header = mutableListOf<String?>() // for the column names
@@ -341,10 +359,12 @@ class HyperDataConverter (private val activity: HyperActivity){
             when {
                 l.matches(Regex("^# \\[(.*)] (.*)$")) -> Regex("^# \\[(.*)] (.*)$").find(l)?.groups?.let {
                     currentCourse = repository.addAsync(Course(symbol = it[1]!!.value, name = it[2]!!.value), overwrite).await().toInt()
+                    if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^# (.*)$")) -> Regex("^# (.*)$").find(l)?.groups?.let {
                     currentCourse = repository.addAsync(Course(symbol = "", name = it[1]!!.value), overwrite).await().toInt()
+                    if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## \\[(.*)] (.*)$")) -> Regex("^## \\[(.*)] (.*)$").find(l)?.groups?.let {
@@ -369,7 +389,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                                     // one for each pairing and direction
                                     grps.drop(3).take(5).mapIndexed { idx,answ ->
                                         answ?.let {
-                                            newlyAdded.add(repository.addAsync(
+                                            newlyAdded.add(
                                                 Card(course_id = cc,
                                                     lesson_id = cl,
                                                     within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx,
@@ -377,10 +397,9 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                     answer = answ.value.unescape(),
                                                     q_col_name = header.getOrNull(0) ?: questionString,
                                                     a_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                    info_file = infofile),
-                                                overwrite).await().toInt())
+                                                    info_file = infofile))
                                             if (twoway) {
-                                                newlyAdded.add(repository.addAsync(
+                                                newlyAdded.add(
                                                     Card(course_id = cc,
                                                         lesson_id = cl,
                                                         within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx+5,
@@ -388,8 +407,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                         answer = grps[2]!!.value.unescape(),
                                                         q_col_name = header.getOrNull(idx+1) ?: answerString,
                                                         a_col_name = header.getOrNull(0) ?: questionString,
-                                                        info_file = infofile),
-                                                    overwrite).await().toInt())
+                                                        info_file = infofile))
                                             }
                                         }
                                     }
@@ -401,28 +419,29 @@ class HyperDataConverter (private val activity: HyperActivity){
                                     // allow one main column and 5 pairings
                                     grps.drop(2).take(5).mapIndexed { idx,answ ->
                                         answ?.let {
-                                            newlyAdded.add(repository.addAsync(
+                                            newlyAdded.add(
                                                 Card(course_id = cc,
                                                      lesson_id = cl,
+                                                     within_course_id = currentWithinCourseId+idx,
                                                      question = grps[1]!!.value.unescape(),
                                                      answer = answ.value.unescape(),
                                                      q_col_name = header.getOrNull(0) ?: questionString,
                                                      a_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                    info_file = infofile),
-                                                onlyIfNew = false).await().toInt())
+                                                    info_file = infofile))
                                             if (twoway) {
-                                                newlyAdded.add(repository.addAsync(
+                                                newlyAdded.add(
                                                     Card(course_id = cc,
                                                         lesson_id = cl,
+                                                        within_course_id = currentWithinCourseId+5,
                                                         question = answ.value.unescape(),
                                                         answer = grps[1]!!.value.unescape(),
                                                         q_col_name = header.getOrNull(idx+1) ?: answerString,
                                                         a_col_name = header.getOrNull(0) ?: questionString,
-                                                        info_file = infofile),
-                                                    onlyIfNew = false).await().toInt())
+                                                        info_file = infofile))
                                             }
                                         }
                                     }
+                                    currentWithinCourseId += 10
                                 }}
                             }
                         }
@@ -450,7 +469,10 @@ class HyperDataConverter (private val activity: HyperActivity){
                 l.matches(Regex("^\\[]\\(oneway\\)$")) -> twoway = false
                 else -> tableLineCount = 0
             }
+            monitor.inc()
         }
+        monitor.determination(false)
+        newlyAddedIndices.addAll(repository.addAllCardsAsync(newlyAdded,overwrite).await())
     }
 
     private fun String.escape(): String = this
@@ -484,7 +506,7 @@ class HyperDataConverter (private val activity: HyperActivity){
         } else throw IOException()
     }
 
-    private fun getUniqueFile(parent: File, name: String): File {
+    private fun getUniqueFile(parent: File, name: String, addToDict: Boolean = true): File {
         var file = File(parent, name)
         var count = 0
         while (file.exists()) {
@@ -493,7 +515,7 @@ class HyperDataConverter (private val activity: HyperActivity){
             file = File(parent, "${name}_$count$dot$ext")
             count++
         }
-        if (file.name != name) renamedFiles[name] = file.name
+        if (addToDict && file.name != name) renamedFiles[name] = file.name
         return file
     }
 
@@ -576,19 +598,22 @@ class HyperDataConverter (private val activity: HyperActivity){
 
     private suspend fun unZipFile(uri: Uri, withOrder: Boolean = false, overwrite: Boolean = false) {
         val parent = getMediaAccess()
-        val path = parent.absolutePath + "/"
 
         newlyAdded.clear()
+        newlyAddedIndices.clear()
         renamedFiles.clear()
+
+        monitor.init()
+        monitor.determination(false)
 
         var ze: ZipEntry?
         contentResolver.openInputStream(uri)?.let { ZipInputStream(BufferedInputStream(it)) }
             .use { input ->
                 while (input?.nextEntry.also { ze = it } != null) {
-                    val fo = if (overwrite) FileOutputStream(path + ze!!.name, false) else getUniqueFile(parent, ze!!.name).outputStream()
+                    val fo = getUniqueFile(parent, ze!!.name).outputStream()
                     BufferedOutputStream(fo).use { output ->
                         if (ze!!.name.substringAfterLast(".") == "md" || ze!!.name.substringAfterLast(".") == "hcmd") {
-                            input?.bufferedReader()?.readText()?.let { mdToCollection(it, withOrder, overwrite) }
+                            input?.bufferedReader()?.let { mdToCollection(it.readText(), withOrder, overwrite) }
                         } else {
                             input?.copyTo(output)
                         }
@@ -598,19 +623,75 @@ class HyperDataConverter (private val activity: HyperActivity){
             }
 
         // if files were renamed, we have to change the corresponding cards too
-        val newlyAddedCards = repository.getCardsFromIdsAsync(newlyAdded)
+        monitor.reset(renamedFiles.size)
+        monitor.determination(true)
+        var newContents = newlyAdded.mapIndexed { idx,card ->
+            CardContent(
+                id = newlyAddedIndices[idx].toInt(),
+                lesson_id = card.lesson_id,
+                question = card.question,
+                answer = card.answer,
+                question_column_name = card.q_col_name,
+                answer_column_name = card.a_col_name,
+                info_file = card.info_file
+            )
+        }
         for (f in renamedFiles) {
-            newlyAddedCards.map { card ->
-                card.apply {
-                    question = Regex("(!\\[.*\\]\\{)${f.key}\\}").replace(question) { it.groups[1]?.value + f.value + "}" }
-                    answer = Regex("(!\\[.*\\]\\{)${f.key}\\}").replace(answer) { it.groups[1]?.value + f.value + "}" }
+            newContents = newContents.map { cc ->
+                cc.apply {
+                    question = Regex("(!\\[.*]\\()${f.key}\\)").replace(question) { it.groups[1]?.value + f.value + ")" }
+                    answer = Regex("(!\\[.*]\\()${f.key}\\)").replace(answer) { it.groups[1]?.value + f.value + ")" }
                 }
+            }
+            monitor.inc()
+        }
+
+        repository.updateAll(newContents)
+
+        newlyAdded.clear()
+        newlyAddedIndices.clear()
+        renamedFiles.clear()
+        monitor.stop()
+    }
+
+    // for task progress
+    class ProgressMonitor(private val activity: HyperActivity){
+        private var units = 1
+        var progress = 0.0
+
+        suspend fun init() {
+            withContext(Dispatchers.Main) {
+                activity.binding.progressBar.visibility = View.VISIBLE
             }
         }
 
-        repository.updateAll(newlyAddedCards)
+        suspend fun determination(determination: Boolean) {
+            withContext(Dispatchers.Main) {
+                activity.binding.progressBar.isIndeterminate = !determination
+            }
+        }
 
-        newlyAdded.clear()
-        renamedFiles.clear()
+        suspend fun inc() {
+            withContext(Dispatchers.Main) {
+                progress += 100.0/units
+                activity.binding.progressBar.progress = progress.toInt()
+            }
+        }
+
+        suspend fun stop() {
+            withContext(Dispatchers.Main) {
+                activity.binding.progressBar.visibility = View.GONE
+                activity.binding.progressBar.progress = 0
+            }
+            progress = 0.0
+        }
+
+        suspend fun reset(newunit: Int) {
+            progress = 0.0
+            units =newunit
+            withContext(Dispatchers.Main) {
+                activity.binding.progressBar.progress = progress.toInt()
+            }
+        }
     }
 }

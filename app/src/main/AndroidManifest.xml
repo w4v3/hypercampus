@@ -61,7 +61,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/md"/>
                 <data android:mimeType="application/hcmd"/>
-                <data android:mimeType="application/zip" android:scheme="content"/>
+                <data android:mimeType="application/zip" />
                 <data android:mimeType="application/hczip" />
                 <data android:mimeType="application/octet-stream" android:scheme="content"/>
             </intent-filter>

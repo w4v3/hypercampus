@@ -66,6 +66,10 @@ open class DeckDataListFragment : Fragment(),
     private var selected: MutableList<DeckData> = mutableListOf()
     private var selectionMode: ActionMode? = null
 
+    private val loadCourse = Course(symbol ="…",name="loading")
+    private val loadLesson = Lesson(symbol ="…",course_id = 0,name="loading")
+    private val loadCard = Card(course_id = 0,lesson_id = 0,question="loading ...")
+
     override fun onAttach(context: Context) {
         (context.applicationContext as HyperApp).hyperComponent.inject(this)
         super.onAttach(context)
@@ -109,6 +113,12 @@ open class DeckDataListFragment : Fragment(),
             }
 
             withContext(Dispatchers.Main) { // needs to run on main
+                when (args.level) {
+                    Level.COURSES -> adapter.setData(listOf(loadCourse))
+                    Level.LESSONS -> adapter.setData(listOf(loadLesson))
+                    Level.CARDS -> adapter.setData(listOf(loadCard))
+                }
+
                 toObserve.observe(viewLifecycleOwner, Observer { data ->
                     data?.let { adapter.setData(it); updateCounts() }
                 })
@@ -545,11 +555,11 @@ open class DeckDataListFragment : Fragment(),
         viewModel.addAsync(Course( 2, "🔤", "Fancy English Words" )).await()
         viewModel.addAsync(Lesson( 1, 1, "🏰", "Capitals" )).await()
         viewModel.addAsync(Lesson(2, 2, "1", "Shakespeare" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Capital of Spain", "Madrid" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Capital of Egypt", "Kairo" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Capital of India", "New Delhi" )).await()
-        viewModel.addAsync(Card( 0, 2, 2, "Meaning of \"simular\"", "false, counterfeit" ) ).await()
-        viewModel.addAsync(Card( 0, 2, 2, "Meaning of \"to perpend\"", "to ponder" ) ).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Spain", "Madrid",a_col_name = "What's the capital?")).await()
+        viewModel.addAsync(Card( 0, 1, 1, "Egypt", "Kairo",a_col_name = "What's the capital?")).await()
+        viewModel.addAsync(Card( 0, 1, 1, "India", "New Delhi",a_col_name = "What's the capital?")).await()
+        viewModel.addAsync(Card( 0, 2, 2, "\"simular\"", "false, counterfeit",a_col_name = "What does it mean?") ).await()
+        viewModel.addAsync(Card( 0, 2, 2, "\"to perpend\"", "to ponder",a_col_name = "What does it mean?") ).await()
     }
 
     private fun intro() {

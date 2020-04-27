@@ -82,7 +82,7 @@ class HyperActivity : AppCompatActivity() {
 
         binding.floatingActionButton.setOnClickListener { navController.navigate(R.id.action_to_srs) }
 
-        intent.data?.also { HyperDataConverter(this).fileToCollection(it) }
+        intent.data?.also { HyperDataConverter(this).fileToCollection(it); intent.data = null }
     }
 
     override fun onStart() {

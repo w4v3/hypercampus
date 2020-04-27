@@ -60,7 +60,6 @@ import uk.co.deanwild.materialshowcaseview.ShowcaseConfig
 import javax.inject.Inject
 import kotlin.random.Random
 
-
 class SrsFragment : Fragment() {
     private val args: SrsFragmentArgs by navArgs()
 
@@ -285,34 +284,27 @@ class SrsFragment : Fragment() {
             activity?.badSnack(getString(R.string.snack_noinfo))
             return
         }
+
+        val txtView = RecyclerView(requireContext())
+        val builder = activity?.let { MaterialAlertDialogBuilder(it) }
+        builder?.setTitle(R.string.info_file_dialog)
+            ?.setView(txtView)
+            ?.setPositiveButton(R.string.ok) { _,_ -> }
+        val dialog: Dialog? = builder?.create()
+        dialog?.show()
+
         val info = HyperDataConverter(activity as HyperActivity).getInfoFile(binding.currentCard?.info_file!!)
-        val coursecards = newCardList.filter { card -> card.course_id == binding.currentCard?.course_id }
-        val first = coursecards.minBy { card -> card.within_course_id }?.within_course_id?.div(10)
-        val last = coursecards.maxBy { card -> card.within_course_id }?.within_course_id?.div(10)
-        val markedinfo = info.split("\n").toMutableList()
-        val start = markedinfo.indexOfFirst { s -> s.startsWith("$first|") }
-        val end = markedinfo.indexOfFirst { s -> s.startsWith("$last|") }
-        markedinfo.add(start,"**---**|**---**|**---**|**---**|**---**|**---**|**---**")
-        markedinfo.add(end+2,"**---**|**---**|**---**|**---**|**---**|**---**|**---**")
 
         val adapter = MarkwonAdapter.builderTextViewIsRoot(R.layout.txtview)
-            .include(TableBlock::class.java, TableEntry.create { builder -> builder
+            .include(TableBlock::class.java, TableEntry.create { b -> b
                 .tableLayout(R.layout.tablelayout,R.id.tablelayout)
                 .textLayoutIsRoot(R.layout.txtview)
                 .build() })
             .build()
-        val txtView = RecyclerView(requireContext())
+        adapter.setMarkdown(markwon,info)
         txtView.adapter = adapter
         txtView.layoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL, false)
-        adapter.setMarkdown(markwon,markedinfo.joinToString("\n"))
         adapter.notifyDataSetChanged()
-
-        val builder = activity?.let { MaterialAlertDialogBuilder(it) }
-        builder?.setTitle(getString(R.string.info_file_dialog))
-            ?.setView(txtView)
-            ?.setPositiveButton(getString(R.string.ok)) { _, _ -> }
-        val dialog: Dialog? = builder?.create()
-        dialog?.show()
     }
 
     private fun doDropout() {

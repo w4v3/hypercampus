@@ -21,9 +21,6 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import onion.w4v3xrmknycexlsd.app.hypercampus.MODE_LEARNT
 import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_ENABLED
 
 sealed class DeckData
@@ -73,7 +70,7 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "info_file") var info_file: String? = null
 ): DeckData()
 
-data class CardContent(val id: Int, val lesson_id: Int, val question: String, val answer: String, val info_file: String?) // for content only updates
+data class CardContent(val id: Int, val lesson_id: Int, var question: String, var answer: String, val question_column_name: String, val answer_column_name: String, val info_file: String?) // for content only updates
 
 @Database(entities = [Course::class, Lesson::class, Card::class], version = 9)
 @TypeConverters(Converters::class)
@@ -94,6 +91,9 @@ interface CourseDAO {
 
     @Query("SELECT * FROM courses WHERE id=:courseId")
     suspend fun getCourse(courseId: Int): Course
+
+    @Query("SELECT * FROM courses WHERE name=:courseName")
+    suspend fun getCoursesFromName(courseName: String): List<Course>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(course: Course): Long
@@ -122,6 +122,9 @@ interface LessonDAO {
 
     @Query("SELECT * FROM lessons WHERE course_id=:courseId")
     suspend fun getFromAsync(courseId: Int): List<Lesson>
+
+    @Query("SELECT * FROM lessons WHERE name=:lessonName AND course_id=:courseId")
+    suspend fun getLessonsFromName(courseId: Int, lessonName: String): List<Lesson>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(lesson: Lesson): Long
@@ -166,6 +169,9 @@ interface CardDAO {
     @Query("SELECT * FROM cards WHERE lesson_id=:lessonId AND due<=:by AND status=$STATUS_ENABLED")
     suspend fun getAllFromLessonDueBy(lessonId: Int, by: Int): List<Card>
 
+    @Query("SELECT * FROM cards WHERE course_id=:courseId AND within_course_id=:withinCourseId")
+    suspend fun getCardsFromWithinCourseId(courseId: Int, withinCourseId: Int): List<Card>
+
     @Query("SELECT COUNT(*) FROM cards WHERE course_id=:courseId AND due<=:by")
     suspend fun countDueInCourse(courseId: Int, by: Int): Int
 
@@ -180,6 +186,9 @@ interface CardDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(card: Card): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addAll(cards: List<Card>): List<Long>
 
     @Query("DELETE FROM cards WHERE id=:id")
     suspend fun delete(id: Int)
@@ -198,6 +207,9 @@ interface CardDAO {
 
     @Update(entity = Card::class)
     suspend fun updateContent(cardContent: CardContent)
+
+    @Update(entity = Card::class)
+    suspend fun updateAllContents(cardContents: List<CardContent>)
 }
 
 class Converters {
