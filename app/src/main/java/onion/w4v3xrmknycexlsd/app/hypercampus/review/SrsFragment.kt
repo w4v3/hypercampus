@@ -73,6 +73,7 @@ class SrsFragment : Fragment() {
 
     private var newCardMode: Int? = 0
     private var algorithm: SrsAlgorithm? = null
+    private val algorithms = listOf(SM2,HC1)
 
     private var repeatUntil: Int = 0
 
@@ -254,7 +255,9 @@ class SrsFragment : Fragment() {
         saveCardList.add(binding.currentCard!!)
         if (repeatUntil > 0) repeatUntil--
         val updatedCard = withContext(Dispatchers.Default) {
-            algorithm?.calculateInterval(binding.currentCard!!, grade, recall)
+            for (alg in algorithms)
+                alg.updateParams(binding.currentCard!!, grade, recall)
+            algorithm?.updateCard(binding.currentCard!!)
         }
 
         updatedCard?.let { viewModel.update(it) }

@@ -22,216 +22,154 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.review
 import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.Card
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.exp
-import kotlin.math.ln
+import kotlin.math.*
 
 sealed class SrsAlgorithm(var ri: Double = 0.9, var calendar: Calendar = Calendar.getInstance()) {
-    abstract suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card
+    private val randomDisperse = 0.15 // std
+    protected var newInterval = 4
+    protected var isLapse = false
 
-    fun nextDue(interval: Int): Int {
-        return currentDate(calendar) + interval
+    // calculateInterval should update card values only relevant to this algorithm only
+    abstract suspend fun updateParams(card: Card, grade: Float, recall: Boolean)
+
+    // this is reserved for the current scheduling algorithm
+    fun updateCard(card: Card): Card {
+        card.had_lapsed = isLapse
+        card.before_last_interval = currentInterval(card)
+        card.last_interval = newInterval
+        card.due = nextDue(randomDisperse(card.last_interval))
+        return card
     }
+
+    protected fun currentInterval(card: Card) =
+        card.last_interval + currentDate(calendar) - (card.due ?: (currentDate(calendar) -4))
+
+    private fun nextDue(interval: Int): Int =
+        currentDate(calendar) + interval
+
+    private fun randomDisperse(oldInterval: Int): Int =
+        oldInterval + ceil((newInterval - oldInterval)
+                *(Random().nextGaussian()*randomDisperse).coerceIn(-0.5,0.5)).toInt()
 }
 
 object SM2: SrsAlgorithm() {
-    override suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card {
+    override suspend fun updateParams(card: Card, grade: Float, recall: Boolean) {
         val q = grade * 2.5 + if (recall) 2.5 else .0
 
         val newEf = (card.eFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))).coerceAtLeast(1.3)
-        val newInt = if (!recall) 1 else when (card.last_interval) {
+        newInterval = if (!recall) 1 else when (card.last_interval) {
             0 -> 1
             1 -> 4
             else -> ceil(card.last_interval*newEf).toInt()
         }
 
         card.eFactor = newEf.toFloat()
-        card.last_interval = newInt
-        card.due = nextDue(newInt)
-
-        return card
+        isLapse = recall
     }
 }
 
 @Suppress("LocalVariableName")
 object HC1: SrsAlgorithm() {
-    private const val gamma = 0.1f // likelihood variance
-    val h: (Float, Float) -> FloatArray = { rho, sigma -> arrayOf(1f,rho,sigma,rho*sigma).toFloatArray() } // feature functions
+    private val h: (Float,Int) -> Float = { sigma,t -> exp(-exp(-sigma)/t).coerceIn(0.01f,0.99f) } // forgetting curve
+    private val f: (Float,Int,FloatArray) -> Float = { sigma,t,theta -> (theta dot xi(sigma,t)).coerceIn(0f,2f) } // stability increase
+    private val xi: (Float,Int) -> FloatArray = { sigma,t -> arrayOf(1f,sigma,h(sigma,t)).toFloatArray() } // feature functions
+    private val h_: (Float,Int) -> Float = { sigma,t -> t*exp(-sigma-t*exp(-sigma)) } // derivatives for extended Kalman filter
+    private val f_: (Float,Int,FloatArray) -> Float = { sigma,t,theta -> 1 + (theta dot xi_(sigma,t))}
+    private val xi_: (Float,Int) -> FloatArray = { sigma,t -> arrayOf(0f,1f,h_(sigma,t)).toFloatArray() } // feature functions
 
-    override suspend fun calculateInterval(card: Card, grade: Float, recall: Boolean): Card {
-        // past values
-        val _rho = card.former_retrievability
+    private const val omega_f = 0.68f // model uncertainty
+    private const val omega_g = 0.04f // measurement variance
+
+    private const val kalman_passes = 10
+
+    override suspend fun updateParams(card: Card, grade: Float, recall: Boolean) {
+        // dsigma = a*(sigma_max - sigma) + b*(1-rho)
+        // = a*sigma_max+b -a*sigma -b*rho
+        val alpha = card.params[0]
+        val beta = if (!card.had_lapsed) card.params[1] else  card.params[2]
+        val sigma_max = card.params[3]
+        var theta = floatArrayOf(alpha*sigma_max+beta,-alpha,-beta)
+        var Psi_theta = card.sigma_params.toFloatArray()
+
+        // predicting stability increase from last review
         val _sigma = card.former_stability
+        val _Psi_sigma = card.kalman_psi
+        val t = card.before_last_interval
+        val T = currentInterval(card)
+        var sigma = _sigma + f(_sigma,t,theta)
+        var Psi_sigma = _Psi_sigma * f_(_sigma,t,theta).pow(2) + omega_f
 
-        // estimate actual stability increase
-        val rho: Float = grade.coerceIn(0.05f,0.95f)
-        val t = card.last_interval + currentDate(calendar) - (card.due ?: (currentDate(calendar) - 4))
-        val sigma = -ln(-ln(rho)/t)
-        val dSigma = sigma - _sigma
-
-        // prior
-        val theta = (if (recall) card.params_r else card.params_w ?: listOf(0.7f, 0f, 0f, 0f)).toFloatArray()
-        val Psi = (if (recall) card.sigma_params_r else card.sigma_params_w ?: listOf(1f, 0f, 0f, 0f,
-                                                                                      0f, 1f, 0f, 0f,
-                                                                                      0f, 0f, 1f, 0f,
-                                                                                      0f, 0f, 0f, 1f)).toFloatArray()
-
-        // infer if not a new card, otherwise take default values
-        val (Psi_,theta_) = if (card.due != null) {
-            val invPsi = !Psi
-            val newPsi = !(invPsi plus (1/gamma * (h(_rho,_sigma) outer h(_rho,_sigma))))
-            val newTheta = newPsi * ((invPsi * theta) plus (1/gamma * dSigma * h(_rho,_sigma)))
-            (newPsi to newTheta)
-        } else {
-            (Psi to theta)
+        // extended Kalman filter
+        repeat (kalman_passes) {
+            val drho: Float = grade.coerceIn(0.01f,0.99f) - h(sigma,T)
+            val dPsi: Float = Psi_sigma * h_(sigma,T).pow(2) + omega_g
+            val K: Float = Psi_sigma * h_(sigma,T) / dPsi
+            sigma += K * drho
+            Psi_sigma *= 1 - K * h_(sigma,T)
         }
+
+        // Bayesian regression
+        val invPsith = !Psi_theta
+        Psi_theta = !(invPsith plus (1/(omega_f+omega_g) * (xi(_sigma,t) outer xi(_sigma,t))))
+        theta = Psi_theta * ((invPsith * theta) plus (1/(omega_f+omega_g) * (sigma - _sigma) * xi(_sigma,t)))
 
         // predict new stability
-        val sigma_ = sigma + (h(rho,sigma) dot theta_)
+        val sigma_ = (sigma + (theta dot xi(sigma,T))).coerceAtLeast(sigma).coerceIn(2f,10f)
 
         // project to interval
-        val newInt = ceil(exp(sigma_)*ln(1/ri.coerceAtLeast(0.05))).toInt().coerceAtLeast(1)
-        val nextDue = nextDue(newInt)
+        newInterval = ceil(-ln(ri.coerceAtLeast(0.05))*exp(sigma_)).toInt().coerceAtLeast(1)
+        isLapse = recall
 
         // update card
-        card.due = nextDue
-        card.last_interval = newInt
         card.former_stability = sigma
-        card.former_retrievability = rho
-        if (recall) {
-            card.params_r = theta_.toList()
-            card.sigma_params_r = Psi_.toList()
-        } else {
-            card.params_w = theta_.toList()
-            card.sigma_params_w = Psi_.toList()
-        }
-
-        return card
+        card.sigma_params = Psi_theta.toList()
+        card.kalman_psi = Psi_sigma
+        val alpha_ = -theta[2]
+        val beta_ = -theta[1]
+        val sigma_max_ = (theta[0] - beta_) / if (alpha_ == 0f) Float.MIN_VALUE else alpha_
+        card.params = listOf(alpha_,
+            if (!card.had_lapsed) beta_ else card.params[1],
+            if (card.had_lapsed) beta_ else card.params[2],
+            sigma_max_)
     }
 
     // matrix operations
     operator fun Float.times(m: FloatArray): FloatArray = m.map { this*it }.toFloatArray()
     private infix fun FloatArray.dot(v: FloatArray): Float = this.zip(v).map { (a,b) -> a * b}.fold(0f, Float::plus)
-    private infix fun FloatArray.outer(v: FloatArray): FloatArray = Array(4) { i -> Array(4) { j -> this[i]*v[j] } }.flatten().toFloatArray()
+    private infix fun FloatArray.outer(v: FloatArray): FloatArray = Array(3) { i -> Array(3) { j -> this[i]*v[j] } }.flatten().toFloatArray()
     private infix fun FloatArray.plus(m: FloatArray): FloatArray = this.zip(m).map { (a,b) -> a + b }.toFloatArray()
     operator fun FloatArray.times(v: FloatArray): FloatArray {
-        val result = FloatArray(4)
-        result[0] = this.slice(0..3).toFloatArray() dot v
-        result[1] = this.slice(4..7).toFloatArray() dot v
-        result[2] = this.slice(8..11).toFloatArray() dot v
-        result[3] = this.slice(12..15).toFloatArray() dot v
+        val result = FloatArray(3)
+        result[0] = this.slice(0..2).toFloatArray() dot v
+        result[1] = this.slice(3..5).toFloatArray() dot v
+        result[2] = this.slice(6..8).toFloatArray() dot v
         return result
     }
     operator fun FloatArray.not(): FloatArray {
-        val result = FloatArray(16)
-        invertM(result,0,this,0)
-        return result
-    }
-    // matrix inversion copied from android.opengl.Matrix, for testability
-    private fun invertM(
-        mInv: FloatArray, mInvOffset: Int, m: FloatArray,
-        mOffset: Int
-    ): Boolean { // Invert a 4 x 4 matrix using Cramer's Rule
-// transpose matrix
-        val src0 = m[mOffset + 0]
-        val src4 = m[mOffset + 1]
-        val src8 = m[mOffset + 2]
-        val src12 = m[mOffset + 3]
-        val src1 = m[mOffset + 4]
-        val src5 = m[mOffset + 5]
-        val src9 = m[mOffset + 6]
-        val src13 = m[mOffset + 7]
-        val src2 = m[mOffset + 8]
-        val src6 = m[mOffset + 9]
-        val src10 = m[mOffset + 10]
-        val src14 = m[mOffset + 11]
-        val src3 = m[mOffset + 12]
-        val src7 = m[mOffset + 13]
-        val src11 = m[mOffset + 14]
-        val src15 = m[mOffset + 15]
-        // calculate pairs for first 8 elements (cofactors)
-        val atmp0 = src10 * src15
-        val atmp1 = src11 * src14
-        val atmp2 = src9 * src15
-        val atmp3 = src11 * src13
-        val atmp4 = src9 * src14
-        val atmp5 = src10 * src13
-        val atmp6 = src8 * src15
-        val atmp7 = src11 * src12
-        val atmp8 = src8 * src14
-        val atmp9 = src10 * src12
-        val atmp10 = src8 * src13
-        val atmp11 = src9 * src12
-        // calculate first 8 elements (cofactors)
-        val dst0 = (atmp0 * src5 + atmp3 * src6 + atmp4 * src7
-                - (atmp1 * src5 + atmp2 * src6 + atmp5 * src7))
-        val dst1 = (atmp1 * src4 + atmp6 * src6 + atmp9 * src7
-                - (atmp0 * src4 + atmp7 * src6 + atmp8 * src7))
-        val dst2 = (atmp2 * src4 + atmp7 * src5 + atmp10 * src7
-                - (atmp3 * src4 + atmp6 * src5 + atmp11 * src7))
-        val dst3 = (atmp5 * src4 + atmp8 * src5 + atmp11 * src6
-                - (atmp4 * src4 + atmp9 * src5 + atmp10 * src6))
-        val dst4 = (atmp1 * src1 + atmp2 * src2 + atmp5 * src3
-                - (atmp0 * src1 + atmp3 * src2 + atmp4 * src3))
-        val dst5 = (atmp0 * src0 + atmp7 * src2 + atmp8 * src3
-                - (atmp1 * src0 + atmp6 * src2 + atmp9 * src3))
-        val dst6 = (atmp3 * src0 + atmp6 * src1 + atmp11 * src3
-                - (atmp2 * src0 + atmp7 * src1 + atmp10 * src3))
-        val dst7 = (atmp4 * src0 + atmp9 * src1 + atmp10 * src2
-                - (atmp5 * src0 + atmp8 * src1 + atmp11 * src2))
-        // calculate pairs for second 8 elements (cofactors)
-        val btmp0 = src2 * src7
-        val btmp1 = src3 * src6
-        val btmp2 = src1 * src7
-        val btmp3 = src3 * src5
-        val btmp4 = src1 * src6
-        val btmp5 = src2 * src5
-        val btmp6 = src0 * src7
-        val btmp7 = src3 * src4
-        val btmp8 = src0 * src6
-        val btmp9 = src2 * src4
-        val btmp10 = src0 * src5
-        val btmp11 = src1 * src4
-        // calculate second 8 elements (cofactors)
-        val dst8 = (btmp0 * src13 + btmp3 * src14 + btmp4 * src15
-                - (btmp1 * src13 + btmp2 * src14 + btmp5 * src15))
-        val dst9 = (btmp1 * src12 + btmp6 * src14 + btmp9 * src15
-                - (btmp0 * src12 + btmp7 * src14 + btmp8 * src15))
-        val dst10 = (btmp2 * src12 + btmp7 * src13 + btmp10 * src15
-                - (btmp3 * src12 + btmp6 * src13 + btmp11 * src15))
-        val dst11 = (btmp5 * src12 + btmp8 * src13 + btmp11 * src14
-                - (btmp4 * src12 + btmp9 * src13 + btmp10 * src14))
-        val dst12 = (btmp2 * src10 + btmp5 * src11 + btmp1 * src9
-                - (btmp4 * src11 + btmp0 * src9 + btmp3 * src10))
-        val dst13 = (btmp8 * src11 + btmp0 * src8 + btmp7 * src10
-                - (btmp6 * src10 + btmp9 * src11 + btmp1 * src8))
-        val dst14 = (btmp6 * src9 + btmp11 * src11 + btmp3 * src8
-                - (btmp10 * src11 + btmp2 * src8 + btmp7 * src9))
-        val dst15 = (btmp10 * src10 + btmp4 * src8 + btmp9 * src9
-                - (btmp8 * src9 + btmp11 * src10 + btmp5 * src8))
-        // calculate determinant
-        val det = src0 * dst0 + src1 * dst1 + src2 * dst2 + src3 * dst3
-        if (det == 0.0f) {
-            return false
-        }
-        // calculate matrix inverse
-        val invdet = 1.0f / det
-        mInv[mInvOffset] = dst0 * invdet
-        mInv[1 + mInvOffset] = dst1 * invdet
-        mInv[2 + mInvOffset] = dst2 * invdet
-        mInv[3 + mInvOffset] = dst3 * invdet
-        mInv[4 + mInvOffset] = dst4 * invdet
-        mInv[5 + mInvOffset] = dst5 * invdet
-        mInv[6 + mInvOffset] = dst6 * invdet
-        mInv[7 + mInvOffset] = dst7 * invdet
-        mInv[8 + mInvOffset] = dst8 * invdet
-        mInv[9 + mInvOffset] = dst9 * invdet
-        mInv[10 + mInvOffset] = dst10 * invdet
-        mInv[11 + mInvOffset] = dst11 * invdet
-        mInv[12 + mInvOffset] = dst12 * invdet
-        mInv[13 + mInvOffset] = dst13 * invdet
-        mInv[14 + mInvOffset] = dst14 * invdet
-        mInv[15 + mInvOffset] = dst15 * invdet
-        return true
+        val a = this[0]
+        val b = this[1]
+        val c = this[2]
+        val d = this[3]
+        val e = this[4]
+        val f = this[5]
+        val g = this[6]
+        val h = this[7]
+        val i = this[8]
+
+        val A = e * i - f * h
+        val B = d * i - f * g
+        val C = d * h - e * g
+        val D = b * i - c * h
+        val E = a * i - c * g
+        val F = a * h - b * g
+        val G = b * f - c * e
+        val H = a * f - c * d
+        val I = a * e - b * d
+
+        val det = (a * A - b * B + c * C)
+
+        return 1/det * floatArrayOf( A,-D, G,
+                                    -B, E,-H,
+                                     C,-F, I )
     }
 }

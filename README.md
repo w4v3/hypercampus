@@ -27,7 +27,7 @@ HyperCampus implements a _spaced repetition system_, which is often considered t
 
 A detailed description can be found [here](https://supermemo.guru/wiki/SuperMemo_1.0_for_DOS_(1987)#Algorithm_SM-2). The algorithm has two fixed intervals: At first, a card is shown after 1 day, and then 6 days later. Each time an item is successfully reviewed, the interval until it is shown the next time increases by a certain factor. This rests on the assumption that successfully reviewing a memory strengthens it in a way such that it takes longer to forget it. In case of an unsuccessful review, i.e. if the item was forgotten, the interval is reset to 1 day.
 
-The algorithm can also account for differences in learning difficulty across items by associating each item with an _easiness factor_ EF. The EF is the factor by which the intervals are increased after successful reviews. After each review, the EF of an item is updated depending on the grade the user has submitted. The implementation of SM-2 in HyperCampus differs from the original in that the original uses a grading system with six categories, from 0 to 5, while grading in HyperCampus is continuous. For SM-2, the continuous grade is scaled linearly to fit into the interval from 0 to 5, and then the update of the EF is carried out using a decimal grade. 
+The algorithm can also account for differences in learning difficulty across items by associating each item with an _easiness factor_ EF. The EF is the factor by which the intervals are increased after successful reviews. After each review, the EF of an item is updated depending on the grade the user has submitted. The implementation of SM-2 in HyperCampus differs from the original in that the original uses a grading system with six categories, from 0 to 5, while grading in HyperCampus is continuous. For SM-2, the continuous grade is scaled linearly to fit into the interval from 0 to 5, and then the update of the EF is carried out using a floating point grade. 
 
 ### The HyperCampus 1 Algorithm
 
@@ -35,7 +35,9 @@ The discussion involves a lot of maths and is thus moved to [this document](/doc
 
 ## Some pre-made collections
 
-coming soon.
+You can find some sample collections [here](/docs/sample_collections/). Currently it contains a geography deck quizzing you on countries and their location on the map, capitals and flags. The images in the file have high resolution so the file is quite huge; I might make a lower resolution version soon.
+
+Also, more decks might come in the future.
 
 ## Release notes
 ### 20200105: version 1.beta
@@ -53,10 +55,11 @@ coming soon.
 - [x] adding multimedia files to flashcards
 - [x] import/export of flashcard collections
 - [x] cram mode
-- [ ] customize the review process and how new cards are learnt
+- [x] customize the review process and how new cards are learnt
 - [x] inspect your learning statistics
 
 ### Features that might be released upon request
+- [ ] embedding several other kinds of data into cards, like LaTeX, SGF/PGN for Go/chess, syntax highlighting for source code
 - [ ] Anki collection import
 - [ ] Review reminder notifications
 - [ ] Widget for quick overview and review

@@ -85,9 +85,10 @@
     <string name="stats_learned_new_disabled">#gelernt/neu/deaktiviert</string>
     <string name="stats_perc_learned_new_disabled">%gelernt/neu/deaktiviert</string>
     <string name="stats_due">fällig</string>
-    <string name="stats_rho_sigma">rho/sigma</string>
-    <string name="stats_hc_1">HC 1</string>
-    <string name="stats_sm_2">SM 2</string>
+    <string name="stats_rho_sigma">sigma</string>
+    <string name="stats_hc_1">alpha/beta/sigma_max</string>
+    <string name="stats_sm_2">E-Faktor</string>
+    <string name="info_file_dialog">Info-Datei</string>
 
     <!-- Preferences -->
     <string name="srs_header">Spaced Repetition System</string>
@@ -135,5 +136,5 @@
     <string name="not_recognized_exception">Dateiendung nicht erkannt.</string>
     <string name="delete_unused_success">Nicht benutzte Medien erfolgreich gelöscht!</string>
     <string name="dismiss">Ok</string>
-    <string name="info_file_dialog">Info file</string>
+    <string name="snack_noinfo">Keine Info-Datei gefunden für diese Karte.</string>
 </resources>

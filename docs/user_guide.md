@@ -26,11 +26,11 @@ By default, HyperCampus treats new cards as if they were already learned and suc
 
 The _self-paced dropout_ option will make HyperCampus ask you if you already know a new item, and will repeatedly show it to you until you indicate that you got it right.
 
-For _show info file_, at the beginning of each review session, for every course you are about to learn new cards from, an _info file_ is shown. This is only available if the course was imported using a `.hcmd` or `.hczip` file, see below. Then, a section of the `.hcmd` file corresponding to the cards you are about to study is shown beforehand.
+For _show info file_, at the beginning of each review session, for every course you are about to learn new cards from, an _info file_ is shown. This is only available if the course was imported using a `.hcmd` or `.hczip` file, see below. Then, the `.hcmd` file that the cards you are about to study is from is shown beforehand. Note that HyperCampus can't currently scroll to the position of the card in the file. For this reason, I recommend either putting the lessons into different `.hcmd` files or putting a markdown table of contents at the beginning of it.
 
 ## Settings
 
-In the settings, you can choose which spaced repetition algorithm to use. Of course I recommend the native HyperCampus algorithm, but as it is still experimental, I will allow you to use [SM-2](#the-supermemo-2-algorithm), on which Anki is based, as well. Note that when changing the algorithm, it will take some time to adapt it to your data, depending on how long you have used the other algorithm. For this reason, changing the algorithm frequently is not encouraged.
+In the settings, you can choose which spaced repetition algorithm to use. Of course I recommend the native HyperCampus algorithm, but as it is still experimental, I will allow you to use [SM-2](#the-supermemo-2-algorithm), on which Anki is based, as well. Note that while only one algorithm is responsible for scheduling the next review, both receive your grade and will update their parameters according to it. For this reason, changing the algorithm frequently is not encouraged.
 
 You can also set the _retention index_, which determines how much of the content learnt you want to keep in memory during any time. The default is 90%, meaning that the algorithms schedule cards such that you should be able to remember around 90% of the contents. Setting it higher is not recommended as it increases the workload without much benefit. If you are happy with a lower retention rate, you can set the retention index to let's say 80% to reduce workload. In fact, a lower retention rate leads to a much more effective acquisition; but this effect only works up to a retention index of 40%, after which the probability of recall is too low to allow memories to be acquired.
 
@@ -51,7 +51,7 @@ This inserts cards into MyLesson, with the question being in the left column and
 ```
 You can therefore simply create a collection on your computer, using any [Markdown editor](https://dillinger.io/) or just a [text editor](https://www.vim.org/). In markdown, course titles will be main headings, lesson titles become subheadings and cards are entries in a two-column table. Any text outside of headings and tables is ignored and can be used for additional remarks. Thus, you can store your HyperCampus collection as part of a bigger document with more information to enhance your studies! Note that a table header and an additional separating line (`---|---`) is required to create a table in markdown, so if your table doesn't start with it, it will be ignored.
 
-To reference a media file in a card entry, use `![audio|media]{filename.jpg|mp3|...}`. The attribute inside `[]` **must** be set to either `image` or `audio`; the file will not be recognized based on file extension alone. If it is set to something other than `image` or `audio`, it will be ignored.
+To reference a media file in a card entry, use `![audio|media](filename.jpg|mp3|...)`. The attribute inside `[]` **must** be set to either `image` or `audio`; the file will not be recognized based on file extension alone. If it is set to something other than `image` or `audio`, it will be ignored.
 
 You can put an `.md` file together with the media files used in one folder and turn it into a `zip` file, which can be opened with HyperCampus. It will extract the media files and create the collection as specified in the `.md` file.
 
@@ -66,3 +66,20 @@ n|Question   | Answer
 This way, if a `.hcmd` file is imported back into HyperCampus (for example after some editing on the computer), if you are importing a course with the same name as an existing one (the symbol does not matter), cards with the same index are going to be replaced without losing their scheduling information.
 
 Similarly, a `.hczip` file is just a `.zip` file (simply rename it to extract its contents), but it has to contain a `.hcmd` file. In this case, media files with the same name will replace existing ones.
+
+If you want to include both directions (Question->Answer, Answer->Quesion) as cards into your deck, you can say
+```markdown
+[](twoway)
+```
+on a separate line in your document. For all table rows following such a line, two cards will then be added to the deck, one for each direction. You can revert this behavior with
+```markdown
+[](oneway)
+```
+
+It is also possible to put multiple cards with the same question side into one row, like so:
+```markdown
+n| Country | Capital |            Flag             |       Location
+-|---------|---------|-----------------------------|-----------------------
+1| Albania | Tirana  | ![image](FlagofAlbania.png) | ![image](Albania.png)
+```
+This will add three cards, where each has the country name on one side and capital, flag and location on the other side. If `[](twoway)` is used as described above, six cards will be added.

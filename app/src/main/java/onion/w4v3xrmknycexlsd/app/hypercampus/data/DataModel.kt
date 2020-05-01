@@ -51,28 +51,23 @@ data class Card(@PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id") val id
                 , @ColumnInfo(name = "within_course_id") var within_course_id: Int = 0
                 , @ColumnInfo(name = "due") var due: Int? = null
                 , @ColumnInfo(name = "status") var status: Int = STATUS_ENABLED
-                , @ColumnInfo(name = "last_interval") var last_interval: Int = 0
+                , @ColumnInfo(name = "last_interval") var last_interval: Int = 1
+                , @ColumnInfo(name = "before_last_interval") var before_last_interval: Int = 1
+                , @ColumnInfo(name = "had_lapsed") var had_lapsed: Boolean = false
                 , @ColumnInfo(name = "sm2_e_factor") var eFactor: Float = 2.5f
                 , @ColumnInfo(name = "hc1_last_stability") var former_stability: Float = 3.6f
-                , @ColumnInfo(name = "hc1_last_retrievability") var former_retrievability: Float = 0.9f
-                , @ColumnInfo(name = "hc1_params") var params_r: List<Float> = listOf(0.7f, 0f, 0f, 0f)
-                , @ColumnInfo(name = "hc1_sigma_params") var sigma_params_r: List<Float>
-                                                                           = listOf(1f, 0f, 0f, 0f,
-                                                                                    0f, 1f, 0f, 0f,
-                                                                                    0f, 0f, 1f, 0f,
-                                                                                    0f, 0f, 0f, 1f)
-                , @ColumnInfo(name = "hc1_params_incorrect") var params_w: List<Float> = listOf(0.7f, 0f, 0f, 0f)
-                , @ColumnInfo(name = "hc1_sigma_params_incorrect") var sigma_params_w: List<Float>
-                                                                           = listOf(1f, 0f, 0f, 0f,
-                                                                                    0f, 1f, 0f, 0f,
-                                                                                    0f, 0f, 1f, 0f,
-                                                                                    0f, 0f, 0f, 1f)
+                , @ColumnInfo(name = "hc1_params") var params: List<Float> = listOf(0.06f,0.1f,0f,10f) // alpha, beta, beta no recall, sigma_max
+                , @ColumnInfo(name = "hc1_sigma_params") var sigma_params: List<Float>
+                                                                           = listOf(.50f, .00f, .00f,
+                                                                                    .00f, .03f, .00f,
+                                                                                    .00f, .00f, .03f )
+                , @ColumnInfo(name = "hc1_kalman_psi") var kalman_psi: Float = 0.83f
                 , @ColumnInfo(name = "info_file") var info_file: String? = null
 ): DeckData()
 
 data class CardContent(val id: Int, val lesson_id: Int, var question: String, var answer: String, val question_column_name: String, val answer_column_name: String, val info_file: String?) // for content only updates
 
-@Database(entities = [Course::class, Lesson::class, Card::class], version = 9)
+@Database(entities = [Course::class, Lesson::class, Card::class], version = 10)
 @TypeConverters(Converters::class)
 abstract class HyperRoom : RoomDatabase() {
     abstract fun courseDao(): CourseDAO

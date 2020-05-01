@@ -86,7 +86,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="@color/colorMainDark"
-                tools:text="177" />
+                tools:text="177d" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
         <androidx.appcompat.widget.LinearLayoutCompat

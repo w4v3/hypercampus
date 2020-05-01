@@ -85,9 +85,9 @@
     <string name="stats_learned_new_disabled">#learned/new/disabled</string>
     <string name="stats_perc_learned_new_disabled">%learned/new/disabled</string>
     <string name="stats_due">due</string>
-    <string name="stats_rho_sigma">rho/sigma</string>
-    <string name="stats_hc_1">HC 1</string>
-    <string name="stats_sm_2">SM 2</string>
+    <string name="stats_rho_sigma">sigma</string>
+    <string name="stats_hc_1">alpha/beta/sigma_max</string>
+    <string name="stats_sm_2">E factor</string>
 
     <!-- Preferences -->
     <string name="srs_header">Spaced Repetition System</string>

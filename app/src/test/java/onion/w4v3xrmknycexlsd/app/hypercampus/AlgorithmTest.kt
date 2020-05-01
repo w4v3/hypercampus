@@ -46,7 +46,8 @@ class AlgorithmTest {
             val grade = -Random.nextFloat()*0.5f+1
 
             runBlocking {
-                testAlgo.calculateInterval(testCard,grade,recall)
+                testAlgo.updateParams(testCard,grade,recall)
+                testAlgo.updateCard(testCard)
             }
 
             val interval = testCard.due!! - currentDate(testCalendar)

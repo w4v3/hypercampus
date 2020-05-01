@@ -358,24 +358,24 @@ class HyperDataConverter (private val activity: HyperActivity){
         for (l in lines) {
             when {
                 l.matches(Regex("^# \\[(.*)] (.*)$")) -> Regex("^# \\[(.*)] (.*)$").find(l)?.groups?.let {
-                    currentCourse = repository.addAsync(Course(symbol = it[1]!!.value, name = it[2]!!.value), overwrite).await().toInt()
+                    currentCourse = repository.addAsync(Course(symbol = it[1]!!.value.trim(), name = it[2]!!.value.trim()), overwrite).await().toInt()
                     if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^# (.*)$")) -> Regex("^# (.*)$").find(l)?.groups?.let {
-                    currentCourse = repository.addAsync(Course(symbol = "", name = it[1]!!.value), overwrite).await().toInt()
+                    currentCourse = repository.addAsync(Course(symbol = "", name = it[1]!!.value.trim()), overwrite).await().toInt()
                     if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## \\[(.*)] (.*)$")) -> Regex("^## \\[(.*)] (.*)$").find(l)?.groups?.let {
                     currentCourse?.let { cc ->
-                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = it[1]!!.value, name = it[2]!!.value), overwrite).await().toInt()
+                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = it[1]!!.value.trim(), name = it[2]!!.value.trim()), overwrite).await().toInt()
                     }
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## (.*)$")) -> Regex("^## (.*)$").find(l)?.groups?.let {
                     currentCourse?.let { cc ->
-                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = "", name = it[1]!!.value), overwrite).await().toInt()
+                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = "", name = it[1]!!.value.trim()), overwrite).await().toInt()
                     }
                     tableLineCount = 0
                 }
@@ -393,8 +393,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                 Card(course_id = cc,
                                                     lesson_id = cl,
                                                     within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx,
-                                                    question = grps[2]!!.value.unescape(),
-                                                    answer = answ.value.unescape(),
+                                                    question = grps[2]!!.value.trim().unescape(),
+                                                    answer = answ.value.trim().unescape(),
                                                     q_col_name = header.getOrNull(0) ?: questionString,
                                                     a_col_name = header.getOrNull(idx+1) ?: answerString,
                                                     info_file = infofile))
@@ -403,8 +403,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                     Card(course_id = cc,
                                                         lesson_id = cl,
                                                         within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx+5,
-                                                        question = answ.value.unescape(),
-                                                        answer = grps[2]!!.value.unescape(),
+                                                        question = answ.value.trim().unescape(),
+                                                        answer = grps[2]!!.value.trim().unescape(),
                                                         q_col_name = header.getOrNull(idx+1) ?: answerString,
                                                         a_col_name = header.getOrNull(0) ?: questionString,
                                                         info_file = infofile))
@@ -423,8 +423,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                 Card(course_id = cc,
                                                      lesson_id = cl,
                                                      within_course_id = currentWithinCourseId+idx,
-                                                     question = grps[1]!!.value.unescape(),
-                                                     answer = answ.value.unescape(),
+                                                     question = grps[1]!!.value.trim().unescape(),
+                                                     answer = answ.value.trim().unescape(),
                                                      q_col_name = header.getOrNull(0) ?: questionString,
                                                      a_col_name = header.getOrNull(idx+1) ?: answerString,
                                                     info_file = infofile))
@@ -433,8 +433,8 @@ class HyperDataConverter (private val activity: HyperActivity){
                                                     Card(course_id = cc,
                                                         lesson_id = cl,
                                                         within_course_id = currentWithinCourseId+5,
-                                                        question = answ.value.unescape(),
-                                                        answer = grps[1]!!.value.unescape(),
+                                                        question = answ.value.trim().unescape(),
+                                                        answer = grps[1]!!.value.trim().unescape(),
                                                         q_col_name = header.getOrNull(idx+1) ?: answerString,
                                                         a_col_name = header.getOrNull(0) ?: questionString,
                                                         info_file = infofile))
@@ -451,7 +451,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                                 .find(l)
                                 ?.groups
                                 ?.drop(2)
-                                ?.map { it?.value }
+                                ?.map { it?.value?.trim() }
                                 ?.toMutableList()
                                 ?: mutableListOf()
                         } else {
@@ -459,14 +459,14 @@ class HyperDataConverter (private val activity: HyperActivity){
                                 .find(l)
                                 ?.groups
                                 ?.drop(1)
-                                ?.map { it?.value }
+                                ?.map { it?.value?.trim() }
                                 ?.toMutableList()
                                 ?: mutableListOf()
                         }
                         tableLineCount++
                     } else tableLineCount++
-                l.matches(Regex("^\\[]\\(twoway\\)$")) -> twoway = true
-                l.matches(Regex("^\\[]\\(oneway\\)$")) -> twoway = false
+                l.matches(Regex("^\\s*\\[]\\(twoway\\)\\s*$")) -> twoway = true
+                l.matches(Regex("^\\s*\\[]\\(oneway\\)\\s*$")) -> twoway = false
                 else -> tableLineCount = 0
             }
             monitor.inc()
@@ -520,7 +520,7 @@ class HyperDataConverter (private val activity: HyperActivity){
     }
 
     private fun getMediaFromCard(card: Card, inParent: File): Array<File>? {
-        val mediaRegex = Regex("!\\[.*\\]\\{(.*)\\}")
+        val mediaRegex = Regex("!\\[.*\\]\\((.*)\\)")
         val usedMedia = mutableListOf<String>()
         usedMedia.addAll(mediaRegex.findAll(card.question).map { it.groups[1]?.value ?: "" })
         usedMedia.addAll(mediaRegex.findAll(card.answer).map { it.groups[1]?.value ?: "" })
