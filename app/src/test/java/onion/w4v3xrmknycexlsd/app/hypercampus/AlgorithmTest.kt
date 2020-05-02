@@ -43,7 +43,7 @@ class AlgorithmTest {
 
         for (i in 1..MAX_REP) {
             val recall = Random.nextFloat() < RECALL_PROB
-            val grade = -Random.nextFloat()*0.5f+1
+            val grade = -Random.nextFloat()*0.5+1
 
             runBlocking {
                 testAlgo.updateParams(testCard,grade,recall)

@@ -35,7 +35,7 @@ The discussion involves a lot of maths and is thus moved to [this document](/doc
 
 ## Some pre-made collections
 
-You can find some sample collections [here](/docs/sample_collections/). Currently it contains a geography deck quizzing you on countries and their location on the map, capitals and flags. The images in the file have high resolution so the file is quite huge; I might make a lower resolution version soon.
+You can find some sample collections [here](/docs/sample_collections/). Currently it contains a geography deck quizzing you on countries and their location on the map, capitals and flags.
 
 Also, more decks might come in the future.
 

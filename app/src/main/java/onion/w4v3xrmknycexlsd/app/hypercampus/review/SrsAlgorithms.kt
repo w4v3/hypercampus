@@ -42,7 +42,8 @@ sealed class SrsAlgorithm(var ri: Double = 0.9, var calendar: Calendar = Calenda
     }
 
     protected fun currentInterval(card: Card) =
-        card.last_interval + currentDate(calendar) - (card.due ?: (currentDate(calendar) -4))
+        (card.last_interval + currentDate(calendar) - (card.due ?: (currentDate(calendar) - 3)))
+            .coerceAtLeast(1)
 
     private fun nextDue(interval: Int): Int =
         currentDate(calendar) + interval
@@ -70,7 +71,7 @@ object SM2: SrsAlgorithm() {
 
 @Suppress("LocalVariableName")
 object HC1: SrsAlgorithm() {
-    private val h: (Float,Int) -> Float = { sigma,t -> exp(-exp(-sigma)/t).coerceIn(0.01f,0.99f) } // forgetting curve
+    private val h: (Float,Int) -> Float = { sigma,t -> exp(-exp(-sigma)*t).coerceIn(0.01f,0.99f) } // forgetting curve
     private val f: (Float,Int,FloatArray) -> Float = { sigma,t,theta -> (theta dot xi(sigma,t)).coerceIn(0f,2f) } // stability increase
     private val xi: (Float,Int) -> FloatArray = { sigma,t -> arrayOf(1f,sigma,h(sigma,t)).toFloatArray() } // feature functions
     private val h_: (Float,Int) -> Float = { sigma,t -> t*exp(-sigma-t*exp(-sigma)) } // derivatives for extended Kalman filter
@@ -114,7 +115,9 @@ object HC1: SrsAlgorithm() {
         theta = Psi_theta * ((invPsith * theta) plus (1/(omega_f+omega_g) * (sigma - _sigma) * xi(_sigma,t)))
 
         // predict new stability
-        val sigma_ = (sigma + (theta dot xi(sigma,T))).coerceAtLeast(sigma).coerceIn(2f,10f)
+        val theta_ = if (recall == card.had_lapsed) theta else
+            floatArrayOf(theta[0],theta[1],if (recall) -card.params[2] else -card.params[1])
+        val sigma_ = (sigma + (theta_ dot xi(sigma,T))).coerceAtLeast(sigma).coerceIn(2f,10f)
 
         // project to interval
         newInterval = ceil(-ln(ri.coerceAtLeast(0.05))*exp(sigma_)).toInt().coerceAtLeast(1)
@@ -124,8 +127,8 @@ object HC1: SrsAlgorithm() {
         card.former_stability = sigma
         card.sigma_params = Psi_theta.toList()
         card.kalman_psi = Psi_sigma
-        val alpha_ = -theta[2]
-        val beta_ = -theta[1]
+        val alpha_ = -theta[1]
+        val beta_ = -theta[2]
         val sigma_max_ = (theta[0] - beta_) / if (alpha_ == 0f) Float.MIN_VALUE else alpha_
         card.params = listOf(alpha_,
             if (!card.had_lapsed) beta_ else card.params[1],
