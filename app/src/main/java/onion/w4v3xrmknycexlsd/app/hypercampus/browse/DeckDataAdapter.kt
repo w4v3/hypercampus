@@ -122,10 +122,10 @@ class DeckDataAdapter(
                     R.string.due_new, dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…",
                newCounts.getOrNull(dataCopy.indexOf(current)) ?: "…" )
                 if (showingStats) {
-                    val stats = statData[position]
-                    val totalnum = stats[0]
-                    val newnum = stats[1]
-                    val disablenum = stats[2]
+                    val stats = statData.getOrNull(position)
+                    val totalnum = stats?.getOrNull(0) ?: 0
+                    val newnum = stats?.getOrNull(1) ?: 0
+                    val disablenum = stats?.getOrNull(2) ?: 0
                     val learntnum = totalnum - newnum - disablenum
                     holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
                     holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
@@ -138,10 +138,10 @@ class DeckDataAdapter(
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
                     R.string.due,dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…")
                 if (showingStats) {
-                    val stats = statData[position]
-                    val totalnum = stats[0]
-                    val newnum = stats[1]
-                    val disablenum = stats[2]
+                    val stats = statData.getOrNull(position)
+                    val totalnum = stats?.getOrNull(0) ?: 0
+                    val newnum = stats?.getOrNull(1) ?: 0
+                    val disablenum = stats?.getOrNull(2) ?: 0
                     val learntnum = totalnum - newnum - disablenum
                     holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
                     holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
