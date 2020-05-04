@@ -35,15 +35,9 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import io.noties.markwon.AbstractMarkwonPlugin
 import io.noties.markwon.Markwon
-import io.noties.markwon.MarkwonConfiguration
-import io.noties.markwon.core.MarkwonTheme
-import io.noties.markwon.image.picasso.PicassoImagesPlugin
 import io.noties.markwon.recycler.MarkwonAdapter
 import io.noties.markwon.recycler.table.TableEntry
-import io.noties.markwon.recycler.table.TableEntryPlugin
-import io.noties.markwon.urlprocessor.UrlProcessorRelativeToAbsolute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,6 +58,7 @@ class SrsFragment : Fragment() {
     private val args: SrsFragmentArgs by navArgs()
 
     @Inject lateinit var modelFactory: ViewModelProvider.Factory
+
     private lateinit var binding: FragmentSrsBinding
     private lateinit var viewModel: HyperViewModel
 
@@ -76,8 +71,6 @@ class SrsFragment : Fragment() {
     private val algorithms = listOf(SM2,HC1)
 
     private var repeatUntil: Int = 0
-
-    private lateinit var markwon: Markwon
 
     override fun onAttach(context: Context) {
         (context.applicationContext as HyperApp).hyperComponent.inject(this)
@@ -142,19 +135,6 @@ class SrsFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        markwon = Markwon.builder(requireContext())
-            .usePlugin(TableEntryPlugin.create(requireContext()))
-            .usePlugin(PicassoImagesPlugin.create(requireContext()))
-            .usePlugin(object : AbstractMarkwonPlugin() {
-                override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
-                    builder.urlProcessor(UrlProcessorRelativeToAbsolute("file://${activity?.applicationContext?.getExternalFilesDir(null)?.absolutePath}/media/"))
-                }
-
-                override fun configureTheme(builder: MarkwonTheme.Builder) {
-                    builder.headingBreakHeight(0)
-                }
-            })
-            .build()
 
         newCardMode = Integer.parseInt(prefs?.getString("srs_newcards","$MODE_LEARNT") ?: "$MODE_LEARNT")
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
@@ -312,7 +292,7 @@ class SrsFragment : Fragment() {
                 .textLayoutIsRoot(R.layout.txtview)
                 .build() })
             .build()
-        adapter.setMarkdown(markwon,info)
+        adapter.setMarkdown((requireActivity() as HyperActivity).markwon,info)
         txtView.adapter = adapter
         txtView.layoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL, false)
         adapter.notifyDataSetChanged()

@@ -83,3 +83,11 @@ n| Country | Capital |            Flag             |       Location
 1| Albania | Tirana  | ![image](FlagofAlbania.png) | ![image](Albania.png)
 ```
 This will add three cards, where each has the country name on one side and capital, flag and location on the other side. If `[](twoway)` is used as described above, six cards will be added.
+
+Both info files and cards for reviewing are rendered using [Markwon](https://noties.io/Markwon/), so you can also use Markdown syntax on the cards. In addition, (limited) LaTeX formula support by Markwon is included. Note that every line containing LaTeX math has to be prefixed with **two** $ signs:
+```
+$$\text{(kind of) inline math: Let} a,b \in \mathbb{N}$$
+$$
+\text{Display style} \sum_{i=1}^\infty i^{-2} = \frac{\pi^2}{6}
+$$
+```

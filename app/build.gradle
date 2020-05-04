@@ -55,7 +55,7 @@ android {
 
         debug {
             debuggable true
-            minifyEnabled true
+            minifyEnabled false
             applicationIdSuffix ".debug"
             pseudoLocalesEnabled true
         }
@@ -139,6 +139,7 @@ dependencies {
     implementation  "io.noties.markwon:recycler-table:4.3.1"
     implementation  "io.noties.markwon:recycler:4.3.1"
     implementation  "io.noties.markwon:image-picasso:4.3.1"
+    implementation  "io.noties.markwon:ext-latex:4.3.1"
 
     // automatic licences
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'

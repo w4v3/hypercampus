@@ -38,6 +38,15 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.preference.PreferenceManager
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonConfiguration
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.ext.latex.JLatexMathPlugin
+import io.noties.markwon.image.picasso.PicassoImagesPlugin
+import io.noties.markwon.inlineparser.MarkwonInlineParserPlugin
+import io.noties.markwon.recycler.table.TableEntryPlugin
+import io.noties.markwon.urlprocessor.UrlProcessorRelativeToAbsolute
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
 import java.util.*
@@ -48,6 +57,7 @@ class HyperActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
 
     var mediaPlayer: MediaPlayer? = null
+    lateinit var markwon: Markwon
 
     var onActivityResultListener: OnActivityResultListener? = null
 
@@ -59,6 +69,28 @@ class HyperActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setTheme(R.style.AppTheme)
+
+        markwon = Markwon.builder(this)
+            .usePlugin(TableEntryPlugin.create(this))
+            .usePlugin(PicassoImagesPlugin.create(this))
+            .usePlugin(MarkwonInlineParserPlugin.create())
+            .usePlugin(JLatexMathPlugin.create(resources.configuration.fontScale*64) { builder -> builder.inlinesEnabled(true) })
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                    builder.urlProcessor(
+                        UrlProcessorRelativeToAbsolute(
+                            "file://${applicationContext.getExternalFilesDir(
+                                null
+                            )?.absolutePath}/media/"
+                        )
+                    )
+                }
+
+                override fun configureTheme(builder: MarkwonTheme.Builder) {
+                    builder.headingBreakHeight(0)
+                }
+            })
+            .build()
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val navHostFragment =

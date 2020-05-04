@@ -29,11 +29,9 @@ import android.provider.OpenableColumns
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -221,13 +219,11 @@ class HyperDataConverter (private val activity: HyperActivity){
             val parse = mediaRegex.find(g)?.groups
             when (parse?.get(1)?.value) {
                 "image" -> {
-                    val imgView = ImageView(activity).apply {
+                    root.addView(TextView(activity).apply {
+                        gravity = Gravity.CENTER
                         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                        scaleType = ImageView.ScaleType.CENTER_INSIDE
-                    }
-                    val uri = "${getMediaAccess().absolutePath}/${parse[2]?.value}"
-                    root.addView(imgView)
-                    Picasso.get().load(File(uri)).resizeDimen(R.dimen.card_width,R.dimen.card_height).centerInside().into(imgView)
+                        activity.markwon.setMarkdown(this,"&nbsp;${parse[0]?.value}&nbsp;")
+                    })
                 }
                 "audio" -> {
                     root.addView(ImageButton(activity).apply {
@@ -264,6 +260,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                             setTextAppearance(R.style.TextAppearance_MaterialComponents_Body1)
                         }
                         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        activity.markwon.setMarkdown(this,g)
                     })
                 }
             }
@@ -659,7 +656,7 @@ class HyperDataConverter (private val activity: HyperActivity){
     // for task progress
     class ProgressMonitor(private val activity: HyperActivity){
         private var units = 1
-        var progress = 0.0
+        private var progress = 0.0
 
         suspend fun init() {
             withContext(Dispatchers.Main) {
