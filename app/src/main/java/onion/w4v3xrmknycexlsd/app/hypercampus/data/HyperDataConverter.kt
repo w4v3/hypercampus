@@ -472,6 +472,7 @@ class HyperDataConverter (private val activity: HyperActivity){
             monitor.inc()
         }
         monitor.determination(false)
+        monitor.stop()
         newlyAddedIndices.addAll(repository.addAllCardsAsync(newlyAdded,overwrite).await())
     }
 
@@ -624,6 +625,7 @@ class HyperDataConverter (private val activity: HyperActivity){
 
         // if files were renamed, we have to change the corresponding cards too
         monitor.reset(renamedFiles.size)
+        monitor.init()
         monitor.determination(true)
         var newContents = newlyAdded.mapIndexed { idx,card ->
             CardContent(

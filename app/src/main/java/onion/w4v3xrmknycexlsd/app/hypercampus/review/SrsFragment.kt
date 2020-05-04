@@ -166,6 +166,14 @@ class SrsFragment : Fragment() {
         }
 
         lifecycleScope.launch {
+            // reset if new day
+            val lastStudied = prefs.getInt("last_studied",0)
+            if (lastStudied != currentDate()) viewModel.resetStudied().join()
+            with(prefs.edit()) {
+                putInt("last_studied",currentDate())
+                apply()
+            }
+
             fillCardSet()
             nextCard()
             intro()
