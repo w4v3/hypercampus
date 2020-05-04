@@ -40,6 +40,13 @@ You can find some sample collections [here](/docs/sample_collections/). Currentl
 Also, more decks might come in the future.
 
 ## Release notes
+### 20200503: version 1.sigma
+- significantly improved the HyperCampus algorithm (for details see https://github.com/w4v3/hypercampus/blob/master/docs/model.ipynb)
+- display info file for new cards
+- self-paced dropout mode
+- cram mode and partial reviews
+- disable cards
+- inspect learning statistics
 ### 20200105: version 1.beta
 - implemented HC 1 algorithm
 - import/export of flashcard collections
