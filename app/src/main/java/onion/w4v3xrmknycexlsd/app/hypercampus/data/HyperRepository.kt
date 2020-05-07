@@ -199,7 +199,7 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         val result = mutableListOf<IntArray>()
         val totraverse = if (level == Level.COURSES) courseDao.getAllAsync() else lessonDao.getFromAsync(dataId)
         for (unit in totraverse) {
-            val unitcards = cardDao.getAllFromCourse(if (unit is Course) unit.id else (unit as Lesson).id)
+            val unitcards = if (unit is Course) cardDao.getAllFromCourse(unit.id) else cardDao.getAllFromLesson((unit as Lesson).id)
             val totalnum = unitcards.size
             val newnum = unitcards.filter { card -> card.due == null && card.status == STATUS_ENABLED }.size
             val disablenum = unitcards.filter { card -> card.status == STATUS_DISABLED }.size
