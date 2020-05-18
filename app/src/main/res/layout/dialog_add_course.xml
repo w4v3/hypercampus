@@ -40,7 +40,7 @@
         <EditText
             android:id="@+id/label_short"
             android:layout_width="48sp"
-            android:layout_height="48sp"
+            android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
             android:gravity="center"
             android:hint="@string/course_symbol_hint"

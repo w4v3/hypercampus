@@ -91,6 +91,7 @@
 
     <!-- Preferences -->
     <string name="srs_header">Spaced Repetition System</string>
+    <string name="sgf_header">Smart Game Format</string>
     <string name="other_header">Other</string>
     <string name="algo_title">Algorithm</string>
     <string name="algo_sm">SuperMemo 2</string>
@@ -101,6 +102,28 @@
     <string name="newcards_dropout">self-paced dropout</string>
     <string name="newcards_info">show info file</string>
     <string name="newcards_info_dropout">both info file and dropout</string>
+    <string name="newcardorder_title">New cards learning order</string>
+    <string name="newcardorder_course">Course order</string>
+    <string name="newcardorder_random">Random</string>
+    <string name="showvariations_title">Show variations</string>
+    <string name="showvariations_file">Use settings from SGF file (default)</string>
+    <string name="showvariations_never">Never</string>
+    <string name="showvariations_always">Always</string>
+    <string name="interactionmode_title">Interaction mode</string>
+    <string name="interactionmode_freeplay">Free play</string>
+    <string name="interactionmode_counter">Automatic countermove</string>
+    <string name="interactionmode_disable">Disable</string>
+    <string name="showinfo_title">Show info text</string>
+    <string name="showbuttons_title">Show undo/redo buttons</string>
+    <string name="colortheme_title">Color theme</string>
+    <string name="colortheme_hypercampus">HyperCampus</string>
+    <string name="colortheme_blackwhite">Black and White</string>
+    <string name="font_size_title">Card font size</string>
+    <string name="font_size_tiny">tiny</string>
+    <string name="font_size_small">small</string>
+    <string name="font_size_medium">medium</string>
+    <string name="font_size_large">large</string>
+    <string name="font_size_huge">huge</string>
     <string name="remove_media_title">Remove unused media …</string>
     <string name="about_title">About …</string>
     <string name="licence_title">Library licences …</string>

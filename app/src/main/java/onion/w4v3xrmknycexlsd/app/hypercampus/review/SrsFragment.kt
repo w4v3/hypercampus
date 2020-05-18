@@ -35,7 +35,6 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import io.noties.markwon.Markwon
 import io.noties.markwon.recycler.MarkwonAdapter
 import io.noties.markwon.recycler.table.TableEntry
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +66,7 @@ class SrsFragment : Fragment() {
     private var saveCardList = mutableListOf<Card>()
 
     private var newCardMode: Int? = 0
+    private var newCardsRandom: Boolean = false
     private var algorithm: SrsAlgorithm? = null
     private val algorithms = listOf(SM2,HC1)
 
@@ -137,6 +137,7 @@ class SrsFragment : Fragment() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
         newCardMode = Integer.parseInt(prefs?.getString("srs_newcards","$MODE_LEARNT") ?: "$MODE_LEARNT")
+        newCardsRandom = Integer.parseInt(prefs?.getString("srs_newcardorder", "0") ?: "0") == 1
         val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
         val ri: Double = (prefs?.getInt("retention_index",90) ?: 90).toDouble()/100.0
         algorithm = when (algo) {
@@ -188,7 +189,9 @@ class SrsFragment : Fragment() {
         }
 
         if (!args.full && args.level == Level.COURSES) {
-            newCardList = viewModel.getNewCardsFromCoursesAsync(args.units).toMutableList()
+            newCardList = viewModel.getNewCardsFromCoursesAsync(args.units).let {
+                if (newCardsRandom) it.shuffled().toMutableList() else it.toMutableList()
+            }
         }
     }
 
@@ -240,7 +243,7 @@ class SrsFragment : Fragment() {
 
     private val runNextCard = Runnable { nextCard() }
     private fun handleGrade(grade: Float, recall: Boolean) = lifecycleScope.launch {
-        saveCardList.add(binding.currentCard!!)
+        saveCardList.add(binding.currentCard!!.copy())
         if (repeatUntil > 0) repeatUntil--
         val updatedCard = withContext(Dispatchers.Default) {
             for (alg in algorithms)
@@ -304,7 +307,7 @@ class SrsFragment : Fragment() {
             binding.wrongTextView.text = ""
             binding.rightTextView.text = ""
             newCardList.remove(binding.currentCard!!)
-            newCardList.add(binding.currentCard!!)
+            dueCardList.add(binding.currentCard!!)
             resetOnClickListeners()
             nextCard()
         }

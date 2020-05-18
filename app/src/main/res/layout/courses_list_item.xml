@@ -41,6 +41,7 @@
             android:layout_height="48sp"
             android:layout_margin="@dimen/text_margin"
             android:gravity="center"
+            android:scrollbars="none"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"

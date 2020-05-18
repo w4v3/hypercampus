@@ -51,7 +51,15 @@ This inserts cards into MyLesson, with the question being in the left column and
 ```
 You can therefore simply create a collection on your computer, using any [Markdown editor](https://dillinger.io/) or just a [text editor](https://www.vim.org/). In markdown, course titles will be main headings, lesson titles become subheadings and cards are entries in a two-column table. Any text outside of headings and tables is ignored and can be used for additional remarks. Thus, you can store your HyperCampus collection as part of a bigger document with more information to enhance your studies! Note that a table header and an additional separating line (`---|---`) is required to create a table in markdown, so if your table doesn't start with it, it will be ignored.
 
-To reference a media file in a card entry, use `![audio|media](filename.jpg|mp3|...)`. The attribute inside `[]` **must** be set to either `image` or `audio`; the file will not be recognized based on file extension alone. If it is set to something other than `image` or `audio`, it will be ignored.
+To reference a media file in a card entry, use `![audio|media|...](filename.jpg|mp3|...)`. The attribute inside `[]` **must** one of:
+
+* `image` for an image file
+* `audio` for an audio file
+* `sgf` for a Smart Game Format file
+
+The file will not be recognized based on file extension alone. If something other than the above tags is found, it will be ignored.
+
+Note that so far, only Go game `SGF` files are supported. For details about the configuration of Go reviews in the settings, please refer to the [SgfCharm library](https://github.com/w4v3/sgfcharm), which is used for displaying the `SGF` files.
 
 You can put an `.md` file together with the media files used in one folder and turn it into a `zip` file, which can be opened with HyperCampus. It will extract the media files and create the collection as specified in the `.md` file.
 

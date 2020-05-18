@@ -24,17 +24,67 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.*
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
-
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.SgfController
 
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        findPreference<ListPreference>("sgf_showvariations")?.setOnPreferenceChangeListener { _, newValue ->
+            (activity as? HyperActivity)?.sgfController?.showVariations =
+                when (newValue) {
+                    "1" -> false
+                    "2" -> true
+                    else -> null
+                }
+            true
+        }
+        findPreference<ListPreference>("sgf_interactionmode")?.setOnPreferenceChangeListener { _, newValue ->
+            (activity as? HyperActivity)?.sgfController?.interactionMode =
+                when (newValue) {
+                    "1" -> SgfController.InteractionMode.COUNTERMOVE
+                    "2" -> SgfController.InteractionMode.DISABLE
+                    else -> SgfController.InteractionMode.FREE_PLAY
+                }
+            true
+        }
+        findPreference<SwitchPreferenceCompat>("sgf_showinfo")?.setOnPreferenceChangeListener { _, newValue ->
+            HyperDataConverter.sgfShowText = newValue as Boolean
+            true
+        }
+        findPreference<SwitchPreferenceCompat>("sgf_showbuttons")?.setOnPreferenceChangeListener { _, newValue ->
+            HyperDataConverter.sgfShowButtons = newValue as Boolean
+            true
+        }
+        findPreference<ListPreference>("sgf_colortheme")?.setOnPreferenceChangeListener { _, newValue ->
+            HyperDataConverter.sgfColors = newValue as String
+            true
+        }
+        with(findPreference<SeekBarPreference>("font_size")) {
+            this?.setOnPreferenceChangeListener { preference, newValue ->
+                when (newValue) {
+                    -2 -> preference.summary = getString(R.string.font_size_tiny)
+                    -1 -> preference.summary = getString(R.string.font_size_small)
+                    0 -> preference.summary = getString(R.string.font_size_medium)
+                    1 -> preference.summary = getString(R.string.font_size_large)
+                    2 -> preference.summary = getString(R.string.font_size_huge)
+                }
+                HyperDataConverter.textSizeFactor = (newValue as Int).toFloat()
+                true
+            }
+            this?.summary =
+                when (this?.value) {
+                    -2 -> getString(R.string.font_size_tiny)
+                    -1 -> getString(R.string.font_size_small)
+                    0 -> getString(R.string.font_size_medium)
+                    1 -> getString(R.string.font_size_large)
+                    2 -> getString(R.string.font_size_huge)
+                    else -> ""
+            }
+        }
         findPreference<Preference>("about")?.setOnPreferenceClickListener {
             val builder = activity?.let { MaterialAlertDialogBuilder(it) }
             builder?.setTitle(R.string.app_name)

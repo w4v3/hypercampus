@@ -49,7 +49,9 @@ import io.noties.markwon.recycler.table.TableEntryPlugin
 import io.noties.markwon.urlprocessor.UrlProcessorRelativeToAbsolute
 import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.SgfController
 import java.util.*
+import kotlin.math.pow
 
 
 class HyperActivity : AppCompatActivity() {
@@ -58,6 +60,7 @@ class HyperActivity : AppCompatActivity() {
 
     var mediaPlayer: MediaPlayer? = null
     lateinit var markwon: Markwon
+    lateinit var sgfController: SgfController
 
     var onActivityResultListener: OnActivityResultListener? = null
 
@@ -91,6 +94,24 @@ class HyperActivity : AppCompatActivity() {
                 }
             })
             .build()
+
+        with(PreferenceManager.getDefaultSharedPreferences(this)) {
+            sgfController = SgfController().apply {
+                showVariations = when (getString("sgf_showvariations", "0")) {
+                    "1" -> false
+                    "2" -> true
+                    else -> null
+                }
+
+                interactionMode = when (getString("sgf_interactionmode", "0")) {
+                    "1" -> SgfController.InteractionMode.COUNTERMOVE
+                    "2" -> SgfController.InteractionMode.DISABLE
+                    else -> SgfController.InteractionMode.FREE_PLAY
+                }
+            }
+
+            HyperDataConverter.readPrefs(this)
+        }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         val navHostFragment =

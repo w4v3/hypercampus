@@ -47,9 +47,64 @@
             app:title="@string/newcards_title"
             app:useSimpleSummaryProvider="true" />
 
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/srs_newcardorder"
+            app:entryValues="@array/srs_newcardorder_values"
+            app:key="srs_newcardorder"
+            app:title="@string/newcardorder_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sgf_header">
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/sgf_showvariations"
+            app:entryValues="@array/sgf_showvariations_values"
+            app:key="sgf_showvariations"
+            app:title="@string/showvariations_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/sgf_interactionmode"
+            app:entryValues="@array/sgf_interactionmode_values"
+            app:key="sgf_interactionmode"
+            app:title="@string/interactionmode_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:key="sgf_showinfo"
+            app:title="@string/showinfo_title"
+            app:defaultValue="true"/>
+
+        <SwitchPreferenceCompat
+            app:key="sgf_showbuttons"
+            app:title="@string/showbuttons_title"
+            app:defaultValue="true"/>
+
+        <ListPreference
+            app:defaultValue="0"
+            app:entries="@array/sgf_colortheme"
+            app:entryValues="@array/sgf_colortheme_values"
+            app:key="sgf_colortheme"
+            app:title="@string/colortheme_title"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/other_header">
+
+        <SeekBarPreference
+            app:key="font_size"
+            app:min="-2"
+            android:max="2"
+            app:defaultValue="0"
+            app:seekBarIncrement="1"
+            app:adjustable="true"
+            app:showSeekBarValue="false"
+            app:title="@string/font_size_title"/>
 
         <Preference
             app:key="remove_media"

@@ -35,7 +35,10 @@ The discussion involves a lot of maths and is thus moved to [this document](/doc
 
 ## Some pre-made collections
 
-You can find some sample collections [here](sample_collections/). Currently it contains a geography deck quizzing you on countries and their location on the map, capitals and flags.
+You can find some sample collections [here](sample_collections):
+* a [geography deck](sample_collections/geography.hczip) quizzing you on countries and their location on the map, capitals and flags
+* a deck teaching you the sounds of the [International phonetic alphabet](sample_collections/ipa.hczip)
+* a collection of [Go problems](sample_collections/go.hczip) featuring HyperCampus' `SGF` display capabilities
 
 Also, more decks might come in the future.
 
@@ -66,7 +69,7 @@ Also, more decks might come in the future.
 - [x] inspect your learning statistics
 
 ### Features that might be released upon request
-- [ ] embedding several other kinds of data into cards, like LaTeX, SGF/PGN for Go/chess, syntax highlighting for source code
+- [x] embedding several other kinds of data into cards, like LaTeX, SGF/PGN for Go (later: chess, syntax highlighting for source code)
 - [ ] Anki collection import
 - [ ] Review reminder notifications
 - [ ] Widget for quick overview and review

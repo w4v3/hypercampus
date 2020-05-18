@@ -136,10 +136,13 @@ dependencies {
 
     // Markwon for markdown rendering
     implementation "io.noties.markwon:core:4.3.1"
-    implementation  "io.noties.markwon:recycler-table:4.3.1"
-    implementation  "io.noties.markwon:recycler:4.3.1"
-    implementation  "io.noties.markwon:image-picasso:4.3.1"
-    implementation  "io.noties.markwon:ext-latex:4.3.1"
+    implementation "io.noties.markwon:recycler-table:4.3.1"
+    implementation "io.noties.markwon:recycler:4.3.1"
+    implementation "io.noties.markwon:image-picasso:4.3.1"
+    implementation "io.noties.markwon:ext-latex:4.3.1"
+
+    // SgfCharm for SGF files
+    implementation "com.github.w4v3:sgfcharm:v0.2.0"
 
     // automatic licences
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'

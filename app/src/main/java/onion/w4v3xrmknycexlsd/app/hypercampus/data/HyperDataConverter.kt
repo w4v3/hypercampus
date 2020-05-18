@@ -22,21 +22,32 @@ package onion.w4v3xrmknycexlsd.app.hypercampus.data
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.text.Html
+import android.util.TypedValue.COMPLEX_UNIT_PX
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import onion.w4v3xrmknycexlsd.app.hypercampus.*
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.SgfInfoKeys
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.handle.MoveInfo
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.handle.NodeInfo
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.DefaultSgfDrawer
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.GoSgfView
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.SgfDrawer
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -45,6 +56,7 @@ import javax.inject.Inject
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.pow
 
 // private file directories
 const val DIR_MEDIA = "media"
@@ -55,7 +67,7 @@ const val CREATE_FILE = 1
 const val OPEN_FILE = 2
 
 @Suppress("RegExpRedundantEscape")
-class HyperDataConverter (private val activity: HyperActivity){
+class HyperDataConverter(private val activity: HyperActivity) {
     @Inject lateinit var repository: HyperRepository
     private val contentResolver = activity.applicationContext.contentResolver
 
@@ -90,13 +102,14 @@ class HyperDataConverter (private val activity: HyperActivity){
                 }
                 activity.goodSnack(activity.getString(R.string.exp_success))
             }
-            monitor.stop()
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
         } catch (e: IOException) {
             activity.badSnack(activity.getString(R.string.io_exception))
+        } finally {
+            monitor.stop()
         }
-}
+    }
 
     fun fileToCollection(uri: Uri) = repository.repositoryScope.launch(Dispatchers.IO) {
         try {
@@ -110,6 +123,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                     val content = contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
                     content?.let { mdToCollection(it) }
                     activity.goodSnack(activity.getString(R.string.imp_success))
+                    monitor.stop()
                 }
                 "hcmd" -> withContext(Dispatchers.Main){
                     val builder =  MaterialAlertDialogBuilder(activity)
@@ -120,6 +134,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                                 val content = contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
                                 content?.let { mdToCollection(it, withOrder = true, overwrite = true) }
                                 activity.goodSnack(activity.getString(R.string.imp_success))
+                                monitor.stop()
                             }
                         }
                         .setNegativeButton(activity.getString(R.string.import_addnew)) { _, _ ->
@@ -127,6 +142,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                                 val content = contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
                                 content?.let { mdToCollection(it, withOrder = true, overwrite = false) }
                                 activity.goodSnack(activity.getString(R.string.imp_success))
+                                monitor.stop()
                             }
                         }
 
@@ -167,6 +183,8 @@ class HyperDataConverter (private val activity: HyperActivity){
             activity.badSnack(activity.getString(R.string.io_exception))
         } catch (e: UnsupportedOperationException) {
             activity.badSnack(activity.getString(R.string.not_recognized_exception))
+        } finally {
+            monitor.stop()
         }
     }
 
@@ -236,17 +254,41 @@ class HyperDataConverter (private val activity: HyperActivity){
                         fun play(uri: String) = try {
                             activity.mediaPlayer?.reset()
                             activity.mediaPlayer?.setDataSource(uri)
-                        } catch (e: IOException) {
-                            activity.badSnack(activity.getString(R.string.io_exception))
-                        } finally {
                             activity.mediaPlayer?.prepare()
                             activity.mediaPlayer?.start()
+                        } catch (e: IOException) {
+                            activity.badSnack(activity.getString(R.string.io_exception))
                         }
                         val uri = "${getMediaAccess().absolutePath}/${parse[2]?.value}"
-                        play(uri)
+                        if (isShown)
+                            play(uri)
+                        else {
+                            tag = isShown
+                            viewTreeObserver.addOnGlobalLayoutListener {
+                                if (isShown && tag != isShown) {
+                                    play(uri)
+                                    tag = isShown
+                                }
+                            }
+                        }
                         setOnClickListener {
                             play(uri)
                         }
+                    })
+                }
+                "sgf" -> parse[2]?.value?.let { sgfFile ->
+                    val fileInputStream = File(getMediaAccess(), sgfFile).inputStream()
+                    val sgfString = readStringFrom(fileInputStream)
+                    root.addView(GoSgfView(activity, null).apply {
+                        gravity = Gravity.CENTER
+                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        blackColor = _sgfColors(activity)['b'] ?: error("no such color")
+                        whiteColor = _sgfColors(activity)['w'] ?: error("no such color")
+                        setTextSize(COMPLEX_UNIT_PX, textSizeFactor * textSize)
+                        showText = sgfShowText
+                        showButtons = sgfShowButtons
+                        sgfDrawer = MSgfDrawer
+                        activity.sgfController.load(sgfString).into(this)
                     })
                 }
                 null -> {
@@ -260,6 +302,7 @@ class HyperDataConverter (private val activity: HyperActivity){
                             setTextAppearance(R.style.TextAppearance_MaterialComponents_Body1)
                         }
                         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        setTextSize(COMPLEX_UNIT_PX, textSizeFactor * textSize)
                         activity.markwon.setMarkdown(this,g)
                     })
                 }
@@ -285,12 +328,13 @@ class HyperDataConverter (private val activity: HyperActivity){
             val hcmdUsed = allcards.map { card -> card.info_file }
             hcmdParent.listFiles()?.let { for (f in it) if (f.name !in hcmdUsed) f.delete() }
 
-            monitor.stop()
             activity.goodSnack(activity.getString(R.string.delete_unused_success))
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
         } catch (e: IOException) {
             activity.badSnack(activity.getString(R.string.io_exception))
+        } finally {
+            monitor.stop()
         }
     }
 
@@ -468,8 +512,8 @@ class HyperDataConverter (private val activity: HyperActivity){
             }
             monitor.inc()
         }
+
         monitor.determination(false)
-        monitor.stop()
         newlyAddedIndices.addAll(repository.addAllCardsAsync(newlyAdded,overwrite).await())
     }
 
@@ -505,7 +549,7 @@ class HyperDataConverter (private val activity: HyperActivity){
     }
 
     private fun getUniqueFile(parent: File, name: String, addToDict: Boolean = true): File {
-        var file = File(parent, name)
+        var file = File(parent, Html.escapeHtml(name).replace(" ", "&#32;"))
         var count = 0
         while (file.exists()) {
             val ext = name.substringAfterLast(".","")
@@ -650,6 +694,7 @@ class HyperDataConverter (private val activity: HyperActivity){
         newlyAdded.clear()
         newlyAddedIndices.clear()
         renamedFiles.clear()
+
         monitor.stop()
     }
 
@@ -687,10 +732,49 @@ class HyperDataConverter (private val activity: HyperActivity){
 
         suspend fun reset(newunit: Int) {
             progress = 0.0
-            units =newunit
+            units = newunit
             withContext(Dispatchers.Main) {
                 activity.binding.progressBar.progress = progress.toInt()
             }
         }
     }
+
+    // for styling from HyperActivity
+    companion object {
+        var textSizeFactor = 1f
+            set(value)  {
+                field = 2.0.pow(value / 2.0).toFloat()
+            }
+
+        private val blackWhite: (Activity) -> Map<Char, Int> = { mapOf('b' to Color.BLACK, 'w' to Color.WHITE) }
+        private val hcColors: (Activity) -> Map<Char, Int> = { activity ->
+            mapOf('b' to ContextCompat.getColor(activity, R.color.colorMain),
+                'w' to ContextCompat.getColor(activity, R.color.colorAccent))
+        }
+
+        private var _sgfColors = hcColors
+        var sgfColors: String? = null
+            set(value) {
+                _sgfColors = if (value == "0") hcColors else blackWhite
+                field = value
+            }
+
+        var sgfShowText = true
+        var sgfShowButtons = true
+
+        fun readPrefs(prefs: SharedPreferences) = with(prefs) {
+            textSizeFactor = getInt("font_size", 0).toFloat()
+            sgfColors = getString("sgf_colortheme", "0")
+            sgfShowText = getBoolean("sgf_showinfo", true)
+            sgfShowButtons = getBoolean("sgf_showbuttons", true)
+        }
+    }
+}
+
+// text handler for sgfview
+private object MSgfDrawer : SgfDrawer by DefaultSgfDrawer() {
+    override fun makeInfoText(nodeInfos: List<NodeInfo>, lastMoveInfo: MoveInfo?): CharSequence =
+        DefaultSgfDrawer().makeInfoText(nodeInfos.filterNot {
+            it.key in listOf(SgfInfoKeys.APN, SgfInfoKeys.APV)
+        }, lastMoveInfo)
 }

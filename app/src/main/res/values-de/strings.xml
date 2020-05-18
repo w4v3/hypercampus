@@ -92,6 +92,7 @@
 
     <!-- Preferences -->
     <string name="srs_header">Spaced Repetition System</string>
+    <string name="sgf_header">Smart Game Format</string>
     <string name="other_header">Weitere</string>
     <string name="algo_title">Algorithmus</string>
     <string name="algo_sm">SuperMemo 2</string>
@@ -102,6 +103,28 @@
     <string name="newcards_dropout">selbstbestimmtes Wiederholen</string>
     <string name="newcards_info">zeige Info-Datei</string>
     <string name="newcards_info_dropout">Info-Datei mit Wiederholen</string>
+    <string name="newcardorder_title">Lernreihenfolge neuer Karten</string>
+    <string name="newcardorder_course">Reihenfolge im Kurs</string>
+    <string name="newcardorder_random">Zufällig</string>
+    <string name="showvariations_title">Zeige Variationen</string>
+    <string name="showvariations_file">Übernehme Einstellungen von der SGF-Datei (Standard)</string>
+    <string name="showvariations_never">Nie</string>
+    <string name="showvariations_always">Immer</string>
+    <string name="interactionmode_title">Interaktionsmodus</string>
+    <string name="interactionmode_freeplay">Freies Spiel</string>
+    <string name="interactionmode_counter">Automatischer Gegenzug</string>
+    <string name="interactionmode_disable">Deaktiviert</string>
+    <string name="showinfo_title">Zeige Info-Text</string>
+    <string name="showbuttons_title">Zeige rückgängig/wiederholen-Buttons</string>
+    <string name="colortheme_title">Farbschema</string>
+    <string name="colortheme_hypercampus">HyperCampus</string>
+    <string name="colortheme_blackwhite">Schwarz/Weiß</string>
+    <string name="font_size_title">Schriftgröße auf den Karten</string>
+    <string name="font_size_tiny">winzig</string>
+    <string name="font_size_small">klein</string>
+    <string name="font_size_medium">mittel</string>
+    <string name="font_size_large">groß</string>
+    <string name="font_size_huge">riesig</string>
     <string name="remove_media_title">Lösche unbenutzte Mediendateien …</string>
     <string name="about_title">Über …</string>
     <string name="licence_title">Lizenzen verwendeter Bibliotheken …</string>
