@@ -51,7 +51,6 @@ import onion.w4v3xrmknycexlsd.app.hypercampus.data.HyperDataConverter
 import onion.w4v3xrmknycexlsd.app.hypercampus.databinding.ActivityMainBinding
 import onion.w4v3xrmknycexlsd.lib.sgfcharm.SgfController
 import java.util.*
-import kotlin.math.pow
 
 
 class HyperActivity : AppCompatActivity() {
@@ -77,7 +76,11 @@ class HyperActivity : AppCompatActivity() {
             .usePlugin(TableEntryPlugin.create(this))
             .usePlugin(PicassoImagesPlugin.create(this))
             .usePlugin(MarkwonInlineParserPlugin.create())
-            .usePlugin(JLatexMathPlugin.create(resources.configuration.fontScale*64) { builder -> builder.inlinesEnabled(true) })
+            .usePlugin(JLatexMathPlugin.create(resources.configuration.fontScale * 64) { builder ->
+                builder.inlinesEnabled(
+                    true
+                )
+            })
             .usePlugin(object : AbstractMarkwonPlugin() {
                 override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
                     builder.urlProcessor(
@@ -182,9 +185,16 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.app_bar_help) { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/w4v3/hypercampus"))) }
+        if (item.itemId == R.id.app_bar_help) {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://github.com/w4v3/hypercampus")
+                )
+            )
+        }
         return item.onNavDestinationSelected(navController)
-            || super.onOptionsItemSelected(item)
+                || super.onOptionsItemSelected(item)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -207,7 +217,8 @@ class HyperActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context?) {
         val locale = when {
-            PreferenceManager.getDefaultSharedPreferences(newBase).getBoolean("set_lang",false) -> "en"
+            PreferenceManager.getDefaultSharedPreferences(newBase)
+                .getBoolean("set_lang", false) -> "en"
             Locale.getDefault().language in SUPPORTED_LANG -> Locale.getDefault().language
             else -> "en"
         }
@@ -215,7 +226,7 @@ class HyperActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
-        onActivityResultListener?.onActivityResult(requestCode,resultCode,resultData)
+        onActivityResultListener?.onActivityResult(requestCode, resultCode, resultData)
         super.onActivityResult(requestCode, resultCode, resultData)
     }
 

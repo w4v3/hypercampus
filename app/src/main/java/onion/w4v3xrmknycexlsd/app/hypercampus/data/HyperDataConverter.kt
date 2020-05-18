@@ -68,7 +68,8 @@ const val OPEN_FILE = 2
 
 @Suppress("RegExpRedundantEscape")
 class HyperDataConverter(private val activity: HyperActivity) {
-    @Inject lateinit var repository: HyperRepository
+    @Inject
+    lateinit var repository: HyperRepository
     private val contentResolver = activity.applicationContext.contentResolver
 
     private val newlyAdded = mutableListOf<Card>()
@@ -81,40 +82,41 @@ class HyperDataConverter(private val activity: HyperActivity) {
         (activity.applicationContext as HyperApp).hyperComponent.inject(this)
     }
 
-    fun collectionToFile(data: List<DeckData>, withMedia: Boolean = false) = repository.repositoryScope.launch(Dispatchers.IO) {
-        try {
-            val uri: Uri? = suspendCancellableCoroutine { cont ->
-                linkActivityIntent(CREATE_FILE, cont)
-                if (withMedia) createFile("collection.hczip") else createFile("collection.hcmd")
-            }
-
-            monitor.init()
-            monitor.determination(false)
-            if (withMedia) {
-                val files = prepareZip(data)
-                uri?.let { makeZipFile(files,it) }
-                activity.goodSnack(activity.getString(R.string.exp_success))
-            } else {
-                uri?.let {
-                    contentResolver.openOutputStream(it)?.let { out ->
-                        writeStringTo(collectionToMd(data), out)
-                    }
+    fun collectionToFile(data: List<DeckData>, withMedia: Boolean = false) =
+        repository.repositoryScope.launch(Dispatchers.IO) {
+            try {
+                val uri: Uri? = suspendCancellableCoroutine { cont ->
+                    linkActivityIntent(CREATE_FILE, cont)
+                    if (withMedia) createFile("collection.hczip") else createFile("collection.hcmd")
                 }
-                activity.goodSnack(activity.getString(R.string.exp_success))
+
+                monitor.init()
+                monitor.determination(false)
+                if (withMedia) {
+                    val files = prepareZip(data)
+                    uri?.let { makeZipFile(files, it) }
+                    activity.goodSnack(activity.getString(R.string.exp_success))
+                } else {
+                    uri?.let {
+                        contentResolver.openOutputStream(it)?.let { out ->
+                            writeStringTo(collectionToMd(data), out)
+                        }
+                    }
+                    activity.goodSnack(activity.getString(R.string.exp_success))
+                }
+            } catch (e: FileNotFoundException) {
+                activity.badSnack(activity.getString(R.string.fnf_exception))
+            } catch (e: IOException) {
+                activity.badSnack(activity.getString(R.string.io_exception))
+            } finally {
+                monitor.stop()
             }
-        } catch (e: FileNotFoundException) {
-            activity.badSnack(activity.getString(R.string.fnf_exception))
-        } catch (e: IOException) {
-            activity.badSnack(activity.getString(R.string.io_exception))
-        } finally {
-            monitor.stop()
         }
-    }
 
     fun fileToCollection(uri: Uri) = repository.repositoryScope.launch(Dispatchers.IO) {
         try {
             val proj = arrayOf(OpenableColumns.DISPLAY_NAME)
-            val cursor = contentResolver.query(uri,proj,null,null,null)
+            val cursor = contentResolver.query(uri, proj, null, null, null)
             cursor?.moveToFirst()
             val filename = cursor?.getString(0)
             cursor?.close()
@@ -125,22 +127,36 @@ class HyperDataConverter(private val activity: HyperActivity) {
                     activity.goodSnack(activity.getString(R.string.imp_success))
                     monitor.stop()
                 }
-                "hcmd" -> withContext(Dispatchers.Main){
-                    val builder =  MaterialAlertDialogBuilder(activity)
+                "hcmd" -> withContext(Dispatchers.Main) {
+                    val builder = MaterialAlertDialogBuilder(activity)
                     builder.setTitle(activity.getString(R.string.title_import))
                         .setMessage(activity.getString(R.string.import_dialog))
                         .setPositiveButton(activity.getString(R.string.import_overwrite)) { _, _ ->
                             repository.repositoryScope.launch(Dispatchers.IO) {
-                                val content = contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
-                                content?.let { mdToCollection(it, withOrder = true, overwrite = true) }
+                                val content =
+                                    contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
+                                content?.let {
+                                    mdToCollection(
+                                        it,
+                                        withOrder = true,
+                                        overwrite = true
+                                    )
+                                }
                                 activity.goodSnack(activity.getString(R.string.imp_success))
                                 monitor.stop()
                             }
                         }
                         .setNegativeButton(activity.getString(R.string.import_addnew)) { _, _ ->
                             repository.repositoryScope.launch(Dispatchers.IO) {
-                                val content = contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
-                                content?.let { mdToCollection(it, withOrder = true, overwrite = false) }
+                                val content =
+                                    contentResolver.openInputStream(uri)?.let { readStringFrom(it) }
+                                content?.let {
+                                    mdToCollection(
+                                        it,
+                                        withOrder = true,
+                                        overwrite = false
+                                    )
+                                }
                                 activity.goodSnack(activity.getString(R.string.imp_success))
                                 monitor.stop()
                             }
@@ -154,7 +170,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
                     activity.goodSnack(activity.getString(R.string.imp_success))
                 }
                 "hczip" -> withContext(Dispatchers.Main) {
-                    val builder =  MaterialAlertDialogBuilder(activity)
+                    val builder = MaterialAlertDialogBuilder(activity)
                     builder.setTitle(activity.getString(R.string.title_import))
                         .setMessage(activity.getString(R.string.import_dialog))
                         .setPositiveButton(activity.getString(R.string.import_overwrite)) { _, _ ->
@@ -191,14 +207,14 @@ class HyperDataConverter(private val activity: HyperActivity) {
     suspend fun addMedia(requestName: String, type: String): String {
         try {
             val uri: Uri? = suspendCoroutine { cont ->
-                linkActivityIntent(OPEN_FILE,cont)
+                linkActivityIntent(OPEN_FILE, cont)
                 openFile(type)
             }
 
             val toParent = getMediaAccess()
 
             val from = uri?.let { contentResolver.openInputStream(it) }
-            val to = getUniqueFile(toParent,requestName)
+            val to = getUniqueFile(toParent, requestName)
             from?.let { writeFromTo(from, to.outputStream()) }
             return "![${if (type == FILE_AUDIO) "audio" else "image"}](${to.name})"
         } catch (e: FileNotFoundException) {
@@ -212,7 +228,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
 
     fun getInfoFile(name: String): String {
         return try {
-            val fileInputStream = File(getMediaAccess(DIR_HCMD),name).inputStream()
+            val fileInputStream = File(getMediaAccess(DIR_HCMD), name).inputStream()
             readStringFrom(fileInputStream)
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
@@ -226,8 +242,8 @@ class HyperDataConverter(private val activity: HyperActivity) {
     fun convertToViews(toConvert: String, root: LinearLayout) {
         val mediaRegex = Regex("""!\[(.*)\]\((.*)\)""")
         val groups: MutableList<String> = toConvert.split(mediaRegex).toMutableList()
-        for ((i,s) in mediaRegex.findAll(toConvert).withIndex()) {
-            groups.add(2*i+1,s.value)
+        for ((i, s) in mediaRegex.findAll(toConvert).withIndex()) {
+            groups.add(2 * i + 1, s.value)
         }
 
         groups.map { it.removeSuffix("\n") }
@@ -239,15 +255,21 @@ class HyperDataConverter(private val activity: HyperActivity) {
                 "image" -> {
                     root.addView(TextView(activity).apply {
                         gravity = Gravity.CENTER
-                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                        activity.markwon.setMarkdown(this,"&nbsp;${parse[0]?.value}&nbsp;")
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        activity.markwon.setMarkdown(this, "&nbsp;${parse[0]?.value}&nbsp;")
                     })
                 }
                 "audio" -> {
                     root.addView(ImageButton(activity).apply {
-                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
                         setBackgroundColor(activity.getThemeColor(R.attr.colorSecondaryVariant))
-                        setPadding(8,8,8,8)
+                        setPadding(8, 8, 8, 8)
                         minimumHeight = 48
                         minimumWidth = 48
                         setImageResource(R.drawable.ic_volume_up_white_24dp)
@@ -259,6 +281,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
                         } catch (e: IOException) {
                             activity.badSnack(activity.getString(R.string.io_exception))
                         }
+
                         val uri = "${getMediaAccess().absolutePath}/${parse[2]?.value}"
                         if (isShown)
                             play(uri)
@@ -281,7 +304,10 @@ class HyperDataConverter(private val activity: HyperActivity) {
                     val sgfString = readStringFrom(fileInputStream)
                     root.addView(GoSgfView(activity, null).apply {
                         gravity = Gravity.CENTER
-                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
                         blackColor = _sgfColors(activity)['b'] ?: error("no such color")
                         whiteColor = _sgfColors(activity)['w'] ?: error("no such color")
                         setTextSize(COMPLEX_UNIT_PX, textSizeFactor * textSize)
@@ -297,13 +323,19 @@ class HyperDataConverter(private val activity: HyperActivity) {
                         gravity = Gravity.CENTER
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                             @Suppress("DEPRECATION")
-                            setTextAppearance(activity, R.style.TextAppearance_MaterialComponents_Body1)
+                            setTextAppearance(
+                                activity,
+                                R.style.TextAppearance_MaterialComponents_Body1
+                            )
                         } else {
                             setTextAppearance(R.style.TextAppearance_MaterialComponents_Body1)
                         }
-                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                        layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
                         setTextSize(COMPLEX_UNIT_PX, textSizeFactor * textSize)
-                        activity.markwon.setMarkdown(this,g)
+                        activity.markwon.setMarkdown(this, g)
                     })
                 }
             }
@@ -318,9 +350,11 @@ class HyperDataConverter(private val activity: HyperActivity) {
             val allcards = repository.getAllCards()
             val medParent = getMediaAccess(DIR_MEDIA)
             val mediaRegex = Regex("!\\[.*\\]\\((.*)\\)")
-            val usedMedia = allcards.joinToString(";",postfix=";") { card ->
-                mediaRegex.findAll(card.question).map { it.groups[1]?.value ?: "" }.joinToString(";",postfix=";") +
-                mediaRegex.findAll(card.answer).map { it.groups[1]?.value ?: "" }.joinToString(";")
+            val usedMedia = allcards.joinToString(";", postfix = ";") { card ->
+                mediaRegex.findAll(card.question).map { it.groups[1]?.value ?: "" }
+                    .joinToString(";", postfix = ";") +
+                        mediaRegex.findAll(card.answer).map { it.groups[1]?.value ?: "" }
+                            .joinToString(";")
             }
             medParent.listFiles()?.let { for (f in it) if ("${f.name};" !in usedMedia) f.delete() }
 
@@ -366,13 +400,17 @@ class HyperDataConverter(private val activity: HyperActivity) {
         return result
     }
 
-    private suspend fun mdToCollection(content: String, withOrder: Boolean = false, overwrite: Boolean = false) {
+    private suspend fun mdToCollection(
+        content: String,
+        withOrder: Boolean = false,
+        overwrite: Boolean = false
+    ) {
         var infofile: String? = null
         try {
             val toParent = getMediaAccess(DIR_HCMD)
-            val to = getUniqueFile(toParent,"collection",false)
+            val to = getUniqueFile(toParent, "collection", false)
             infofile = to.name
-            writeStringTo(content,to.outputStream())
+            writeStringTo(content, to.outputStream())
         } catch (e: FileNotFoundException) {
             activity.badSnack(activity.getString(R.string.fnf_exception))
         } catch (e: IOException) {
@@ -399,110 +437,164 @@ class HyperDataConverter(private val activity: HyperActivity) {
         for (l in lines) {
             when {
                 l.matches(Regex("^# \\[(.*)] (.*)$")) -> Regex("^# \\[(.*)] (.*)$").find(l)?.groups?.let {
-                    currentCourse = repository.addAsync(Course(symbol = it[1]!!.value.trim(), name = it[2]!!.value.trim()), overwrite).await().toInt()
+                    currentCourse = repository.addAsync(
+                        Course(
+                            symbol = it[1]!!.value.trim(),
+                            name = it[2]!!.value.trim()
+                        ), overwrite
+                    ).await().toInt()
                     if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^# (.*)$")) -> Regex("^# (.*)$").find(l)?.groups?.let {
-                    currentCourse = repository.addAsync(Course(symbol = "", name = it[1]!!.value.trim()), overwrite).await().toInt()
+                    currentCourse = repository.addAsync(
+                        Course(symbol = "", name = it[1]!!.value.trim()),
+                        overwrite
+                    ).await().toInt()
                     if (!withOrder) currentWithinCourseId = 0
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## \\[(.*)] (.*)$")) -> Regex("^## \\[(.*)] (.*)$").find(l)?.groups?.let {
                     currentCourse?.let { cc ->
-                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = it[1]!!.value.trim(), name = it[2]!!.value.trim()), overwrite).await().toInt()
+                        currentLesson = repository.addAsync(
+                            Lesson(
+                                course_id = cc,
+                                symbol = it[1]!!.value.trim(),
+                                name = it[2]!!.value.trim()
+                            ), overwrite
+                        ).await().toInt()
                     }
                     tableLineCount = 0
                 }
                 l.matches(Regex("^## (.*)$")) -> Regex("^## (.*)$").find(l)?.groups?.let {
                     currentCourse?.let { cc ->
-                        currentLesson = repository.addAsync(Lesson(course_id = cc, symbol = "", name = it[1]!!.value.trim()), overwrite).await().toInt()
+                        currentLesson = repository.addAsync(
+                            Lesson(
+                                course_id = cc,
+                                symbol = "",
+                                name = it[1]!!.value.trim()
+                            ), overwrite
+                        ).await().toInt()
                     }
                     tableLineCount = 0
                 }
                 l.matches(Regex("^(.*)\\|(.*)$")) ->
                     if (tableLineCount >= 2) {
                         if (withOrder) {
-                            Regex("^(\\d+)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(l)?.groups?.let { grps ->
-                                currentCourse?.let { cc -> currentLesson?.let { cl ->
-                                    // allow one count column, one main and 5 pairings
-                                    // 10 values of within_course_id are now reserved per entry,
-                                    // one for each pairing and direction
-                                    grps.drop(3).take(5).mapIndexed { idx,answ ->
-                                        answ?.let {
-                                            newlyAdded.add(
-                                                Card(course_id = cc,
-                                                    lesson_id = cl,
-                                                    within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx,
-                                                    question = grps[2]!!.value.trim().unescape(),
-                                                    answer = answ.value.trim().unescape(),
-                                                    q_col_name = header.getOrNull(0) ?: questionString,
-                                                    a_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                    info_file = infofile))
-                                            if (twoway) {
+                            Regex("^(\\d+)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(
+                                l
+                            )?.groups?.let { grps ->
+                                currentCourse?.let { cc ->
+                                    currentLesson?.let { cl ->
+                                        // allow one count column, one main and 5 pairings
+                                        // 10 values of within_course_id are now reserved per entry,
+                                        // one for each pairing and direction
+                                        grps.drop(3).take(5).mapIndexed { idx, answ ->
+                                            answ?.let {
                                                 newlyAdded.add(
-                                                    Card(course_id = cc,
+                                                    Card(
+                                                        course_id = cc,
                                                         lesson_id = cl,
-                                                        within_course_id = Integer.parseInt(grps[1]!!.value)*10+idx+5,
-                                                        question = answ.value.trim().unescape(),
-                                                        answer = grps[2]!!.value.trim().unescape(),
-                                                        q_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                        a_col_name = header.getOrNull(0) ?: questionString,
-                                                        info_file = infofile))
+                                                        within_course_id = Integer.parseInt(grps[1]!!.value) * 10 + idx,
+                                                        question = grps[2]!!.value.trim()
+                                                            .unescape(),
+                                                        answer = answ.value.trim().unescape(),
+                                                        q_col_name = header.getOrNull(0)
+                                                            ?: questionString,
+                                                        a_col_name = header.getOrNull(idx + 1)
+                                                            ?: answerString,
+                                                        info_file = infofile
+                                                    )
+                                                )
+                                                if (twoway) {
+                                                    newlyAdded.add(
+                                                        Card(
+                                                            course_id = cc,
+                                                            lesson_id = cl,
+                                                            within_course_id = Integer.parseInt(grps[1]!!.value) * 10 + idx + 5,
+                                                            question = answ.value.trim().unescape(),
+                                                            answer = grps[2]!!.value.trim()
+                                                                .unescape(),
+                                                            q_col_name = header.getOrNull(idx + 1)
+                                                                ?: answerString,
+                                                            a_col_name = header.getOrNull(0)
+                                                                ?: questionString,
+                                                            info_file = infofile
+                                                        )
+                                                    )
+                                                }
                                             }
                                         }
                                     }
-                                }}
+                                }
                             }
                         } else {
-                            Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(l)?.groups?.let { grps ->
-                                currentCourse?.let { cc -> currentLesson?.let { cl ->
-                                    // allow one main column and 5 pairings
-                                    grps.drop(2).take(5).mapIndexed { idx,answ ->
-                                        answ?.let {
-                                            newlyAdded.add(
-                                                Card(course_id = cc,
-                                                     lesson_id = cl,
-                                                     within_course_id = currentWithinCourseId+idx,
-                                                     question = grps[1]!!.value.trim().unescape(),
-                                                     answer = answ.value.trim().unescape(),
-                                                     q_col_name = header.getOrNull(0) ?: questionString,
-                                                     a_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                    info_file = infofile))
-                                            if (twoway) {
+                            Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$").find(
+                                l
+                            )?.groups?.let { grps ->
+                                currentCourse?.let { cc ->
+                                    currentLesson?.let { cl ->
+                                        // allow one main column and 5 pairings
+                                        grps.drop(2).take(5).mapIndexed { idx, answ ->
+                                            answ?.let {
                                                 newlyAdded.add(
-                                                    Card(course_id = cc,
+                                                    Card(
+                                                        course_id = cc,
                                                         lesson_id = cl,
-                                                        within_course_id = currentWithinCourseId+5,
-                                                        question = answ.value.trim().unescape(),
-                                                        answer = grps[1]!!.value.trim().unescape(),
-                                                        q_col_name = header.getOrNull(idx+1) ?: answerString,
-                                                        a_col_name = header.getOrNull(0) ?: questionString,
-                                                        info_file = infofile))
+                                                        within_course_id = currentWithinCourseId + idx,
+                                                        question = grps[1]!!.value.trim()
+                                                            .unescape(),
+                                                        answer = answ.value.trim().unescape(),
+                                                        q_col_name = header.getOrNull(0)
+                                                            ?: questionString,
+                                                        a_col_name = header.getOrNull(idx + 1)
+                                                            ?: answerString,
+                                                        info_file = infofile
+                                                    )
+                                                )
+                                                if (twoway) {
+                                                    newlyAdded.add(
+                                                        Card(
+                                                            course_id = cc,
+                                                            lesson_id = cl,
+                                                            within_course_id = currentWithinCourseId + 5,
+                                                            question = answ.value.trim().unescape(),
+                                                            answer = grps[1]!!.value.trim()
+                                                                .unescape(),
+                                                            q_col_name = header.getOrNull(idx + 1)
+                                                                ?: answerString,
+                                                            a_col_name = header.getOrNull(0)
+                                                                ?: questionString,
+                                                            info_file = infofile
+                                                        )
+                                                    )
+                                                }
                                             }
                                         }
+                                        currentWithinCourseId += 10
                                     }
-                                    currentWithinCourseId += 10
-                                }}
+                                }
                             }
                         }
                     } else if (tableLineCount == 0) { // reading a header
                         if (withOrder) {
-                            header = Regex("^(.*?)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
-                                .find(l)
-                                ?.groups
-                                ?.drop(2)
-                                ?.map { it?.value?.trim() }
-                                ?.toMutableList()
-                                ?: mutableListOf()
+                            header =
+                                Regex("^(.*?)\\|(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
+                                    .find(l)
+                                    ?.groups
+                                    ?.drop(2)
+                                    ?.map { it?.value?.trim() }
+                                    ?.toMutableList()
+                                    ?: mutableListOf()
                         } else {
-                            header = Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
-                                .find(l)
-                                ?.groups
-                                ?.drop(1)
-                                ?.map { it?.value?.trim() }
-                                ?.toMutableList()
-                                ?: mutableListOf()
+                            header =
+                                Regex("^(.*?)\\|(.*?)(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?(?:\\|(.*?))?$")
+                                    .find(l)
+                                    ?.groups
+                                    ?.drop(1)
+                                    ?.map { it?.value?.trim() }
+                                    ?.toMutableList()
+                                    ?: mutableListOf()
                         }
                         tableLineCount++
                     } else tableLineCount++
@@ -514,23 +606,25 @@ class HyperDataConverter(private val activity: HyperActivity) {
         }
 
         monitor.determination(false)
-        newlyAddedIndices.addAll(repository.addAllCardsAsync(newlyAdded,overwrite).await())
+        newlyAddedIndices.addAll(repository.addAllCardsAsync(newlyAdded, overwrite).await())
     }
 
     private fun String.escape(): String = this
-        .replace("""&""","""&amp;""")
-        .replace("""|""","""&verbar;""")
-        .replace("\n","""&NewLine;""")
+        .replace("""&""", """&amp;""")
+        .replace("""|""", """&verbar;""")
+        .replace("\n", """&NewLine;""")
+
     private fun String.unescape(): String = this
-        .replace("""&amp;""","""&""")
-        .replace("""&verbar;""","""|""")
-        .replace("""&NewLine;""","\n")
+        .replace("""&amp;""", """&""")
+        .replace("""&verbar;""", """|""")
+        .replace("""&NewLine;""", "\n")
 
     private fun linkActivityIntent(code: Int, cont: Continuation<Uri>) {
         activity.onActivityResultListener = object : HyperActivity.OnActivityResultListener {
             override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
                 if (requestCode == code
-                    && resultCode == Activity.RESULT_OK) {
+                    && resultCode == Activity.RESULT_OK
+                ) {
                     resultData?.data?.also { uri ->
                         cont.resume(uri)
                     }
@@ -541,7 +635,8 @@ class HyperDataConverter(private val activity: HyperActivity) {
 
     private fun getMediaAccess(dir: String = DIR_MEDIA): File {
         if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            val parent = File(activity.applicationContext.getExternalFilesDir(null)?.absolutePath + "/$dir/")
+            val parent =
+                File(activity.applicationContext.getExternalFilesDir(null)?.absolutePath + "/$dir/")
             if (parent.exists() || parent.mkdirs()) {
                 return parent
             } else throw FileNotFoundException()
@@ -552,7 +647,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
         var file = File(parent, Html.escapeHtml(name).replace(" ", "&#32;"))
         var count = 0
         while (file.exists()) {
-            val ext = name.substringAfterLast(".","")
+            val ext = name.substringAfterLast(".", "")
             val dot = if (ext != "") "." else ""
             file = File(parent, "${name}_$count$dot$ext")
             count++
@@ -589,7 +684,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             putExtra(Intent.EXTRA_TITLE, name)
-            type="*/*"
+            type = "*/*"
         }
         activity.startActivityForResult(intent, CREATE_FILE)
     }
@@ -609,14 +704,18 @@ class HyperDataConverter(private val activity: HyperActivity) {
         if (data.isNotEmpty()) {
             @Suppress("UNCHECKED_CAST")
             val toTraverse: List<Card> = when (data[0]) {
-                is Course -> repository.getAllCardsFromCourses(data.map { (it as Course).id }.toIntArray())
-                is Lesson -> repository.getAllCardsFromLessons(data.map { (it as Lesson).id }.toIntArray())
+                is Course -> repository.getAllCardsFromCourses(data.map { (it as Course).id }
+                    .toIntArray())
+                is Lesson -> repository.getAllCardsFromLessons(data.map { (it as Lesson).id }
+                    .toIntArray())
                 is Card -> data as List<Card>
             }
 
-            for (t in toTraverse) { getMediaFromCard(t,toParent)?.let { result.addAll(it) } }
+            for (t in toTraverse) {
+                getMediaFromCard(t, toParent)?.let { result.addAll(it) }
+            }
 
-            val md = File(toParent.absolutePath,"collection.md")
+            val md = File(toParent.absolutePath, "collection.md")
             val mdData = collectionToMd(data)
             writeStringTo(mdData, md.outputStream())
             result.add(md)
@@ -628,17 +727,21 @@ class HyperDataConverter(private val activity: HyperActivity) {
     private fun makeZipFile(files: List<File>, uri: Uri) {
         contentResolver.openOutputStream(uri)?.let { ZipOutputStream(BufferedOutputStream(it)) }
             .use { output ->
-            for (file in files) {
-                BufferedInputStream(FileInputStream(file)).use { input ->
-                    val entry = ZipEntry(file.name)
-                    output?.putNextEntry(entry)
-                    output?.let { input.copyTo(it) }
+                for (file in files) {
+                    BufferedInputStream(FileInputStream(file)).use { input ->
+                        val entry = ZipEntry(file.name)
+                        output?.putNextEntry(entry)
+                        output?.let { input.copyTo(it) }
+                    }
                 }
             }
-        }
     }
 
-    private suspend fun unZipFile(uri: Uri, withOrder: Boolean = false, overwrite: Boolean = false) {
+    private suspend fun unZipFile(
+        uri: Uri,
+        withOrder: Boolean = false,
+        overwrite: Boolean = false
+    ) {
         val parent = getMediaAccess()
 
         newlyAdded.clear()
@@ -654,8 +757,12 @@ class HyperDataConverter(private val activity: HyperActivity) {
                 while (input?.nextEntry.also { ze = it } != null) {
                     val fo = getUniqueFile(parent, ze!!.name).outputStream()
                     BufferedOutputStream(fo).use { output ->
-                        if (ze!!.name.substringAfterLast(".") == "md" || ze!!.name.substringAfterLast(".") == "hcmd") {
-                            input?.bufferedReader()?.let { mdToCollection(it.readText(), withOrder, overwrite) }
+                        if (ze!!.name.substringAfterLast(".") == "md" || ze!!.name.substringAfterLast(
+                                "."
+                            ) == "hcmd"
+                        ) {
+                            input?.bufferedReader()
+                                ?.let { mdToCollection(it.readText(), withOrder, overwrite) }
                         } else {
                             input?.copyTo(output)
                         }
@@ -668,7 +775,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
         monitor.reset(renamedFiles.size)
         monitor.init()
         monitor.determination(true)
-        var newContents = newlyAdded.mapIndexed { idx,card ->
+        var newContents = newlyAdded.mapIndexed { idx, card ->
             CardContent(
                 id = newlyAddedIndices[idx].toInt(),
                 lesson_id = card.lesson_id,
@@ -682,8 +789,10 @@ class HyperDataConverter(private val activity: HyperActivity) {
         for (f in renamedFiles) {
             newContents = newContents.map { cc ->
                 cc.apply {
-                    question = Regex("(!\\[.*]\\()${f.key}\\)").replace(question) { it.groups[1]?.value + f.value + ")" }
-                    answer = Regex("(!\\[.*]\\()${f.key}\\)").replace(answer) { it.groups[1]?.value + f.value + ")" }
+                    question =
+                        Regex("(!\\[.*]\\()${f.key}\\)").replace(question) { it.groups[1]?.value + f.value + ")" }
+                    answer =
+                        Regex("(!\\[.*]\\()${f.key}\\)").replace(answer) { it.groups[1]?.value + f.value + ")" }
                 }
             }
             monitor.inc()
@@ -699,7 +808,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
     }
 
     // for task progress
-    class ProgressMonitor(private val activity: HyperActivity){
+    class ProgressMonitor(private val activity: HyperActivity) {
         private var units = 1
         private var progress = 0.0
 
@@ -717,7 +826,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
 
         suspend fun inc() {
             withContext(Dispatchers.Main) {
-                progress += 100.0/units
+                progress += 100.0 / units
                 activity.binding.progressBar.progress = progress.toInt()
             }
         }
@@ -742,14 +851,17 @@ class HyperDataConverter(private val activity: HyperActivity) {
     // for styling from HyperActivity
     companion object {
         var textSizeFactor = 1f
-            set(value)  {
+            set(value) {
                 field = 2.0.pow(value / 2.0).toFloat()
             }
 
-        private val blackWhite: (Activity) -> Map<Char, Int> = { mapOf('b' to Color.BLACK, 'w' to Color.WHITE) }
+        private val blackWhite: (Activity) -> Map<Char, Int> =
+            { mapOf('b' to Color.BLACK, 'w' to Color.WHITE) }
         private val hcColors: (Activity) -> Map<Char, Int> = { activity ->
-            mapOf('b' to ContextCompat.getColor(activity, R.color.colorMain),
-                'w' to ContextCompat.getColor(activity, R.color.colorAccent))
+            mapOf(
+                'b' to ContextCompat.getColor(activity, R.color.colorMain),
+                'w' to ContextCompat.getColor(activity, R.color.colorAccent)
+            )
         }
 
         private var _sgfColors = hcColors

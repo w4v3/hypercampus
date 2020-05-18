@@ -43,7 +43,8 @@ import javax.inject.Inject
 class EditCardFragment : Fragment() {
     private val args: EditCardFragmentArgs by navArgs()
 
-    @Inject lateinit var modelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var viewModel: HyperViewModel
     private lateinit var binding: FragmentEditCardBinding
 
@@ -70,8 +71,14 @@ class EditCardFragment : Fragment() {
 
         binding.addImage.setOnClickListener {
             lifecycleScope.launch {
-                val name = viewModel.getCourseAsync(args.courseId).name+"_"+viewModel.getLessonAsync(args.lessonId).name+"_0"
-                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(name, FILE_IMAGE)
+                val name =
+                    viewModel.getCourseAsync(args.courseId).name + "_" + viewModel.getLessonAsync(
+                        args.lessonId
+                    ).name + "_0"
+                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(
+                    name,
+                    FILE_IMAGE
+                )
                 if (binding.editAnswer.hasFocus()) {
                     binding.editCard!!.answer += "\n" + tag
                 } else {
@@ -82,8 +89,14 @@ class EditCardFragment : Fragment() {
         }
         binding.addSound.setOnClickListener {
             lifecycleScope.launch {
-                val name = viewModel.getCourseAsync(args.courseId).name+"_"+viewModel.getLessonAsync(args.lessonId).name+"_0"
-                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(name, FILE_AUDIO)
+                val name =
+                    viewModel.getCourseAsync(args.courseId).name + "_" + viewModel.getLessonAsync(
+                        args.lessonId
+                    ).name + "_0"
+                val tag = HyperDataConverter(requireActivity() as HyperActivity).addMedia(
+                    name,
+                    FILE_AUDIO
+                )
                 if (binding.editAnswer.hasFocus()) {
                     binding.editCard!!.answer += "\n" + tag
                 } else {
@@ -93,7 +106,13 @@ class EditCardFragment : Fragment() {
             }
         }
 
-        findNavController().addOnDestinationChangedListener { _, _, _ -> activity?.let { hideSoftKeyboard(it) } }
+        findNavController().addOnDestinationChangedListener { _, _, _ ->
+            activity?.let {
+                hideSoftKeyboard(
+                    it
+                )
+            }
+        }
 
         setHasOptionsMenu(true)
         return binding.root

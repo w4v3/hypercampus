@@ -24,10 +24,10 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -57,7 +57,8 @@ open class DeckDataListFragment : Fragment(),
     private var currentCourse: Course? = null
     private var currentLesson: Lesson? = null
 
-    @Inject lateinit var modelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var modelFactory: ViewModelProvider.Factory
     private lateinit var viewModel: HyperViewModel
     private lateinit var binding: DeckdataListBinding
     private lateinit var adapter: DeckDataAdapter
@@ -66,9 +67,9 @@ open class DeckDataListFragment : Fragment(),
     private var selected: MutableList<DeckData> = mutableListOf()
     private var selectionMode: ActionMode? = null
 
-    private val loadCourse = Course(symbol ="…",name="loading")
-    private val loadLesson = Lesson(symbol ="…",course_id = 0,name="loading")
-    private val loadCard = Card(course_id = 0,lesson_id = 0,question="loading ...")
+    private val loadCourse = Course(symbol = "…", name = "loading")
+    private val loadLesson = Lesson(symbol = "…", course_id = 0, name = "loading")
+    private val loadCard = Card(course_id = 0, lesson_id = 0, question = "loading ...")
 
     override fun onAttach(context: Context) {
         (context.applicationContext as HyperApp).hyperComponent.inject(this)
@@ -124,7 +125,8 @@ open class DeckDataListFragment : Fragment(),
                 })
 
                 when (args.level) {
-                    Level.COURSES -> {}
+                    Level.COURSES -> {
+                    }
                     Level.LESSONS -> {
                         currentCourse = viewModel.getCourseAsync(args.dataId)
                         (activity as HyperActivity).binding.appBar.title = currentCourse?.name
@@ -139,16 +141,19 @@ open class DeckDataListFragment : Fragment(),
 
             // reset new cards if new day
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-            val lastStudied = prefs.getInt("last_studied",0)
+            val lastStudied = prefs.getInt("last_studied", 0)
             if (lastStudied != currentDate()) viewModel.resetStudied()
             with(prefs.edit()) {
-                putInt("last_studied",currentDate())
+                putInt("last_studied", currentDate())
                 apply()
             }
 
             // app intro
-            val pref = activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE)
-            if (pref?.getBoolean("first_time_${args.level.ordinal}", true) == true) withContext(Dispatchers.Main){
+            val pref =
+                activity?.getSharedPreferences("material_showcaseview_prefs", Context.MODE_PRIVATE)
+            if (pref?.getBoolean("first_time_${args.level.ordinal}", true) == true) withContext(
+                Dispatchers.Main
+            ) {
                 if (args.level == Level.COURSES) {
                     val builder = activity?.let { MaterialAlertDialogBuilder(it) }
                     builder?.setTitle(R.string.app_name)
@@ -249,9 +254,15 @@ open class DeckDataListFragment : Fragment(),
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val inflater: MenuInflater = mode.menuInflater
             inflater.inflate(R.menu.selection_menu, menu)
-            (activity as HyperActivity).binding.floatingActionButton.isVisible = (args.level != Level.CARDS)
+            (activity as HyperActivity).binding.floatingActionButton.isVisible =
+                (args.level != Level.CARDS)
             (activity as HyperActivity).binding.floatingActionButton.backgroundTintList =
-                ColorStateList.valueOf(ContextCompat.getColor(activity as Context, R.color.colorContrastDark))
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        activity as Context,
+                        R.color.colorContrastDark
+                    )
+                )
             (activity as HyperActivity).binding.floatingActionButton.setColorFilter(
                 ContextCompat.getColor(activity as Context, R.color.colorLight)
             )
@@ -323,7 +334,12 @@ open class DeckDataListFragment : Fragment(),
             multiSelect = false
             selectionMode = null
             (activity as HyperActivity).binding.floatingActionButton.backgroundTintList =
-                ColorStateList.valueOf(ContextCompat.getColor(activity as Context, R.color.colorAccent))
+                ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        activity as Context,
+                        R.color.colorAccent
+                    )
+                )
             (activity as HyperActivity).binding.floatingActionButton.setColorFilter(
                 ContextCompat.getColor(activity as Context, R.color.colorContrastDark)
             )
@@ -348,7 +364,8 @@ open class DeckDataListFragment : Fragment(),
                 }
             })
         }
-        (menu.findItem(R.id.app_bar_search)).setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        (menu.findItem(R.id.app_bar_search)).setOnActionExpandListener(object :
+            MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 menu.findItem(R.id.app_bar_add)?.isVisible = false
                 menu.findItem(R.id.app_bar_stats)?.isVisible = false
@@ -363,7 +380,7 @@ open class DeckDataListFragment : Fragment(),
                 activity?.invalidateOptionsMenu()
                 return true
             }
-    } )
+        })
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -396,11 +413,12 @@ open class DeckDataListFragment : Fragment(),
                                 it.id
                             )
                         }
-                    Level.CARDS -> {}
+                    Level.CARDS -> {
+                    }
                 }
 
                 val builder = activity?.let { MaterialAlertDialogBuilder(it) }
-                builder?.setTitle(getString(R.string.new_,label))
+                builder?.setTitle(getString(R.string.new_, label))
                     ?.setView(cardBinding?.root)
                     ?.setPositiveButton(getString(R.string.add)) { _, _ ->
                         when (args.level) {
@@ -410,7 +428,8 @@ open class DeckDataListFragment : Fragment(),
                             Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson?.let {
                                 viewModel.add(it)
                             }
-                            Level.CARDS -> {}
+                            Level.CARDS -> {
+                            }
                         }
                     }
                     ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
@@ -421,7 +440,7 @@ open class DeckDataListFragment : Fragment(),
             R.id.app_bar_stats -> {
                 if (!adapter.showingStats) {
                     lifecycleScope.launch {
-                        val statData = viewModel.getStatsAsync(args.level,args.dataId)
+                        val statData = viewModel.getStatsAsync(args.level, args.dataId)
                         adapter.toggleStats(statData)
                     }
                 } else adapter.toggleStats()
@@ -431,8 +450,15 @@ open class DeckDataListFragment : Fragment(),
     }
 
     fun deleteSelected() {
-        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
-        builder?.setTitle(resources.getQuantityString(R.plurals.deleting_, selected.size, selected.size, label))
+        val builder = activity?.let { MaterialAlertDialogBuilder(it) }
+        builder?.setTitle(
+            resources.getQuantityString(
+                R.plurals.deleting_,
+                selected.size,
+                selected.size,
+                label
+            )
+        )
             ?.setMessage(getString(R.string.are_you_sure))
             ?.setPositiveButton(getString(R.string.ok)) { _, _ ->
                 for (i in selected) {
@@ -469,10 +495,11 @@ open class DeckDataListFragment : Fragment(),
                 selected[0] as Course
             Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson =
                 selected[0] as Lesson
-            Level.CARDS -> {}
+            Level.CARDS -> {
+            }
         }
 
-        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
+        val builder = activity?.let { MaterialAlertDialogBuilder(it) }
         builder?.setTitle(getString(R.string.edit_, label))
             ?.setView(cardBinding?.root)
             ?.setPositiveButton(getString(R.string.edit_dialog)) { _, _ ->
@@ -483,7 +510,8 @@ open class DeckDataListFragment : Fragment(),
                     Level.LESSONS -> (cardBinding as DialogAddLessonBinding).editLesson?.let {
                         viewModel.update(it)
                     }
-                    Level.CARDS -> {}
+                    Level.CARDS -> {
+                    }
                 }
             }
             ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
@@ -494,13 +522,23 @@ open class DeckDataListFragment : Fragment(),
 
     private fun exportSelected() {
         var withMedia = false
-        val builder =  activity?.let { MaterialAlertDialogBuilder(it) }
-        builder?.setTitle(resources.getQuantityString(R.plurals.export_, selected.size, selected.size, label))
-            ?.setMultiChoiceItems(R.array.export_options,null) { _,_,isChecked ->
+        val builder = activity?.let { MaterialAlertDialogBuilder(it) }
+        builder?.setTitle(
+            resources.getQuantityString(
+                R.plurals.export_,
+                selected.size,
+                selected.size,
+                label
+            )
+        )
+            ?.setMultiChoiceItems(R.array.export_options, null) { _, _, isChecked ->
                 withMedia = isChecked
             }
             ?.setPositiveButton(getString(R.string.action_exp)) { _, _ ->
-                HyperDataConverter(requireActivity() as HyperActivity).collectionToFile(selected.toList(),withMedia)
+                HyperDataConverter(requireActivity() as HyperActivity).collectionToFile(
+                    selected.toList(),
+                    withMedia
+                )
                 selectionMode?.finish()
             }
             ?.setNegativeButton(getString(R.string.cancel)) { _, _ -> }
@@ -547,83 +585,112 @@ open class DeckDataListFragment : Fragment(),
                 adapter.setNewCounts(viewModel.countNewPerCourseAsync())
             }
             Level.LESSONS -> adapter.setDueCounts(viewModel.countDuePerLessonAsync(args.dataId))
-            Level.CARDS -> {}
-        }}
+            Level.CARDS -> {
+            }
+        }
+    }
 
     private fun insertSamples() = lifecycleScope.launch {
-        viewModel.addAsync(Course( 1, "🌍", "Geography" )).await()
-        viewModel.addAsync(Course( 2, "🔤", "Fancy English Words" )).await()
-        viewModel.addAsync(Lesson( 1, 1, "🏰", "Capitals" )).await()
-        viewModel.addAsync(Lesson(2, 2, "1", "Shakespeare" )).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Spain", "Madrid",a_col_name = "What's the capital?")).await()
-        viewModel.addAsync(Card( 0, 1, 1, "Egypt", "Kairo",a_col_name = "What's the capital?")).await()
-        viewModel.addAsync(Card( 0, 1, 1, "India", "New Delhi",a_col_name = "What's the capital?")).await()
-        viewModel.addAsync(Card( 0, 2, 2, "\"simular\"", "false, counterfeit",a_col_name = "What does it mean?") ).await()
-        viewModel.addAsync(Card( 0, 2, 2, "\"to perpend\"", "to ponder",a_col_name = "What does it mean?") ).await()
+        viewModel.addAsync(Course(1, "🌍", "Geography")).await()
+        viewModel.addAsync(Course(2, "🔤", "Fancy English Words")).await()
+        viewModel.addAsync(Lesson(1, 1, "🏰", "Capitals")).await()
+        viewModel.addAsync(Lesson(2, 2, "1", "Shakespeare")).await()
+        viewModel.addAsync(Card(0, 1, 1, "Spain", "Madrid", a_col_name = "What's the capital?"))
+            .await()
+        viewModel.addAsync(Card(0, 1, 1, "Egypt", "Kairo", a_col_name = "What's the capital?"))
+            .await()
+        viewModel.addAsync(Card(0, 1, 1, "India", "New Delhi", a_col_name = "What's the capital?"))
+            .await()
+        viewModel.addAsync(
+            Card(
+                0,
+                2,
+                2,
+                "\"simular\"",
+                "false, counterfeit",
+                a_col_name = "What does it mean?"
+            )
+        ).await()
+        viewModel.addAsync(
+            Card(
+                0,
+                2,
+                2,
+                "\"to perpend\"",
+                "to ponder",
+                a_col_name = "What does it mean?"
+            )
+        ).await()
     }
 
     private fun intro() {
-        val bg = ContextCompat.getColor(activity as Context, R.color.colorIntroBg )
-        val fg = ContextCompat.getColor(activity as Context, R.color.colorIntroFg )
+        val bg = ContextCompat.getColor(activity as Context, R.color.colorIntroBg)
+        val fg = ContextCompat.getColor(activity as Context, R.color.colorIntroFg)
 
         val config = ShowcaseConfig()
         config.delay = 200
 
-        val sequence = MaterialShowcaseSequence(activity, when (args.level) {
-            Level.COURSES -> COURSE_SHOW
-            Level.LESSONS -> LESSON_SHOW
-            Level.CARDS -> CARD_SHOW
-        })
+        val sequence = MaterialShowcaseSequence(
+            activity, when (args.level) {
+                Level.COURSES -> COURSE_SHOW
+                Level.LESSONS -> LESSON_SHOW
+                Level.CARDS -> CARD_SHOW
+            }
+        )
 
         sequence.setConfig(config)
 
-        sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
-        sequence.setOnItemDismissedListener { _, _ ->  (activity as HyperActivity).showing = false }
+        sequence.setOnItemShownListener { _, _ -> (activity as HyperActivity).showing = true }
+        sequence.setOnItemDismissedListener { _, _ -> (activity as HyperActivity).showing = false }
 
         when (args.level) {
             Level.COURSES -> {
                 val item = binding.dummyCourse
 
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(activity?.findViewById(R.id.app_bar_add))
-                    .setContentText(getString(R.string.intro1))
-                    .setMaskColour(bg)
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(activity?.findViewById(R.id.app_bar_add))
+                        .setContentText(getString(R.string.intro1))
+                        .setMaskColour(bg)
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
 
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(item.findViewById(R.id.review_button))
-                    .setContentText(getString(R.string.intro2))
-                    .setDismissText(getString(R.string.got_it))
-                    .setMaskColour(bg)
-                    .setDismissTextColor(fg)
-                    .withOvalShape()
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(item.findViewById(R.id.review_button))
+                        .setContentText(getString(R.string.intro2))
+                        .setDismissText(getString(R.string.got_it))
+                        .setMaskColour(bg)
+                        .setDismissTextColor(fg)
+                        .withOvalShape()
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
 
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget((activity as HyperActivity).binding.floatingActionButton)
-                    .setDismissText(getString(R.string.got_it))
-                    .setContentText(getString(R.string.intro3))
-                    .setShapePadding(64)
-                    .setMaskColour(bg)
-                    .setDismissTextColor(fg)
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
+                        .setDismissText(getString(R.string.got_it))
+                        .setContentText(getString(R.string.intro3))
+                        .setShapePadding(64)
+                        .setMaskColour(bg)
+                        .setDismissTextColor(fg)
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(item)
-                    .setContentText(getString(R.string.intro4))
-                    .withRectangleShape(true)
-                    .setMaskColour(bg)
-                    .setDismissOnTargetTouch(true)
-                    .setDismissOnTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(item)
+                        .setContentText(getString(R.string.intro4))
+                        .withRectangleShape(true)
+                        .setMaskColour(bg)
+                        .setDismissOnTargetTouch(true)
+                        .setDismissOnTouch(true)
+                        .build()
                 )
 
                 sequence.setOnItemDismissedListener { _, position ->
@@ -635,54 +702,62 @@ open class DeckDataListFragment : Fragment(),
             }
             Level.LESSONS -> {
                 val item = binding.dummyCourse
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(item)
-                    .setContentText(getString(R.string.intro5))
-                    .withRectangleShape(true)
-                    .setMaskColour(bg)
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(item)
+                        .setContentText(getString(R.string.intro5))
+                        .withRectangleShape(true)
+                        .setMaskColour(bg)
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
 
                 sequence.setOnItemDismissedListener { _, _ -> findNavController().navigate(R.id.next_action) }
             }
             Level.CARDS -> {
                 val item = binding.dummyWord
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(item.findViewById(R.id.label_short))
-                    .setDismissText(getString(R.string.got_it))
-                    .withRectangleShape()
-                    .setContentText(getString(R.string.intro6))
-                    .setMaskColour(bg)
-                    .setDismissTextColor(fg)
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(item.findViewById(R.id.label_short))
+                        .setDismissText(getString(R.string.got_it))
+                        .withRectangleShape()
+                        .setContentText(getString(R.string.intro6))
+                        .setMaskColour(bg)
+                        .setDismissTextColor(fg)
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
 
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget(item.findViewById(R.id.label_full))
-                    .setDismissText(getString(R.string.got_it))
-                    .withRectangleShape()
-                    .setContentText(getString(R.string.intro7))
-                    .setMaskColour(bg)
-                    .setDismissTextColor(fg)
-                    .setDismissOnTouch(true)
-                    .setDismissOnTargetTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget(item.findViewById(R.id.label_full))
+                        .setDismissText(getString(R.string.got_it))
+                        .withRectangleShape()
+                        .setContentText(getString(R.string.intro7))
+                        .setMaskColour(bg)
+                        .setDismissTextColor(fg)
+                        .setDismissOnTouch(true)
+                        .setDismissOnTargetTouch(true)
+                        .build()
                 )
 
-                sequence.addSequenceItem(MaterialShowcaseView.Builder(activity)
-                    .setTarget((activity as HyperActivity).binding.floatingActionButton)
-                    .setShapePadding(64)
-                    .setContentText(getString(R.string.intro8))
-                    .setMaskColour(bg)
-                    .setDismissOnTargetTouch(true)
-                    .setDismissOnTouch(true)
-                    .build()
+                sequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(activity)
+                        .setTarget((activity as HyperActivity).binding.floatingActionButton)
+                        .setShapePadding(64)
+                        .setContentText(getString(R.string.intro8))
+                        .setMaskColour(bg)
+                        .setDismissOnTargetTouch(true)
+                        .setDismissOnTouch(true)
+                        .build()
                 )
-                sequence.setOnItemDismissedListener { _, position -> if (position == 2) findNavController().navigate(R.id.action_to_srs) }
+                sequence.setOnItemDismissedListener { _, position ->
+                    if (position == 2) findNavController().navigate(
+                        R.id.action_to_srs
+                    )
+                }
             }
         }
         sequence.start()

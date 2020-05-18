@@ -83,7 +83,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     1 -> getString(R.string.font_size_large)
                     2 -> getString(R.string.font_size_huge)
                     else -> ""
-            }
+                }
         }
         findPreference<Preference>("about")?.setOnPreferenceClickListener {
             val builder = activity?.let { MaterialAlertDialogBuilder(it) }
@@ -93,7 +93,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
             val dialog: Dialog? = builder?.create()
             dialog?.show()
-            dialog?.findViewById<TextView>(android.R.id.message)?.movementMethod = LinkMovementMethod.getInstance()
+            dialog?.findViewById<TextView>(android.R.id.message)?.movementMethod =
+                LinkMovementMethod.getInstance()
             true
         }
         findPreference<Preference>("remove_media")?.setOnPreferenceClickListener {
@@ -101,7 +102,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
         findPreference<SwitchPreferenceCompat>("set_lang")?.setOnPreferenceChangeListener { _, _ ->
-            startActivity(Intent(activity,HyperActivity::class.java))
+            startActivity(Intent(activity, HyperActivity::class.java))
             true
         }
         findPreference<Preference>("licence")?.setOnPreferenceClickListener {

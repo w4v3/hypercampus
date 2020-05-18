@@ -35,7 +35,7 @@ class AlgorithmTest {
         it.ri = RI
         it.calendar = testCalendar
     }
-    private val testCard = Card(0,0,0)
+    private val testCard = Card(0, 0, 0)
 
     @Test
     fun algorithmLongRunTest() {
@@ -43,10 +43,10 @@ class AlgorithmTest {
 
         for (i in 1..MAX_REP) {
             val recall = Random.nextFloat() < RECALL_PROB
-            val grade = -Random.nextFloat()*0.5+1
+            val grade = -Random.nextFloat() * 0.5 + 1
 
             runBlocking {
-                testAlgo.updateParams(testCard,grade,recall)
+                testAlgo.updateParams(testCard, grade, recall)
                 testAlgo.updateCard(testCard)
             }
 
@@ -56,6 +56,6 @@ class AlgorithmTest {
             println("recall: $recall grade: $grade next interval: $interval")
         }
 
-        println("Final date: ${currentDate(testCalendar)} years passed: ${(currentDate(testCalendar) - currentDate())/365}")
+        println("Final date: ${currentDate(testCalendar)} years passed: ${(currentDate(testCalendar) - currentDate()) / 365}")
     }
 }

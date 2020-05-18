@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
   ~
   ~     This file is part of HyperCampus.
@@ -21,6 +20,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
+
         <variable
             name="editCard"
             type="onion.w4v3xrmknycexlsd.app.hypercampus.data.Card" />

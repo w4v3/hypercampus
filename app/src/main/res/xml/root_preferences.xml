@@ -37,7 +37,7 @@
             app:defaultValue="90"
             app:adjustable="true"
             app:showSeekBarValue="true"
-            app:title="@string/ri_title"/>
+            app:title="@string/ri_title" />
 
         <ListPreference
             app:defaultValue="-1"
@@ -77,12 +77,12 @@
         <SwitchPreferenceCompat
             app:key="sgf_showinfo"
             app:title="@string/showinfo_title"
-            app:defaultValue="true"/>
+            app:defaultValue="true" />
 
         <SwitchPreferenceCompat
             app:key="sgf_showbuttons"
             app:title="@string/showbuttons_title"
-            app:defaultValue="true"/>
+            app:defaultValue="true" />
 
         <ListPreference
             app:defaultValue="0"
@@ -104,24 +104,24 @@
             app:seekBarIncrement="1"
             app:adjustable="true"
             app:showSeekBarValue="false"
-            app:title="@string/font_size_title"/>
+            app:title="@string/font_size_title" />
 
         <Preference
             app:key="remove_media"
-            app:title="@string/remove_media_title"/>
+            app:title="@string/remove_media_title" />
 
         <Preference
             app:key="about"
-            app:title="@string/about_title"/>
+            app:title="@string/about_title" />
 
         <Preference
             app:key="licence"
-            app:title="@string/licence_title"/>
+            app:title="@string/licence_title" />
 
         <SwitchPreferenceCompat
             app:key="set_lang"
             app:title="@string/change_to_eng"
-            app:defaultValue="false"/>
+            app:defaultValue="false" />
 
     </PreferenceCategory>
 

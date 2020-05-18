@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
   ~
   ~     This file is part of HyperCampus.
@@ -79,6 +78,7 @@
             tools:ignore="RtlSymmetry" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/stats_view"
         android:layout_width="match_parent"
@@ -118,6 +118,7 @@
                 tools:text="177" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
+
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -126,6 +127,7 @@
             android:paddingRight="8dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/txt_cardprops"
                 android:gravity="center"
@@ -143,6 +145,7 @@
                 android:textColor="@color/colorMainDark"
                 tools:text="177/134/2" />
         </androidx.appcompat.widget.LinearLayoutCompat>
+
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -151,6 +154,7 @@
             android:paddingRight="8dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/txt_cardpercs"
                 android:gravity="center"

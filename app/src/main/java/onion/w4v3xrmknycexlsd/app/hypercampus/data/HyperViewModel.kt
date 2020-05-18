@@ -34,26 +34,31 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 
-class HyperViewModel @Inject constructor(private val repository: HyperRepository): ViewModel() {
+class HyperViewModel @Inject constructor(private val repository: HyperRepository) : ViewModel() {
 
     val allCourses: LiveData<List<Course>> = repository.allCourses
     fun getCourseLessons(courseId: Int): LiveData<List<Lesson>> = repository.getLessons(courseId)
     fun getLessonCards(lessonId: Int): LiveData<List<Card>> = repository.getCards(lessonId)
-    fun getCard(cardId: Int): LiveData<Card> =  repository.getCard(cardId)
+    fun getCard(cardId: Int): LiveData<Card> = repository.getCard(cardId)
 
     suspend fun getCourseAsync(courseId: Int): Course = repository.getCourse(courseId)
     suspend fun getLessonAsync(lessonId: Int): Lesson = repository.getLesson(lessonId)
 
     suspend fun getDueFromCoursesAsync(premature: Boolean, courses: IntArray?): List<Card> =
-        if (premature) repository.getAllCardsFromCourses(courses).filter { card -> card.due != null } else repository.getAllDueCardsFromCourses(courses)
+        if (premature) repository.getAllCardsFromCourses(courses)
+            .filter { card -> card.due != null } else repository.getAllDueCardsFromCourses(courses)
+
     suspend fun getDueFromLessonsAsync(premature: Boolean, lessons: IntArray?): List<Card> =
-        if (premature) repository.getAllCardsFromLessons(lessons).filter { card -> card.due != null } else repository.getAllDueCardsFromLessons(lessons)
+        if (premature) repository.getAllCardsFromLessons(lessons)
+            .filter { card -> card.due != null } else repository.getAllDueCardsFromLessons(lessons)
+
     suspend fun getNewCardsFromCoursesAsync(courses: IntArray?): List<Card> =
         repository.getNewCards(courses)
 
     suspend fun countDuePerCourseAsync(): List<Int> = repository.countDueCourses()
     suspend fun countNewPerCourseAsync(): List<Int> = repository.countNewCards()
-    suspend fun countDuePerLessonAsync(courseId: Int): List<Int> = repository.countDueLessons(courseId)
+    suspend fun countDuePerLessonAsync(courseId: Int): List<Int> =
+        repository.countDueLessons(courseId)
 
     fun add(data: DeckData) = repository.add(data)
     fun delete(data: DeckData) = repository.delete(data)
@@ -64,10 +69,14 @@ class HyperViewModel @Inject constructor(private val repository: HyperRepository
     fun resetStudied() = repository.resetStudied()
 
     suspend fun getStatsAsync(level: Level, dataId: Int): List<IntArray>? =
-        if (level == Level.CARDS) null else repository.getStats(level,dataId)
+        if (level == Level.CARDS) null else repository.getStats(level, dataId)
 }
 
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+@Target(
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER
+)
 @Retention(AnnotationRetention.RUNTIME)
 @MapKey
 annotation class ViewModelKey(val value: KClass<out ViewModel>)
@@ -76,6 +85,7 @@ annotation class ViewModelKey(val value: KClass<out ViewModel>)
 abstract class ViewModelModule {
     @Binds
     abstract fun bindViewModelFactory(factory: HyperViewModelFactory): ViewModelProvider.Factory
+
     @Binds
     @IntoMap
     @ViewModelKey(HyperViewModel::class)

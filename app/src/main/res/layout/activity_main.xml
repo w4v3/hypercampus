@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Copyright (c) 2019, 2020 by w4v3 <support.w4v3+hypercampus@protonmail.com>
   ~
   ~     This file is part of HyperCampus.
@@ -22,8 +21,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-    </data>
+    <data></data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/the_coordinator"
@@ -63,7 +61,7 @@
                     android:padding="0dp"
                     android:layout_margin="0dp"
                     tools:visibility="visible"
-                    tools:progress="50"/>
+                    tools:progress="50" />
 
             </com.google.android.material.appbar.AppBarLayout>
 

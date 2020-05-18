@@ -20,12 +20,12 @@
 package onion.w4v3xrmknycexlsd.app.hypercampus.browse
 
 import android.annotation.SuppressLint
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import onion.w4v3xrmknycexlsd.app.hypercampus.R
 import onion.w4v3xrmknycexlsd.app.hypercampus.STATUS_DISABLED
 import onion.w4v3xrmknycexlsd.app.hypercampus.currentDate
@@ -38,7 +38,7 @@ import java.util.*
 
 class DeckDataAdapter(
     private val listener: OnItemClickListener
-): RecyclerView.Adapter<DeckDataAdapter.DeckDataViewHolder>() {
+) : RecyclerView.Adapter<DeckDataAdapter.DeckDataViewHolder>() {
     private var deckData = mutableListOf<DeckData>()
     private var statData = mutableListOf<IntArray>()
     private var dataCopy = mutableListOf<DeckData>()
@@ -82,7 +82,7 @@ class DeckDataAdapter(
         }
     }
 
-    open inner class DeckDataViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    open inner class DeckDataViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val shortLabelView: TextView = itemView.findViewById(R.id.label_short)
         val fullLabelView: TextView = itemView.findViewById(R.id.label_full)
         val reviewButton: TextView? = if (deckData[0] !is Card) itemView.findViewById(
@@ -90,21 +90,21 @@ class DeckDataAdapter(
         ) else null
         val statsView: View = itemView.findViewById(R.id.stats_view)
 
-        fun bind(data: DeckData){
+        fun bind(data: DeckData) {
             itemView.setOnClickListener(mOnClickListener)
             itemView.setOnLongClickListener(mOnLongClickListener)
             itemView.tag = data
             reviewButton?.setOnClickListener(mOnClickListener)
             reviewButton?.tag = data
             statsView.visibility = if (showingStats) View.VISIBLE else View.GONE
-            checkDisableColor(data,itemView)
+            checkDisableColor(data, itemView)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeckDataViewHolder {
         val inflater = LayoutInflater.from(parent.context)
 
-        val itemView = when(deckData[0]) {
+        val itemView = when (deckData[0]) {
             is Course -> inflater.inflate(R.layout.courses_list_item, parent, false)
             is Lesson -> inflater.inflate(R.layout.courses_list_item, parent, false)
             is Card -> inflater.inflate(R.layout.words_list_item, parent, false)
@@ -114,13 +114,14 @@ class DeckDataAdapter(
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: DeckDataViewHolder, position: Int) {
-        when(val current = deckData[position]){
+        when (val current = deckData[position]) {
             is Course -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
                     R.string.due_new, dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…",
-               newCounts.getOrNull(dataCopy.indexOf(current)) ?: "…" )
+                    newCounts.getOrNull(dataCopy.indexOf(current)) ?: "…"
+                )
                 if (showingStats) {
                     val stats = statData.getOrNull(position)
                     val totalnum = stats?.getOrNull(0) ?: 0
@@ -128,15 +129,22 @@ class DeckDataAdapter(
                     val disablenum = stats?.getOrNull(2) ?: 0
                     val learntnum = totalnum - newnum - disablenum
                     holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
-                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
-                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text = "%.1f/%.1f/%.1f".format(learntnum*100f/totalnum,newnum*100f/totalnum,disablenum*100f/totalnum)
+                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text =
+                        "$learntnum/$newnum/$disablenum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text =
+                        "%.1f/%.1f/%.1f".format(
+                            learntnum * 100f / totalnum,
+                            newnum * 100f / totalnum,
+                            disablenum * 100f / totalnum
+                        )
                 }
             }
             is Lesson -> {
                 holder.shortLabelView.text = current.symbol
                 holder.fullLabelView.text = current.name
                 holder.reviewButton?.text = holder.reviewButton?.context?.getString(
-                    R.string.due,dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…")
+                    R.string.due, dueCounts.getOrNull(dataCopy.indexOf(current)) ?: "…"
+                )
                 if (showingStats) {
                     val stats = statData.getOrNull(position)
                     val totalnum = stats?.getOrNull(0) ?: 0
@@ -144,19 +152,33 @@ class DeckDataAdapter(
                     val disablenum = stats?.getOrNull(2) ?: 0
                     val learntnum = totalnum - newnum - disablenum
                     holder.statsView.findViewById<TextView>(R.id.label_numcards).text = "$totalnum"
-                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text = "$learntnum/$newnum/$disablenum"
-                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text = "%.1f/%.1f/%.1f".format(learntnum*100f/totalnum,newnum*100f/totalnum,disablenum*100f/totalnum)
+                    holder.statsView.findViewById<TextView>(R.id.label_cardprops).text =
+                        "$learntnum/$newnum/$disablenum"
+                    holder.statsView.findViewById<TextView>(R.id.label_cardpercs).text =
+                        "%.1f/%.1f/%.1f".format(
+                            learntnum * 100f / totalnum,
+                            newnum * 100f / totalnum,
+                            disablenum * 100f / totalnum
+                        )
                 }
             }
             is Card -> {
                 holder.shortLabelView.text = current.question
                 holder.fullLabelView.text = current.answer
                 if (showingStats) {
-                    holder.statsView.findViewById<TextView>(R.id.label_due).text = if (current.due != null) "${current.due!! - currentDate()}d" else "-"
-                    holder.statsView.findViewById<TextView>(R.id.label_rhosig).text = "%.1f".format(current.former_stability)
+                    holder.statsView.findViewById<TextView>(R.id.label_due).text =
+                        if (current.due != null) "${current.due!! - currentDate()}d" else "-"
+                    holder.statsView.findViewById<TextView>(R.id.label_rhosig).text =
+                        "%.1f".format(current.former_stability)
                     holder.statsView.findViewById<TextView>(R.id.label_hcparams).text =
-                        "%.2f/%.2f(%.2f)/%.1f".format(current.params[0],current.params[1],current.params[2],current.params[3])
-                    holder.statsView.findViewById<TextView>(R.id.label_smparams).text = "%.1f".format(current.eFactor)
+                        "%.2f/%.2f(%.2f)/%.1f".format(
+                            current.params[0],
+                            current.params[1],
+                            current.params[2],
+                            current.params[3]
+                        )
+                    holder.statsView.findViewById<TextView>(R.id.label_smparams).text =
+                        "%.1f".format(current.eFactor)
                 }
             }
         }
@@ -188,22 +210,22 @@ class DeckDataAdapter(
         notifyDataSetChanged()
     }
 
-    private fun select(v: View){
+    private fun select(v: View) {
         selectedViews.add(v)
         v.setBackgroundColor(v.context.getThemeColor(R.attr.colorControlHighlight))
     }
 
-    private fun deselect(v: View){
+    private fun deselect(v: View) {
         selectedViews.remove(v)
         v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
-        checkDisableColor(v.tag as DeckData,v)
+        checkDisableColor(v.tag as DeckData, v)
     }
 
     fun deselectAll() {
         // need to handle one by one to prevent ConcurrentModificationException
         for (v in selectedViews) {
             v.setBackgroundColor(v.context.getThemeColor(R.attr.colorSurface))
-            checkDisableColor(v.tag as DeckData,v)
+            checkDisableColor(v.tag as DeckData, v)
         }
         selectedViews.clear()
     }
@@ -223,21 +245,33 @@ class DeckDataAdapter(
 
     fun filter(text: String) {
         deckData.clear()
-        if(text.isEmpty()){
+        if (text.isEmpty()) {
             deckData.addAll(dataCopy)
         } else {
-            for (item in dataCopy){
-                when(item) {
+            for (item in dataCopy) {
+                when (item) {
                     is Course ->
-                        if(item.symbol.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())) || item.name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault()))){
+                        if (item.symbol.toLowerCase(Locale.getDefault())
+                                .contains(text.toLowerCase(Locale.getDefault())) || item.name.toLowerCase(
+                                Locale.getDefault()
+                            ).contains(text.toLowerCase(Locale.getDefault()))
+                        ) {
                             deckData.add(item)
                         }
                     is Lesson ->
-                        if(item.symbol.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())) || item.name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault()))){
+                        if (item.symbol.toLowerCase(Locale.getDefault())
+                                .contains(text.toLowerCase(Locale.getDefault())) || item.name.toLowerCase(
+                                Locale.getDefault()
+                            ).contains(text.toLowerCase(Locale.getDefault()))
+                        ) {
                             deckData.add(item)
                         }
                     is Card ->
-                        if(item.question.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())) || item.answer.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault()))){
+                        if (item.question.toLowerCase(Locale.getDefault())
+                                .contains(text.toLowerCase(Locale.getDefault())) || item.answer.toLowerCase(
+                                Locale.getDefault()
+                            ).contains(text.toLowerCase(Locale.getDefault()))
+                        ) {
                             deckData.add(item)
                         }
                 }

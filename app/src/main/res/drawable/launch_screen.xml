@@ -19,12 +19,12 @@
   ~     along with HyperCampus.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
-    <item android:drawable="@android:color/white"/>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+    <item android:drawable="@android:color/white" />
 
     <item
         android:drawable="@drawable/ic_logo"
-        android:gravity="center">
-    </item>
+        android:gravity="center"></item>
 
 </layer-list>

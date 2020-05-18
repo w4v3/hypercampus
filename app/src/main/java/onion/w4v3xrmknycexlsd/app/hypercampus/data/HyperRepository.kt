@@ -29,7 +29,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HyperRepository @Inject constructor(private val courseDao: CourseDAO, private val lessonDao: LessonDAO, private val cardDao: CardDAO) {
+class HyperRepository @Inject constructor(
+    private val courseDao: CourseDAO,
+    private val lessonDao: LessonDAO,
+    private val cardDao: CardDAO
+) {
     val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val allCourses: LiveData<List<Course>> = courseDao.getAll()
@@ -40,11 +44,14 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
     suspend fun getCourse(courseId: Int): Course = courseDao.getCourse(courseId)
     suspend fun getLesson(lessonId: Int): Lesson = lessonDao.getLesson(lessonId)
 
-    suspend fun getLessonsFromCourseAsync(courseId: Int): List<Lesson> = lessonDao.getFromAsync(courseId)
-    suspend fun getCardsFromLessonAsync(lessonId: Int): List<Card> = cardDao.getAllFromLesson(lessonId)
+    suspend fun getLessonsFromCourseAsync(courseId: Int): List<Lesson> =
+        lessonDao.getFromAsync(courseId)
+
+    suspend fun getCardsFromLessonAsync(lessonId: Int): List<Card> =
+        cardDao.getAllFromLesson(lessonId)
 
     suspend fun getAllCardsFromCourses(courses: IntArray?): List<Card> =
-        if (courses==null) cardDao.getAllAsync()
+        if (courses == null) cardDao.getAllAsync()
         else {
             val result = mutableListOf<Card>()
             for (course in courses) result.addAll(cardDao.getAllFromCourse(course))
@@ -52,17 +59,20 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
 
     suspend fun getAllDueCardsFromCourses(courses: IntArray?): List<Card> =
-        if (courses==null) cardDao.getAllDueBy(currentDate())
+        if (courses == null) cardDao.getAllDueBy(currentDate())
         else {
             val result = mutableListOf<Card>()
-            for (course in courses) result.addAll(cardDao.getAllFromCourseDueBy(course,
-                currentDate()
-            ))
+            for (course in courses) result.addAll(
+                cardDao.getAllFromCourseDueBy(
+                    course,
+                    currentDate()
+                )
+            )
             result.toList()
         }
 
     suspend fun getAllCardsFromLessons(lessons: IntArray?): List<Card> =
-        if (lessons==null) cardDao.getAllAsync()
+        if (lessons == null) cardDao.getAllAsync()
         else {
             val result = mutableListOf<Card>()
             for (lesson in lessons) result.addAll(cardDao.getAllFromLesson(lesson))
@@ -70,27 +80,32 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         }
 
     suspend fun getAllDueCardsFromLessons(lessons: IntArray?): List<Card> =
-        if (lessons==null) cardDao.getAllDueBy(currentDate())
+        if (lessons == null) cardDao.getAllDueBy(currentDate())
         else {
             val result = mutableListOf<Card>()
-            for (lesson in lessons) result.addAll(cardDao.getAllFromLessonDueBy(lesson,
-                currentDate()
-            ))
+            for (lesson in lessons) result.addAll(
+                cardDao.getAllFromLessonDueBy(
+                    lesson,
+                    currentDate()
+                )
+            )
             result.toList()
         }
 
     suspend fun getAllCards() = cardDao.getAllAsync()
 
     private suspend fun getNewCardsCourse(course: Course): List<Card> {
-        return cardDao.getNewCardsAsync(course.id,course.new_per_day - course.new_studied_today)
+        return cardDao.getNewCardsAsync(
+            course.id,
+            (course.new_per_day - course.new_studied_today).coerceAtLeast(0)
+        )
     }
 
     suspend fun getNewCards(courses: IntArray?): List<Card> {
         val courseList = mutableListOf<Course>()
-        if (courses==null) {
+        if (courses == null) {
             courseList.addAll(courseDao.getAllAsync())
-        }
-        else {
+        } else {
             for (course in courses) courseList.add(courseDao.getCourse(course))
         }
         val result = mutableListOf<Card>()
@@ -100,8 +115,15 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
 
     suspend fun countDueCourses(): List<Int> = courseDao.getAllAsync()
         .map { cardDao.countDueInCourse(it.id, currentDate()) }
+
     suspend fun countNewCards(): List<Int> = courseDao.getAllAsync()
-        .map { cardDao.getNewCardsAsync(it.id, (it.new_per_day - it.new_studied_today).coerceAtLeast(0)).size }
+        .map {
+            cardDao.getNewCardsAsync(
+                it.id,
+                (it.new_per_day - it.new_studied_today).coerceAtLeast(0)
+            ).size
+        }
+
     suspend fun countDueLessons(courseId: Int): List<Int> = lessonDao.getFromAsync(courseId)
         .map { cardDao.countDueInLessons(it.id, currentDate()) }
 
@@ -110,7 +132,8 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
             is Course -> courseDao.add(data)
             is Lesson -> lessonDao.add(data)
             is Card -> {
-                val withinCourse = ((cardDao.getWithinCourseIndex(data.course_id) ?: 0).div(10) + 1)*10
+                val withinCourse =
+                    ((cardDao.getWithinCourseIndex(data.course_id) ?: 0).div(10) + 1) * 10
                 cardDao.add(data.apply { within_course_id = withinCourse })
             }
         }
@@ -124,13 +147,25 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
                     if (coursesWithSameName.isEmpty()) courseDao.add(data) else coursesWithSameName[0].id.toLong()
                 }
                 is Lesson -> {
-                    val lessonsWithSameName = lessonDao.getLessonsFromName(data.course_id,data.name)
+                    val lessonsWithSameName =
+                        lessonDao.getLessonsFromName(data.course_id, data.name)
                     if (lessonsWithSameName.isEmpty()) lessonDao.add(data) else lessonsWithSameName[0].id.toLong()
                 }
                 is Card -> {
-                    val existingCard = cardDao.getCardsFromWithinCourseId(data.course_id,data.within_course_id)
+                    val existingCard =
+                        cardDao.getCardsFromWithinCourseId(data.course_id, data.within_course_id)
                     if (existingCard.isEmpty()) cardDao.add(data) else {
-                        cardDao.updateContent(CardContent(existingCard[0].id, data.lesson_id, data.question, data.answer, data.q_col_name, data.a_col_name, data.info_file))
+                        cardDao.updateContent(
+                            CardContent(
+                                existingCard[0].id,
+                                data.lesson_id,
+                                data.question,
+                                data.answer,
+                                data.q_col_name,
+                                data.a_col_name,
+                                data.info_file
+                            )
+                        )
                         existingCard[0].id.toLong()
                     }
                 }
@@ -148,15 +183,20 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
         if (onlyIfNew) {
             val result = mutableListOf<Long>()
             for (card in cards) {
-                val existingCard = cardDao.getCardsFromWithinCourseId(card.course_id,card.within_course_id)
+                val existingCard =
+                    cardDao.getCardsFromWithinCourseId(card.course_id, card.within_course_id)
                 if (existingCard.isEmpty()) result.add(cardDao.add(card)) else {
-                    cardDao.updateContent(CardContent(id = existingCard[0].id,
-                        lesson_id = card.lesson_id,
-                        question = card.question,
-                        answer = card.answer,
-                        question_column_name = card.q_col_name,
-                        answer_column_name = card.a_col_name,
-                        info_file = card.info_file))
+                    cardDao.updateContent(
+                        CardContent(
+                            id = existingCard[0].id,
+                            lesson_id = card.lesson_id,
+                            question = card.question,
+                            answer = card.answer,
+                            question_column_name = card.q_col_name,
+                            answer_column_name = card.a_col_name,
+                            info_file = card.info_file
+                        )
+                    )
                     result.add(existingCard[0].id.toLong())
                 }
             }
@@ -197,13 +237,18 @@ class HyperRepository @Inject constructor(private val courseDao: CourseDAO, priv
 
     suspend fun getStats(level: Level, dataId: Int): List<IntArray> {
         val result = mutableListOf<IntArray>()
-        val totraverse = if (level == Level.COURSES) courseDao.getAllAsync() else lessonDao.getFromAsync(dataId)
+        val totraverse =
+            if (level == Level.COURSES) courseDao.getAllAsync() else lessonDao.getFromAsync(dataId)
         for (unit in totraverse) {
-            val unitcards = if (unit is Course) cardDao.getAllFromCourse(unit.id) else cardDao.getAllFromLesson((unit as Lesson).id)
+            val unitcards =
+                if (unit is Course) cardDao.getAllFromCourse(unit.id) else cardDao.getAllFromLesson(
+                    (unit as Lesson).id
+                )
             val totalnum = unitcards.size
-            val newnum = unitcards.filter { card -> card.due == null && card.status == STATUS_ENABLED }.size
+            val newnum =
+                unitcards.filter { card -> card.due == null && card.status == STATUS_ENABLED }.size
             val disablenum = unitcards.filter { card -> card.status == STATUS_DISABLED }.size
-            result.add(intArrayOf(totalnum,newnum,disablenum))
+            result.add(intArrayOf(totalnum, newnum, disablenum))
         }
         return result
     }

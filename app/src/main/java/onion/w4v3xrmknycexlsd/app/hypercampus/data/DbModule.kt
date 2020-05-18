@@ -27,14 +27,29 @@ import javax.inject.Singleton
 
 @Module
 class DbModule {
-    @Provides @Singleton
+    @Provides
+    @Singleton
     internal fun provideDatabase(application: Application): HyperRoom {
         return Room.databaseBuilder(application, HyperRoom::class.java, "hypercampus_database.db")
-            .fallbackToDestructiveMigrationFrom(1,2,3,4,5,6,7,8,9)
+            .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5, 6, 7, 8, 9)
             .build()
     }
 
-    @Provides @Singleton internal fun provideCourseDao(hyperRoom: HyperRoom): CourseDAO { return hyperRoom.courseDao() }
-    @Provides @Singleton internal fun provideLessonDao(hyperRoom: HyperRoom): LessonDAO { return hyperRoom.lessonDao() }
-    @Provides @Singleton internal fun provideCardDao(hyperRoom: HyperRoom): CardDAO { return hyperRoom.cardDao() }
+    @Provides
+    @Singleton
+    internal fun provideCourseDao(hyperRoom: HyperRoom): CourseDAO {
+        return hyperRoom.courseDao()
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideLessonDao(hyperRoom: HyperRoom): LessonDAO {
+        return hyperRoom.lessonDao()
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideCardDao(hyperRoom: HyperRoom): CardDAO {
+        return hyperRoom.cardDao()
+    }
 }

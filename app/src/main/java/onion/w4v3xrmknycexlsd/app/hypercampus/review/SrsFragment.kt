@@ -56,7 +56,8 @@ import kotlin.random.Random
 class SrsFragment : Fragment() {
     private val args: SrsFragmentArgs by navArgs()
 
-    @Inject lateinit var modelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var modelFactory: ViewModelProvider.Factory
 
     private lateinit var binding: FragmentSrsBinding
     private lateinit var viewModel: HyperViewModel
@@ -68,7 +69,7 @@ class SrsFragment : Fragment() {
     private var newCardMode: Int? = 0
     private var newCardsRandom: Boolean = false
     private var algorithm: SrsAlgorithm? = null
-    private val algorithms = listOf(SM2,HC1)
+    private val algorithms = listOf(SM2, HC1)
 
     private var repeatUntil: Int = 0
 
@@ -125,10 +126,10 @@ class SrsFragment : Fragment() {
                 selectedGrade = progress
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                seekBar?.let { handleGrade(selectedGrade/it.max.toFloat(), selectedRecall) }
+                seekBar?.let { handleGrade(selectedGrade / it.max.toFloat(), selectedRecall) }
             }
         })
     }
@@ -136,10 +137,11 @@ class SrsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
-        newCardMode = Integer.parseInt(prefs?.getString("srs_newcards","$MODE_LEARNT") ?: "$MODE_LEARNT")
+        newCardMode =
+            Integer.parseInt(prefs?.getString("srs_newcards", "$MODE_LEARNT") ?: "$MODE_LEARNT")
         newCardsRandom = Integer.parseInt(prefs?.getString("srs_newcardorder", "0") ?: "0") == 1
-        val algo = Integer.parseInt(prefs?.getString("srs_algorithm","$ALG_HC1") ?: "$ALG_HC1")
-        val ri: Double = (prefs?.getInt("retention_index",90) ?: 90).toDouble()/100.0
+        val algo = Integer.parseInt(prefs?.getString("srs_algorithm", "$ALG_HC1") ?: "$ALG_HC1")
+        val ri: Double = (prefs?.getInt("retention_index", 90) ?: 90).toDouble() / 100.0
         algorithm = when (algo) {
             ALG_SM2 -> SM2.also { it.ri = ri }
             ALG_HC1 -> HC1.also { it.ri = ri }
@@ -148,10 +150,10 @@ class SrsFragment : Fragment() {
 
         lifecycleScope.launch {
             // reset if new day
-            val lastStudied = prefs.getInt("last_studied",0)
+            val lastStudied = prefs.getInt("last_studied", 0)
             if (lastStudied != currentDate()) viewModel.resetStudied().join()
             with(prefs.edit()) {
-                putInt("last_studied",currentDate())
+                putInt("last_studied", currentDate())
                 apply()
             }
 
@@ -160,31 +162,32 @@ class SrsFragment : Fragment() {
             intro()
         }
 
-        (activity as HyperActivity).onBackPressedListener = object : HyperActivity.OnBackPressedListener {
-            override fun doOnBackPressed(): Boolean {
-                val lastCard = saveCardList.lastOrNull()
-                lastCard?.let {
-                    if (lastCard.due == null) {
-                        newCardList.add(0, lastCard)
-                    } else {
-                        dueCardList.add(0, lastCard)
+        (activity as HyperActivity).onBackPressedListener =
+            object : HyperActivity.OnBackPressedListener {
+                override fun doOnBackPressed(): Boolean {
+                    val lastCard = saveCardList.lastOrNull()
+                    lastCard?.let {
+                        if (lastCard.due == null) {
+                            newCardList.add(0, lastCard)
+                        } else {
+                            dueCardList.add(0, lastCard)
+                        }
+                        saveCardList.remove(lastCard)
+                        repeatUntil++
+                        nextCard()
+                        return false
                     }
-                    saveCardList.remove(lastCard)
-                    repeatUntil++
-                    nextCard()
-                    return false
+                    return true
                 }
-                return true
             }
-        }
 
         super.onActivityCreated(savedInstanceState)
     }
 
     private suspend fun fillCardSet() {
         dueCardList = when (args.level) {
-            Level.COURSES -> viewModel.getDueFromCoursesAsync(args.full,args.units).toMutableList()
-            Level.LESSONS -> viewModel.getDueFromLessonsAsync(args.full,args.units).toMutableList()
+            Level.COURSES -> viewModel.getDueFromCoursesAsync(args.full, args.units).toMutableList()
+            Level.LESSONS -> viewModel.getDueFromLessonsAsync(args.full, args.units).toMutableList()
             Level.CARDS -> emptyList<Card>().toMutableList()
         }
 
@@ -199,7 +202,7 @@ class SrsFragment : Fragment() {
         binding.questionLayout.visibility = View.VISIBLE
         binding.answerLayout.visibility = View.INVISIBLE
         binding.noMoreQuestions.visibility = View.INVISIBLE
-        binding.gradeSelector.progress = binding.gradeSelector.max/2
+        binding.gradeSelector.progress = binding.gradeSelector.max / 2
         infoShowable = true
         activity?.invalidateOptionsMenu()
 
@@ -207,10 +210,13 @@ class SrsFragment : Fragment() {
             newCardList.isNotEmpty() -> {
                 binding.currentCard = newCardList[0]
                 when (newCardMode) {
-                    MODE_LEARNT -> {}
+                    MODE_LEARNT -> {
+                    }
                     MODE_INFO -> checkShowInfoFile()
                     MODE_DROPOUT -> doDropout()
-                    MODE_INFO_DROPOUT -> { checkShowInfoFile(); doDropout() }
+                    MODE_INFO_DROPOUT -> {
+                        checkShowInfoFile(); doDropout()
+                    }
                 }
                 lifecycleScope.launch {
                     binding.currentColumnName =
@@ -222,7 +228,10 @@ class SrsFragment : Fragment() {
             }
 
             dueCardList.isNotEmpty() -> {
-                binding.currentCard = if (repeatUntil > 0) dueCardList[0] else dueCardList.elementAt(Random.nextInt(dueCardList.size))
+                binding.currentCard =
+                    if (repeatUntil > 0) dueCardList[0] else dueCardList.elementAt(
+                        Random.nextInt(dueCardList.size)
+                    )
                 lifecycleScope.launch {
                     binding.currentColumnName =
                         "${viewModel.getCourseAsync(binding.currentCard!!.course_id).name}/" +
@@ -283,21 +292,24 @@ class SrsFragment : Fragment() {
         val builder = activity?.let { MaterialAlertDialogBuilder(it) }
         builder?.setTitle(R.string.info_file_dialog)
             ?.setView(txtView)
-            ?.setPositiveButton(R.string.ok) { _,_ -> }
+            ?.setPositiveButton(R.string.ok) { _, _ -> }
         val dialog: Dialog? = builder?.create()
         dialog?.show()
 
-        val info = HyperDataConverter(activity as HyperActivity).getInfoFile(binding.currentCard?.info_file!!)
+        val info =
+            HyperDataConverter(activity as HyperActivity).getInfoFile(binding.currentCard?.info_file!!)
 
         val adapter = MarkwonAdapter.builderTextViewIsRoot(R.layout.txtview)
-            .include(TableBlock::class.java, TableEntry.create { b -> b
-                .tableLayout(R.layout.tablelayout,R.id.tablelayout)
-                .textLayoutIsRoot(R.layout.txtview)
-                .build() })
+            .include(TableBlock::class.java, TableEntry.create { b ->
+                b
+                    .tableLayout(R.layout.tablelayout, R.id.tablelayout)
+                    .textLayoutIsRoot(R.layout.txtview)
+                    .build()
+            })
             .build()
-        adapter.setMarkdown((requireActivity() as HyperActivity).markwon,info)
+        adapter.setMarkdown((requireActivity() as HyperActivity).markwon, info)
         txtView.adapter = adapter
-        txtView.layoutManager = LinearLayoutManager(requireContext(),RecyclerView.VERTICAL, false)
+        txtView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         adapter.notifyDataSetChanged()
     }
 
@@ -307,7 +319,7 @@ class SrsFragment : Fragment() {
             binding.wrongTextView.text = ""
             binding.rightTextView.text = ""
             newCardList.remove(binding.currentCard!!)
-            dueCardList.add(binding.currentCard!!)
+            newCardList.add(binding.currentCard!!)
             resetOnClickListeners()
             nextCard()
         }
@@ -330,10 +342,12 @@ class SrsFragment : Fragment() {
 
     private fun intro() {
         if (newCardList.isNotEmpty() || dueCardList.isNotEmpty()) {
-            val bg = ContextCompat.getColor(activity as Context,
+            val bg = ContextCompat.getColor(
+                activity as Context,
                 R.color.colorIntroBg
             )
-            val fg = ContextCompat.getColor(activity as Context,
+            val fg = ContextCompat.getColor(
+                activity as Context,
                 R.color.colorIntroFg
             )
 
@@ -344,7 +358,7 @@ class SrsFragment : Fragment() {
 
             sequence.setConfig(config)
 
-            sequence.setOnItemShownListener { _, _ ->  (activity as HyperActivity).showing = true }
+            sequence.setOnItemShownListener { _, _ -> (activity as HyperActivity).showing = true }
 
             sequence.addSequenceItem(
                 MaterialShowcaseView.Builder(activity)

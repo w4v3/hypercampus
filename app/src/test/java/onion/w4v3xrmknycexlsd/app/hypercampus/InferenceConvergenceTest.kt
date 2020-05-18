@@ -33,15 +33,15 @@ class InferenceConvergenceTest {
     private val RECALL_PROB = 0.8f
     private val RI = 0.9
 
-    private val TRUE_PARAMS = arrayOf(0.7f,-0.02f,-0.03f)
-    private val TEST_SIGMAS = arrayOf(-1f,-0.5f,0f,0.5f,1f,1.5f,2f,3.6f,5f,10f)
+    private val TRUE_PARAMS = arrayOf(0.7f, -0.02f, -0.03f)
+    private val TEST_SIGMAS = arrayOf(-1f, -0.5f, 0f, 0.5f, 1f, 1.5f, 2f, 3.6f, 5f, 10f)
 
     private val testCalendar = Calendar.getInstance()
     private val testAlgo = HC1.also {
         it.ri = RI
         it.calendar = testCalendar
     }
-    private val testCard = Card(0,0,0)
+    private val testCard = Card(0, 0, 0)
 
     @Test
     fun hyperCampusConvergenceTest() {
@@ -52,18 +52,19 @@ class InferenceConvergenceTest {
             var error = 0.0
             for (i in 1..MAX_REP) {
                 val recall = Random.nextFloat() < RECALL_PROB
-                val t = testCard.last_interval + currentDate(testCalendar) - (testCard.due ?: (currentDate(testCalendar) - 4))
-                val grade = exp(-t/exp(trueSigma))
+                val t = testCard.last_interval + currentDate(testCalendar) - (testCard.due
+                    ?: (currentDate(testCalendar) - 4))
+                val grade = exp(-t / exp(trueSigma))
 
                 runBlocking {
-                    testAlgo.updateParams(testCard,grade,recall)
+                    testAlgo.updateParams(testCard, grade, recall)
                     testAlgo.updateCard(testCard)
                 }
 
                 // simulate true stability derived from true parameters
                 val rho = grade
                 trueSigma += (TRUE_PARAMS[0] + TRUE_PARAMS[1] * rho + TRUE_PARAMS[2] * trueSigma)
-                error = (error * (i - 1) + abs(rho - testAlgo.ri))/i
+                error = (error * (i - 1) + abs(rho - testAlgo.ri)) / i
                 testCalendar.timeInMillis = (testCard.due!! + 1) * 24L * 60 * 60 * 1000
             }
             println("Average error for startup sigma = $tS: $error")

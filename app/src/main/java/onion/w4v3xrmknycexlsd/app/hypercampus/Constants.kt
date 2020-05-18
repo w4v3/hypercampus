@@ -18,6 +18,7 @@
  */
 
 @file:JvmName("Constants")
+
 package onion.w4v3xrmknycexlsd.app.hypercampus
 
 import android.app.Activity
@@ -61,14 +62,14 @@ const val FILE_IMAGE = "image/*"
 const val FILE_AUDIO = "audio/*"
 
 // Supported locales
-val SUPPORTED_LANG = listOf("en","de")
+val SUPPORTED_LANG = listOf("en", "de")
 
 // custom adapter for card view in srs
 @BindingAdapter("card_view_content")
 fun LinearLayout.convertToViews(toConvert: String?) {
     this.removeAllViews()
     context.activity()?.let { hyperActivity ->
-        toConvert?.let { HyperDataConverter(hyperActivity).convertToViews(it,this) }
+        toConvert?.let { HyperDataConverter(hyperActivity).convertToViews(it, this) }
     }
 }
 
@@ -82,14 +83,16 @@ tailrec fun Context?.activity(): HyperActivity? = when (this) { // sweet sweet k
 const val NEW_DAY_HOURS = 3 // start of new day in hours after midnight
 fun currentDate(date: Calendar = Calendar.getInstance()): Int {
     val utcmidnight = date.timeInMillis + TimeZone.getDefault().getOffset(date.timeInMillis)
-    return ((utcmidnight / (1000 * 60 * 60) - NEW_DAY_HOURS)/24).toInt()
+    return ((utcmidnight / (1000 * 60 * 60) - NEW_DAY_HOURS) / 24).toInt()
 }
 
 @ColorInt
-fun Context.getThemeColor(@AttrRes attribute: Int) = TypedValue().let { theme.resolveAttribute(attribute, it, true); it.data }
+fun Context.getThemeColor(@AttrRes attribute: Int) =
+    TypedValue().let { theme.resolveAttribute(attribute, it, true); it.data }
 
 fun hideSoftKeyboard(activity: Activity) {
-    val inputMethodManager: InputMethodManager? = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    val inputMethodManager: InputMethodManager? =
+        activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager?.hideSoftInputFromWindow(activity.currentFocus?.windowToken, 0)
 }
 
@@ -118,14 +121,16 @@ class ApplicationLanguageHelper(base: Context) : ContextThemeWrapper(base, R.sty
 
 // snacks
 fun Activity.goodSnack(message: String) {
-    val snack = Snackbar.make(this.findViewById(R.id.the_coordinator),message,Snackbar.LENGTH_SHORT)
+    val snack =
+        Snackbar.make(this.findViewById(R.id.the_coordinator), message, Snackbar.LENGTH_SHORT)
     snack.view.setBackgroundColor(this.getThemeColor(R.attr.colorSecondary))
     snack.setTextColor(this.getThemeColor(R.attr.colorOnSecondary))
     snack.show()
 }
 
 fun Activity.badSnack(message: String) {
-    val snack = Snackbar.make(this.findViewById(R.id.the_coordinator),message,Snackbar.LENGTH_INDEFINITE)
+    val snack =
+        Snackbar.make(this.findViewById(R.id.the_coordinator), message, Snackbar.LENGTH_INDEFINITE)
     snack.view.setBackgroundColor(this.getThemeColor(R.attr.colorError))
     snack.setTextColor(this.getThemeColor(R.attr.colorOnError))
     snack.setAction(getString(R.string.dismiss)) { }

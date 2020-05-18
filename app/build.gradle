@@ -31,8 +31,8 @@ android {
         applicationId "onion.w4v3xrmknycexlsd.app.hypercampus"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 8
-        versionName "1.sigma"
+        versionCode 10
+        versionName "1.psi"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         kapt {
