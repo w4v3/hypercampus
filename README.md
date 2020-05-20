@@ -43,6 +43,12 @@ You can find some sample collections [here](sample_collections):
 Also, more decks might come in the future.
 
 ## Release notes
+### 20200519: version 1.psi
+- SGF file support for Go
+- LaTeX math support on cards
+- option to learn new cards in random order
+- fixed audio and import progress bar bugs
+- improved background contrast
 ### 20200503: version 1.sigma
 - significantly improved the HyperCampus algorithm (for details see https://github.com/w4v3/hypercampus/blob/master/docs/model.ipynb)
 - display info file for new cards
