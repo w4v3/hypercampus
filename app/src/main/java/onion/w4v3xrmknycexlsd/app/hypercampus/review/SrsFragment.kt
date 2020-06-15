@@ -300,9 +300,8 @@ class SrsFragment : Fragment() {
             HyperDataConverter(activity as HyperActivity).getInfoFile(binding.currentCard?.info_file!!)
 
         val adapter = MarkwonAdapter.builderTextViewIsRoot(R.layout.txtview)
-            .include(TableBlock::class.java, TableEntry.create { b ->
-                b
-                    .tableLayout(R.layout.tablelayout, R.id.tablelayout)
+            .include(TableBlock::class.java, TableEntry.create {
+                it.tableLayout(R.layout.tablelayout, R.id.tablelayout)
                     .textLayoutIsRoot(R.layout.txtview)
                     .build()
             })
@@ -322,6 +321,11 @@ class SrsFragment : Fragment() {
             newCardList.add(binding.currentCard!!)
             resetOnClickListeners()
             nextCard()
+        }
+
+        binding.rightButton.setOnClickListener {
+            resetOnClickListeners()
+            binding.rightButton.callOnClick()
         }
     }
 

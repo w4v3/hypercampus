@@ -43,11 +43,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import onion.w4v3xrmknycexlsd.app.hypercampus.*
 import onion.w4v3xrmknycexlsd.lib.sgfcharm.SgfInfoKeys
-import onion.w4v3xrmknycexlsd.lib.sgfcharm.handle.MoveInfo
-import onion.w4v3xrmknycexlsd.lib.sgfcharm.handle.NodeInfo
-import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.DefaultSgfDrawer
-import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.GoSgfView
-import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.SgfDrawer
+import onion.w4v3xrmknycexlsd.lib.sgfcharm.view.*
+import onion.w4v3xrmknycexlsd.lib.sgfcharm_chess.setupChess
 import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -302,7 +299,8 @@ class HyperDataConverter(private val activity: HyperActivity) {
                 "sgf" -> parse[2]?.value?.let { sgfFile ->
                     val fileInputStream = File(getMediaAccess(), sgfFile).inputStream()
                     val sgfString = readStringFrom(fileInputStream)
-                    root.addView(GoSgfView(activity, null).apply {
+                    SgfView.useInfoTextMaker(mInfoTextMaker)
+                    root.addView(SgfView(activity, null).apply {
                         gravity = Gravity.CENTER
                         layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -313,7 +311,7 @@ class HyperDataConverter(private val activity: HyperActivity) {
                         setTextSize(COMPLEX_UNIT_PX, textSizeFactor * textSize)
                         showText = sgfShowText
                         showButtons = sgfShowButtons
-                        sgfDrawer = MSgfDrawer
+                        setupChess()
                         activity.sgfController.load(sgfString).into(this)
                     })
                 }
@@ -653,6 +651,16 @@ class HyperDataConverter(private val activity: HyperActivity) {
             count++
         }
         if (addToDict && file.name != name) renamedFiles[name] = file.name
+
+        try {
+            parent.mkdirs()
+            file.createNewFile()
+        } catch (e: FileNotFoundException) {
+            activity.badSnack(activity.getString(R.string.fnf_exception))
+        } catch (e: IOException) {
+            activity.badSnack(activity.getString(R.string.io_exception))
+        }
+
         return file
     }
 
@@ -884,9 +892,8 @@ class HyperDataConverter(private val activity: HyperActivity) {
 }
 
 // text handler for sgfview
-private object MSgfDrawer : SgfDrawer by DefaultSgfDrawer() {
-    override fun makeInfoText(nodeInfos: List<NodeInfo>, lastMoveInfo: MoveInfo?): CharSequence =
-        DefaultSgfDrawer().makeInfoText(nodeInfos.filterNot {
+private val mInfoTextMaker : SgfInfoTextMaker = { nodeInfos, lastMoveInfo ->
+        DefaultInfoTextMaker(nodeInfos.filterNot {
             it.key in listOf(SgfInfoKeys.APN, SgfInfoKeys.APV)
         }, lastMoveInfo)
 }
